@@ -1,0 +1,469 @@
+  .container {
+    position: relative;
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    border-radius: 8px;
+    margin-top: 25px;
+    margin-bottom: 25px;
+    overflow: visible;
+  }
+
+  .nav {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 80px;
+  }
+
+  .nav a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 14px;
+    opacity: 0.8;
+    transition: opacity 0.3s;
+  }
+
+  .nav a:hover {
+    opacity: 1;
+  }
+
+
+  .left-panel {
+    flex: 1;
+    background: linear-gradient(135deg, #1a1f3a 0%, #2d3561 100%);
+    position: relative;
+    overflow: visible;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; 
+    align-items: center; 
+  }
+
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .title {
+    font-size: 48px;
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: 30px;
+    line-height: 1.2;
+  }
+
+  .subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 16px;
+  }
+
+  .subtitle a {
+    color: #6c8aff;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .subtitle a:hover {
+    text-decoration: underline;
+  }
+
+  .illustration {
+    position: absolute;
+    bottom: -50px;
+    right: -50px;
+    width: 600px;
+    height: 600px;
+  }
+
+  .person {
+    display: none; /* Ocultar el personaje dibujado con CSS */
+  }
+
+  /* Character body */
+  .body {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 180px;
+    background: #1a1f3a;
+    border-radius: 60px 60px 40px 40px;
+  }
+
+  /* Head */
+  .head {
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 90px;
+    background: #f4c4a0;
+    border-radius: 40px;
+  } 
+
+  /* Hair */
+  .hair {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 85px;
+    height: 60px;
+    background: #2d2340;
+    border-radius: 50% 50% 0 0;
+  }
+
+  /* Beard */
+  .beard {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 40px;
+    background: #2d2340;
+    border-radius: 0 0 30px 30px;
+  }
+
+  /* Arms */
+  .arm {
+    position: absolute;
+    width: 35px;
+    height: 120px;
+    background: #1a1f3a;
+    border-radius: 20px;
+  }
+
+  .arm.left {
+    top: 30px;
+    left: -20px;
+    transform: rotate(-45deg);
+  }
+
+  .arm.right {
+    top: 20px;
+    right: -30px;
+    transform: rotate(45deg);
+  }
+
+  /* Legs */
+  .leg {
+    position: absolute;
+    width: 40px;
+    height: 100px;
+    background: #1a1f3a;
+    bottom: -100px;
+    border-radius: 20px;
+  }
+
+  .leg.left {
+    left: 20px;
+    transform: rotate(-30deg);
+  }
+
+  .leg.right {
+    right: 20px;
+    transform: rotate(30deg);
+  }
+
+  .coin1 {
+    top: 80px;
+    left: 80px;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .coin2 {
+    top: 40px;
+    left: 150px;
+    animation: float 3s ease-in-out infinite 0.5s;
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-20px) rotate(180deg);
+    }
+  }
+
+  /* Right Panel */
+  .right-panel {
+    flex: 1;
+    background: #f5f5f7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    position: relative;
+  }
+
+  .header-right {
+    position: absolute;
+    top: 40px;
+    right: 40px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+
+  .lang-select {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+  }
+
+  .lang-select:hover {
+    color: #333;
+  }
+
+  .header-right a {
+    color: #666;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s;
+  }
+
+  .header-right a:hover {
+    color: #333;
+  }
+
+  .register-link {
+    color: #5e7cff !important;
+    font-weight: 500;
+  }
+
+  .login-form {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .input-group {
+    margin-bottom: 20px;
+  }
+
+  .input-wrapper {
+    position: relative;
+    width: auto;
+  }
+
+  input {
+    width: 100%;
+    padding: 15px 45px 15px 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    background: #fff;
+    transition: border 0.3s;
+    font-family: inherit;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: #5e7cff;
+  }
+
+  input.error {
+    border-color: #ff4444;
+  }
+
+  input::placeholder {
+    color: #999;
+  }
+
+  .input-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    cursor: pointer;
+    font-size: 18px;
+    user-select: none;
+  }
+
+  .input-icon:hover {
+    color: #666;
+  }
+
+  .error-message {
+    margin-top: 5px;
+    padding-left: 5px;
+  }
+
+  .error-message small {
+    color: #ff4444;
+    font-size: 12px;
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 15px;
+    background: #5e7cff;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 10px;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: #4a68e6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(94, 124, 255, 0.3);
+  }
+
+  .btn-primary:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+
+  .divider {
+    text-align: center;
+    margin: 30px 0;
+    color: #999;
+    font-size: 14px;
+    position: relative;
+  }
+
+  .divider::before,
+  .divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    background: #e0e0e0;
+  }
+
+  .divider::before {
+    left: 0;
+  }
+
+  .divider::after {
+    right: 0;
+  }
+
+  .social-login {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+  }
+
+  .social-btn {
+    width: 50px;
+    height: 50px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .social-btn:hover {
+    border-color: #5e7cff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Responsive */
+  @media (max-width: 968px) {
+    .container {
+      flex-direction: column;
+    }
+
+    .left-panel {
+      display: none;
+    }
+
+    .right-panel {
+      flex: 1;
+    }
+
+    .header-right {
+      top: 20px;
+      right: 20px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .right-panel {
+      padding: 20px;
+    }
+
+    .login-form {
+      max-width: 100%;
+    }
+
+    .header-right {
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-end;
+    }
+  }
+
+  .floating-img {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px; 
+    z-index: 100;
+    animation: float 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+
+  @keyframes float {
+    0%, 100% {
+      transform: translate(-50%, -50%) translateY(0);
+    }
+    50% {
+      transform: translate(-50%, -50%) translateY(-15px);
+    }
+  }
+
+/* Aumentar el ancho horizontal del formulario */
+.login-form {
+  width: 100%;
+  max-width: 500px; 
+}
+
+/* Aumentar ancho de los inputs */
+.input-wrapper {
+  width: 100%;
+}
+
+input {
+  width: 100%;
+  max-width: 500px; 
+  padding: 15px 50px 15px 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 15px;
+  background: #fff;
+  transition: border 0.3s ease;
+}
+
+/* Ajustar el botón para coincidir con el nuevo ancho */
+.btn-primary {
+  width: 100%;
+  max-width: 500px;
+}
