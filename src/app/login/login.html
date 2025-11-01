@@ -1,45 +1,21 @@
 <div class="container">
   <!-- Left Panel -->
   <div class="left-panel">
-    <nav class="nav">
-      <a href="#">Home</a>
-      <a href="#">About</a>
-      <a href="#">Blog</a>
-      <a href="#">Pages</a>
-      <a href="#">Contact</a>
-    </nav>
-
     <div class="content">
-      <h1 class="title">Sign In to<br>Recharge Direct</h1>
+      <h1 class="title">Inicia sesión en<br>Recharge Direct</h1>
       <p class="subtitle">
-        If you don't an account<br>you can <a href="#">Register here!</a>
+        Si no tienes una cuenta,<br>puedes <a href="#">Registrarte aquí!</a>
       </p>
     </div>
-
-    <img src="assets/image_login.png" class="floating-img" alt="Character" />
-
-    <div class="illustration">
-      <div class="coin coin1"></div>
-      <div class="coin coin2"></div>
-      <div class="person">
-        <div class="body">
-          <div class="head">
-            <div class="hair"></div>
-            <div class="beard"></div>
-          </div>
-          <div class="arm left"></div>
-          <div class="arm right"></div>
-          <div class="leg left"></div>
-          <div class="leg right"></div>
-        </div>
-      </div>
-    </div>
   </div>
+
+  <!-- Character Image - POSICIÓN CORREGIDA -->
+  <img src="assets/image_login.png" class="character-image" alt="Character" />
 
   <!-- Right Panel -->
   <div class="right-panel">
     <div class="header-right">
-      <select class="lang-select" [(ngModel)]="selectedLanguage">
+      <select class="lang-select" [(ngModel)]="selectedLanguage" (change)="onLanguageChange()">
         <option value="en">English</option>
         <option value="es">Español</option>
       </select>
@@ -61,8 +37,8 @@
             <span class="input-icon">✉</span>
           </div>
           <div class="error-message" *ngIf="email?.invalid && email?.touched">
-            <small *ngIf="email?.errors?.['required']">Email is required</small>
-            <small *ngIf="email?.errors?.['email']">Invalid email format</small>
+            <small *ngIf="email?.errors?.['required']">Email es obligatorio</small>
+            <small *ngIf="email?.errors?.['email']">Formato de email inválido</small>
           </div>
         </div>
 
@@ -80,19 +56,19 @@
             </span>
           </div>
           <div class="error-message" *ngIf="password?.invalid && password?.touched">
-            <small *ngIf="password?.errors?.['required']">Password is required</small>
+            <small *ngIf="password?.errors?.['required']">Contraseña es obligatoria</small>
             <small *ngIf="password?.errors?.['minlength']">
-              Password must be at least 6 characters
+              La contraseña debe tener al menos 8 caracteres
             </small>
           </div>
         </div>
 
         <button type="submit" class="btn-primary" [disabled]="loginForm.invalid">
-          Sign In
+          Iniciar sesión
         </button>
       </form>
 
-      <div class="divider">Or continue with</div>
+      <div class="divider">O continuar con</div>
 
       <div class="social-login">
         <div class="social-btn" (click)="socialLogin('google')">
