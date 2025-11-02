@@ -1,6 +1,13 @@
-/* login.css */
-* { box-sizing: border-box; }
-html, body { height: 100%; margin: 0; font-family: Inter, "Helvetica Neue", Arial, sans-serif; }
+* { 
+  box-sizing: border-box; 
+  scroll-behavior: smooth;
+}
+
+html, body { 
+  height: 100%; 
+  margin: 0; 
+  font-family: 'Roboto', sans-serif; 
+}
 
 /* Contenedor principal */
 .container {
@@ -12,7 +19,7 @@ html, body { height: 100%; margin: 0; font-family: Inter, "Helvetica Neue", Aria
   border-radius: 8px;
   margin-top: 25px;
   margin-bottom: 25px;
-  overflow: hidden; /* cambiamos a hidden para evitar scroll no deseados */
+  overflow: hidden;
 }
 
 /* NAV */
@@ -62,17 +69,26 @@ html, body { height: 100%; margin: 0; font-family: Inter, "Helvetica Neue", Aria
 
 .subtitle {
   color: rgba(255, 255, 255, 0.85);
+  font-family: 'Roboto', sans-serif;
   font-size: 16px;
   line-height: 1.6;
 }
 
-.subtitle a {
-  color: #6c8aff;
-  text-decoration: none;
+.subtitle button {
+  color: aliceblue;
   font-weight: 500;
+  background-color: #6c8aff;
+  padding: 6px 8px;
+  border-radius: 8px;
+  transition: all 0.3s;
+  border-color: #1a1f3a;
 }
 
-.subtitle a:hover { text-decoration: underline; }
+.subtitle button:hover { 
+  background-color: #5e7cff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(94, 124, 255, 0.3);
+}
 
 /* RIGHT PANEL */
 .right-panel {
@@ -86,43 +102,20 @@ html, body { height: 100%; margin: 0; font-family: Inter, "Helvetica Neue", Aria
   overflow: hidden;
 }
 
-.header-right {
-  position: absolute;
-  top: 24px;
-  right: 24px;
-  display: flex;
-  gap: 20px;
-  align-items: center;
-}
-
-.lang-select {
-  background: none;
-  border: none;
-  color: #666;
-  font-size: 14px;
-  cursor: pointer;
-  outline: none;
-}
-
-.lang-select:hover { color: #333; }
-
-.header-right a {
-  color: #666;
-  text-decoration: none;
-  font-size: 14px;
-  transition: color 0.3s;
-}
-
-.header-right a:hover { color: #333; }
-
-.register-link { color: #5e7cff !important; font-weight: 500; }
-
 /* Form */
 .login-form { width: 100%; max-width: 400px; }
 
 .input-group { margin-bottom: 20px; }
 
 .input-wrapper { position: relative; width: 100%; }
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 16px;
+  color: #333;
+  font-weight: 500;
+}
 
 input {
   width: 100%;
@@ -136,15 +129,10 @@ input {
   box-sizing: border-box;
 }
 
-input:focus { outline: none; border-color: #5e7cff; }
-input.error { border-color: #ff4444; }
-input::placeholder { color: #999; }
-
 .input-icon {
   position: absolute;
   right: 15px;
   top: 50%;
-  transform: translateY(-50%);
   color: #999;
   cursor: pointer;
   font-size: 18px;
@@ -161,6 +149,7 @@ input::placeholder { color: #999; }
 .error-message small {
   color: #ff4444;
   font-size: 12px;
+  transition: all 0.3s;
 }
 
 /* Botón */
@@ -177,14 +166,11 @@ input::placeholder { color: #999; }
   transition: all 0.3s;
   margin-top: 10px;
 }
-
-.btn-primary:hover:not(:disabled) {
-  background: #4a68e6;
+.btn-primary:hover {
+  background: #4a63e0;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(94, 124, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(74, 99, 224, 0.3);
 }
-
-.btn-primary:disabled { background: #ccc; cursor: not-allowed; }
 
 /* Divider & social */
 .divider { text-align: center; margin: 30px 0; color: #999; font-size: 14px; position: relative; }
@@ -198,15 +184,6 @@ input::placeholder { color: #999; }
 }
 .divider::before { left: 0; }
 .divider::after { right: 0; }
-
-.social-login { display: flex; gap: 15px; justify-content: center; }
-.social-btn {
-  width: 50px; height: 50px;
-  border: 1px solid #e0e0e0; border-radius: 8px;
-  background: #fff; display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: all 0.3s;
-}
-.social-btn:hover { border-color: #5e7cff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
 
 .character-image {
   position: absolute;
@@ -246,10 +223,4 @@ input::placeholder { color: #999; }
   .right-panel { padding: 20px; }
   .login-form { max-width: 100%; }
   .header-right { flex-direction: column; gap: 10px; align-items: flex-end; }
-}
-
-/* Eliminar estilos antiguos no usados */
-.character-container,
-.illustration, .person, .body, .head, .hair, .beard, .arm, .leg, .coin1, .coin2, .floating-img {
-  display: none;
 }

@@ -2,7 +2,7 @@
   background-color: #1b2742;
   color: #ffffff;
   padding: 50px 20px 20px;
-  font-family: "Poppins", sans-serif;
+  font-family: 'Roboto', sans-serif;
 }
 
 .footer-container {
@@ -15,7 +15,7 @@
 }
 
 .footer-logo img {
-  width: 60px;
+  width: 80px;
   margin-bottom: 10px;
 }
 
@@ -51,7 +51,7 @@
 }
 
 .footer-links ul li a:hover {
-  color: #38bdf8; /* Azul claro */
+  color: #38bdf8;
 }
 
 .footer-contact p {
@@ -68,7 +68,7 @@
   color: #94a3b8;
 }
 
-/* 🔹 Responsivo */
+/* Responsivo */
 @media (max-width: 768px) {
   .footer-container {
     flex-direction: column;
