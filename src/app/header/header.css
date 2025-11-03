@@ -9,18 +9,7 @@
 }
 
 /* Estilos del navbar */
-.navbar {
-  background: var(--dark-bg) !important;
-  backdrop-filter: blur(20px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  padding: 1rem 0;
-  position: fixed;
-  top: 0;
-  width: 100%;
-  z-index: 1000;
-  border-bottom: 1px solid rgba(167, 139, 250, 0.2);
-}
-
+.navbar { background: var(--dark-bg) !important; backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); padding: 1rem 0; position: fixed; top: 0; width: 100%; z-index: 1000; border-bottom: 1px solid rgba(167, 139, 250, 0.2); }
 .navbar {
   animation: fadeInDown 0.6s ease;
 }
@@ -31,7 +20,8 @@
   padding: 0 2rem;
   display: flex;
   align-items: center;
-  justify-content: space-between; 
+  justify-content: space-between;
+  width: 100%;
 }
 
 .nav {
@@ -55,18 +45,22 @@
   opacity: 1; 
   color: #fff;
 }
-
-/* Logo y marca */
 .navbar-brand {
   display: flex;
   align-items: center;
   gap: 10px;
   text-decoration: none;
+  z-index: 1010; /* encima del fondo */
 }
 
 .navbar-brand img {
-  width: 90px;
+  width: 90px;         
   height: auto;
+  background: #ffffff;  /* fondo blanco para contraste */
+  padding: 0px;         /* espacio alrededor del logo */
+  border-radius: 50%;   /* logo circular */
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.12);
 }
 
 .navbar-brand h2 {
