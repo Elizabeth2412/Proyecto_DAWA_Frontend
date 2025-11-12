@@ -1,10 +1,18 @@
 <div class="container">
+  <!-- Pantalla de carga -->
+  <div class="pantalla-carga" *ngIf="cargando">
+    <div class="caja-carga">
+      <div class="spinner"></div>
+      <p>Se procederá a validar las credenciales de acceso...</p>
+    </div>
+  </div>
+
   <!-- Left Panel -->
   <div class="left-panel">
     <div class="content">
       <h1 class="title">Inicia sesión en<br>AGROPE-TECH</h1>
       <p class="subtitle">
-        Si no tienes una cuenta<br><button href="#">Registrarte aquí!</button>
+        Si no tienes una cuenta<br><button type="button" (click)="registrar()">Registrarte aquí!</button>
       </p>
     </div>
   </div>
@@ -52,10 +60,22 @@
           </div>
         </div>
 
+        <div class="error-message" *ngIf="credencialesInvalidas">
+          <small>Credenciales inválidas. Por favor, intente nuevamente.</small>
+        </div>
+
         <button type="submit" class="btn-primary">
           Iniciar sesión
         </button>
       </form>
+
+      <!-- Información de cuentas demo -->
+      <div class="demo-accounts">
+        <h4>Cuentas demo:</h4>
+        <p><strong>Admin:</strong> admin@agropetech.com / admin123</p>
+        <p><strong>Instructor:</strong> instructor@agropetech.com / instructor123</p>
+        <p><strong>Estudiante:</strong> estudiante@agropetech.com / estudiante123</p>
+      </div>
 
       <div class="divider"></div>
     </div>

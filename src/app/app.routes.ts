@@ -1,11 +1,18 @@
 import { Routes } from '@angular/router';
-import { Header } from './header/header';
-import { Footer } from './footer/footer';
 import { Login } from './login/login';
+import { AdminDashboard } from './admin-dashboard/admin-dashboard';
+import { InstructorDashboard } from './instructor-dashboard/instructor-dashboard';
+import { EstudianteDashboard } from './estudiante-dashboard/estudiante-dashboard';
+import { Footer } from './footer/footer';
+import { Header } from './header/header';
 
 export const routes: Routes = [
-    { path: '', component: Header},
-    { path: 'pie de pagina', component: Footer},
-    { path: 'login', component: Login}
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: 'login', component: Login },
+  { path: 'admin', component: AdminDashboard },
+  { path: 'instructor', component: InstructorDashboard },
+  { path: 'estudiante', component: EstudianteDashboard },
+  { path: 'header', component: Header },
+  { path: 'footer', component: Footer },
+  { path: '**', redirectTo: '/login' }
 ];
-    

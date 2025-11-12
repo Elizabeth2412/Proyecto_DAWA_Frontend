@@ -1,14 +1,29 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { Login } from "./login/login";
+import { CommonModule } from '@angular/common';
+import { ServicioAutorizacion } from './autorizacion.service';
+import { Header } from "./header/header";
 import { Footer } from "./footer/footer";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Login, Footer],
+  standalone: true,
+  imports: [RouterOutlet, CommonModule, Header, Footer],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrls: ['./app.css']
 })
-export class App {
-  protected readonly title = signal('Proyect_Frontend');
+export class App implements OnInit {
+  titulo: string = 'Proyecto_Frontend';
+  estaLogueado: boolean = false;
+
+  constructor(private servicioAutorizacion: ServicioAutorizacion) {}
+
+  ngOnInit(): void {
+    this.servicioAutorizacion
+      .obtenerObservableLogueado()
+      .subscribe((logueado) => {
+        this.estaLogueado = logueado;
+      });
+  }
+  
 }
