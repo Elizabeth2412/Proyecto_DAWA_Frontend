@@ -1,12 +1,10 @@
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
   <div class="container-fluid">
-    <!-- Logo y marca a la izquierda -->
     <a class="navbar-brand" href="">
-      <img src="assets/AgroPe-Tech_LOGO.png" alt="Logo" width="90" height="auto" class="d-inline-block align-text-top"/>
+      <img src="assets/AgroPe-Tech_LOGO.png" alt="Logo" width="90" class="d-inline-block align-text-top"/>
       <h2 class="mx-2">Agrope-Tech</h2>
     </a>
 
-    <!-- Nav links centrados -->
     <div class="nav">
       <a href="#">Home</a>
       <a href="#">Acerca</a>
@@ -15,10 +13,10 @@
       <a href="#">Contacto</a>
     </div>
 
-    <!-- Botones a la derecha -->
     <div class="d-flex" role="buttons">
-      <!--<button class="btn btn-outline-success me-2" type="button">Acerca de</button>-->
-      <button class="btn btn-outline-success" type="submit">Iniciar Sesión</button>
+      <button class="btn btn-outline-success" type="button" (click)="manejarSesion()">
+        {{ usuarioLogueado ? 'Cerrar sesión' : 'Iniciar Sesión' }}
+      </button>
     </div>
   </div>
 </nav>
