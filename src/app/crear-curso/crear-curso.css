@@ -1,0 +1,222 @@
+
+:root{
+	--bg: #f5f7fb;
+	--card: #ffffff;
+	--muted: #6b7280;
+	--primary: #2563eb;
+	--primary-700: #1d4ed8;
+	--danger: #ef4444;
+	--radius: 10px;
+}
+
+.crear-curso-container{
+	/* Dejar espacio por la navbar fija en el header */
+	padding-top: 96px; /* ajustable si la altura de la navbar cambia */
+	min-height: calc(100vh - 40px);
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	padding-left:24px;
+	padding-right:24px;
+	padding-bottom:24px;
+	background: linear-gradient(180deg, var(--bg), #eef2ff);
+}
+
+.card{
+	width:100%;
+	max-width:740px;
+	background: var(--card);
+	border-radius: var(--radius);
+	box-shadow: 0 8px 30px rgba(32,41,60,0.08);
+	/* permitir que sombras y elementos no queden recortados */
+	overflow: visible;
+	border: 1px solid rgba(16,24,40,0.04);
+}
+
+.card-header{
+	padding:20px 24px;
+	border-bottom: 1px solid rgba(16,24,40,0.04);
+	background: linear-gradient(90deg, rgba(37,99,235,0.06), rgba(99,102,241,0.03));
+}
+
+.card-header h2{
+	margin:0 0 6px 0;
+	font-size:1.25rem;
+	color:#0f172a;
+}
+.subtitle{
+	margin:0;
+	color:var(--muted);
+	font-size:0.9rem;
+}
+
+.card-body{
+	padding:20px 24px 32px 24px; 
+	display:block;
+}
+
+.form-row{
+	display:flex;
+	flex-direction:column;
+	gap:8px;
+	margin-bottom:16px;
+}
+
+label{
+	font-weight:600;
+	color:#0f172a;
+	font-size:0.95rem;
+}
+
+input[type="text"], textarea{
+	padding:12px 14px;
+	border-radius:8px;
+	border:1px solid rgba(15,23,42,0.08);
+	background: #fff;
+	font-size:0.95rem;
+	color: #0f172a;
+	outline: none;
+	transition: box-shadow .15s ease, border-color .15s ease;
+}
+
+input[type="text"]:focus, textarea:focus{
+	border-color: var(--primary);
+	box-shadow: 0 6px 18px rgba(37,99,235,0.08);
+}
+
+/* Estilos para selects con icono y badge */
+.select-wrap{
+	display:flex;
+	align-items:center;
+	gap:10px;
+	position:relative;
+}
+.select-wrap .field-icon{
+	flex:0 0 20px;
+	opacity:0.9;
+}
+.select-wrap select{
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	width:100%;
+	padding:10px 36px 10px 8px;
+	border-radius:8px;
+	border:1px solid rgba(15,23,42,0.08);
+	background: linear-gradient(180deg,#fff,#fbfdff);
+	box-sizing:border-box;
+	font-size:0.95rem;
+	color:#0f172a;
+}
+.select-wrap select:focus{box-shadow: 0 6px 18px rgba(37,99,235,0.06); border-color:var(--primary)}
+.select-wrap .select-badge{
+	position:absolute;
+	right:10px;
+	top:50%;
+	transform:translateY(-50%);
+	background: rgba(99,102,241,0.12);
+	color: #4f46e5;
+	padding:4px 8px;
+	border-radius:999px;
+	font-size:0.8rem;
+	font-weight:600;
+	pointer-events:none;
+}
+
+/* Input con unidad al lado (ej. horas) */
+.input-with-unit{
+	display:flex;
+	align-items:center;
+	gap:8px;
+}
+.input-with-unit input[type="number"]{
+	-moz-appearance: textfield;
+	appearance: none;
+	padding:10px 12px;
+	border-radius:8px;
+	border:1px solid rgba(15,23,42,0.08);
+	width:120px;
+}
+.input-with-unit .unit{
+	background: rgba(16,185,129,0.08);
+	color: #065f46;
+	padding:8px 10px;
+	border-radius:8px;
+	font-size:0.9rem;
+	font-weight:600;
+}
+
+.muted-help{color:var(--muted); font-size:0.85rem; margin-top:6px}
+
+textarea{
+	min-height:120px;
+	resize:vertical;
+}
+
+.actions{
+	display:flex;
+	gap:12px;
+	justify-content:flex-end;
+	align-items:center;
+	margin-top:6px;
+	z-index: 2; 
+}
+
+.btn{
+	display:inline-block;
+	padding:10px 16px;
+	border-radius:8px;
+	font-weight:600;
+	cursor:pointer;
+	border: none;
+}
+.btn:disabled{opacity:0.6; cursor:default}
+
+.btn-primary{
+	background: linear-gradient(180deg,var(--primary), var(--primary-700));
+	color:#fff;
+	box-shadow: 0 8px 20px rgba(37,99,235,0.12);
+}
+
+.btn-primary:hover:not(:disabled){
+	transform: translateY(-1px);
+}
+
+.btn-secondary{
+	background: transparent;
+	color:var(--muted);
+	border:1px solid rgba(15,23,42,0.06);
+}
+
+/* Botón específico para "Guardar curso" (verde) */
+.btn-guardar{
+	background-color: #198561; 
+	color: #ffffff;
+	box-shadow: 0 8px 20px rgba(16,185,129,0.12);
+}
+
+.btn-guardar:disabled{
+	background-color: #1f9b72;
+	color: rgba(255,255,255,0.9);
+	opacity: 0.9;
+	cursor: default;
+}
+
+.error{
+	color: var(--danger);
+	font-size:0.85rem;
+	margin-top:4px;
+}
+
+@media (max-width:991px){
+	.crear-curso-container{
+		padding-top: calc(70px + 12px);
+	}
+}
+
+@media (max-width:640px){
+	.card{padding:0; margin:0 12px}
+	.card-body{padding:16px}
+	.actions{flex-direction:column-reverse; align-items:stretch}
+	.btn{width:100%}
+}
