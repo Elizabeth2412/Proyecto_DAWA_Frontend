@@ -9,6 +9,8 @@ export interface Curso {
   instructor: string;
   fechaCreacion: Date;
   fechaActualizacion: Date;
+  nivel: string;     // 👈 agregado
+  duracion: number;  // 👈 agregado
 }
 
 export interface Diapositiva {
@@ -39,6 +41,8 @@ export class ServicioCursos {
           id: 1,
           titulo: 'Introducción a la agricultura sostenible',
           descripcion: 'Conceptos básicos de agricultura sostenible y prácticas ecológicas.',
+          nivel: 'Principiante',      // 👈 agregado
+          duracion: 5,                // 👈 agregado
           diapositivas: [
             { 
               id: 1, 
@@ -55,6 +59,7 @@ export class ServicioCursos {
           fechaActualizacion: new Date('2024-01-01')
         }
       ];
+
       this.guardarCursos(cursosIniciales);
     }
   }
@@ -64,7 +69,7 @@ export class ServicioCursos {
     if (!cursosAlmacenamiento) return [];
     
     const cursos = JSON.parse(cursosAlmacenamiento);
-    // Convertir fechas de string a Date
+
     return cursos.map((curso: any) => ({
       ...curso,
       fechaCreacion: new Date(curso.fechaCreacion),
@@ -81,7 +86,7 @@ export class ServicioCursos {
       localStorage.setItem(this.claveCursos, JSON.stringify(cursos));
     } catch (error) {
       console.error('Error al guardar cursos:', error);
-      throw new Error('No fue posible guardar la información localmente. Intenta liberar espacio o usar un archivo más pequeño.');
+      throw new Error('No fue posible guardar la información localmente.');
     }
   }
 

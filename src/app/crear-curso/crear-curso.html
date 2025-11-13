@@ -1,0 +1,66 @@
+<div class="crear-curso-container">
+  <div class="card">
+    <header class="card-header">
+      <h2>Crear nuevo curso</h2>
+      <p class="subtitle">Crea un curso rápidamente y compártelo con tus estudiantes.</p>
+    </header>
+
+    <form class="card-body" (ngSubmit)="guardarCurso()" #formCurso="ngForm" novalidate>
+
+      <!-- TÍTULO -->
+      <div class="form-row">
+        <label for="titulo">Título</label>
+        <input id="titulo" type="text" name="titulo" [(ngModel)]="curso.titulo" required placeholder="Ej. Introducción a Angular" #titulo="ngModel" />
+        <div class="error" *ngIf="titulo.invalid && titulo.touched">El título es obligatorio.</div>
+      </div>
+
+      <!-- DESCRIPCIÓN -->
+      <div class="form-row">
+        <label for="descripcion">Descripción</label>
+        <textarea id="descripcion" name="descripcion" [(ngModel)]="curso.descripcion" required placeholder="Breve descripción del curso" #descripcion="ngModel"></textarea>
+        <div class="error" *ngIf="descripcion.invalid && descripcion.touched">La descripción es obligatoria.</div>
+      </div>
+
+      <!-- NIVEL -->
+      <div class="form-row">
+        <label for="nivel">Nivel</label>
+        <div class="select-wrap">
+          <svg class="field-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="12" cy="8" r="3" stroke="#94a3b8" stroke-width="1.2" />
+            <path d="M4 20c0-3.3137 3.5817-6 8-6s8 2.6863 8 6" stroke="#94a3b8" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <select id="nivel" name="nivel" [(ngModel)]="curso.nivel" required #nivel="ngModel" aria-label="Nivel">
+            <option value="" disabled selected>Selecciona un nivel</option>
+            <option value="Principiante">Principiante</option>
+            <option value="Intermedio">Intermedio</option>
+            <option value="Avanzado">Avanzado</option>
+          </select>
+          <span class="select-badge" *ngIf="curso.nivel">{{curso.nivel}}</span>
+        </div>
+        <div class="error" *ngIf="nivel.invalid && nivel.touched">
+          El nivel es obligatorio.
+        </div>
+      </div>
+
+      <!-- DURACIÓN -->
+      <div class="form-row">
+        <label for="duracion">Duración</label>
+        <div class="input-with-unit">
+          <input id="duracion" type="number" name="duracion" [(ngModel)]="curso.duracion" required placeholder="Ej. 10" min="1" #duracion="ngModel" aria-label="Duración en horas" />
+          <span class="unit">horas</span>
+        </div>
+        <div class="muted-help">Introduce la duración estimada en horas (mín. 1).</div>
+        <div class="error" *ngIf="duracion.invalid && duracion.touched">
+          La duración es obligatoria.
+        </div>
+      </div>
+
+      <!-- ACCIONES -->
+      <div class="actions">
+        <button type="button" class="btn btn-secondary" (click)="router.navigate(['/instructor'])">Cancelar</button>
+        <button type="submit" class="btn btn-guardar" [disabled]="formCurso.invalid">Guardar curso</button>
+      </div>
+
+    </form>
+  </div>
+</div>

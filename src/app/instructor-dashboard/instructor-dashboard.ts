@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
 import { Router } from '@angular/router';
@@ -24,9 +24,17 @@ export class InstructorDashboard implements OnInit {
   modoEdicion: boolean = false;
   cursoSeleccionado: Curso | null = null;
   mostrarModalCurso: boolean = false;
-  nuevoCurso = {
+  nuevoCurso: any = {
     titulo: '',
     descripcion: ''
+  };
+  // Objeto usado por el modal (apunta a `nuevoCurso` o a `cursoEditando` según acción)
+  modalCurso: any = null;
+  // Handler para cerrar con tecla ESC (bind seguro por arrow function)
+  private _handleEsc = (e: KeyboardEvent) => {
+    if (e.key === 'Escape' || e.key === 'Esc') {
+      if (this.mostrarModalCurso) this.cerrarModalCrearCurso();
+    }
   };
 
   constructor(
@@ -34,7 +42,8 @@ export class InstructorDashboard implements OnInit {
     private servicioCursos: ServicioCursos,
     private servicioArchivos: ServicioArchivos,
     private almacenamientoIndexedDB: ServicioAlmacenamientoIndexedDB,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -161,13 +170,26 @@ export class InstructorDashboard implements OnInit {
 
   // Funciones para gestión de cursos
   abrirModalCrearCurso(): void {
-    this.mostrarModalCurso = true;
-    this.nuevoCurso = { titulo: '', descripcion: '' };
+    this.nuevoCurso = { titulo: '', descripcion: '', nivel: 'Principiante', duracion: 1 };
+    this.modalCurso = this.nuevoCurso;
+    // Activar el modal en el next tick para evitar problemas de render dentro de manejadores de eventos
+    setTimeout(() => {
+      this.mostrarModalCurso = true;
+      console.log('abrirModalCrearCurso: modalCurso=', this.modalCurso, 'mostrarModalCurso=', this.mostrarModalCurso);
+      try { this.cdr.detectChanges(); } catch (e) { /* safe */ }
+      // Evitar scroll de fondo y forzar que el modal se muestre encima de todo
+      try { document.body.classList.add('modal-open'); } catch (e) { /* safe in SSR */ }
+      try { document.addEventListener('keydown', this._handleEsc); } catch (e) { /* safe */ }
+    }, 0);
   }
 
   cerrarModalCrearCurso(): void {
     this.mostrarModalCurso = false;
     this.nuevoCurso = { titulo: '', descripcion: '' };
+    this.cursoEditando = null;
+    this.modalCurso = null;
+    try { document.body.classList.remove('modal-open'); } catch (e) { /* safe in SSR */ }
+    try { document.removeEventListener('keydown', this._handleEsc); } catch (e) { /* safe */ }
   }
 
   crearCurso(): void {
@@ -181,10 +203,13 @@ export class InstructorDashboard implements OnInit {
       return;
     }
 
+
     const nuevoCurso: Curso = {
       id: 0,
       titulo: this.nuevoCurso.titulo,
       descripcion: this.nuevoCurso.descripcion,
+      nivel: this.nuevoCurso.nivel || 'Principiante',   
+      duracion: this.nuevoCurso.duracion || 1,          
       diapositivas: [],
       progreso: 0,
       instructor: this.usuarioActual!.email,
@@ -220,26 +245,59 @@ export class InstructorDashboard implements OnInit {
     alert('Selecciona un curso de la lista para agregar diapositivas.');
   }
 
+  irCrearCurso(): void {
+  this.router.navigate(['/crear-curso']);
+}
+
   verCurso(curso: Curso): void {
     alert(`Viendo curso: ${curso.titulo}`);
   }
 
   editarCurso(curso: Curso): void {
-    const nuevoTitulo = prompt('Nuevo título del curso:', curso.titulo);
-    const nuevaDescripcion = prompt('Nueva descripción del curso:', curso.descripcion);
-    
-    if (nuevoTitulo !== null && nuevaDescripcion !== null) {
-      const cursoActualizado: Curso = {
-        ...curso,
-        titulo: nuevoTitulo,
-        descripcion: nuevaDescripcion,
-        fechaActualizacion: new Date()
-      };
-      
-      this.servicioCursos.actualizarCurso(cursoActualizado);
-      this.cargarCursos();
-      alert('Curso actualizado exitosamente.');
+    // Abrir modal para editar curso en lugar de usar prompt
+    // Hacemos una copia para que los cambios no se reflejen hasta guardar
+    this.cursoEditando = { ...curso };
+    // Asegurar que nivel y duracion existan
+    if (!this.cursoEditando.nivel) this.cursoEditando.nivel = 'Principiante';
+    if (!this.cursoEditando.duracion) this.cursoEditando.duracion = 1;
+    this.modalCurso = this.cursoEditando;
+    // Abrir modal en siguiente tick para forzar renderizado
+    setTimeout(() => {
+      this.mostrarModalCurso = true;
+      console.log('editarCurso: modalCurso=', this.modalCurso, 'mostrarModalCurso=', this.mostrarModalCurso);
+      try { this.cdr.detectChanges(); } catch (e) { /* safe */ }
+      try { document.body.classList.add('modal-open'); } catch (e) { /* safe in SSR */ }
+      try { document.addEventListener('keydown', this._handleEsc); } catch (e) { /* safe */ }
+    }, 0);
+  }
+
+  guardarEdicionCurso(): void {
+    if (!this.cursoEditando) return;
+
+    // Validaciones básicas
+    if (!this.cursoEditando.titulo || !this.cursoEditando.titulo.trim()) {
+      alert('Por favor, ingresa un título para el curso.');
+      return;
     }
+    if (!this.cursoEditando.descripcion || !this.cursoEditando.descripcion.trim()) {
+      alert('Por favor, ingresa una descripción para el curso.');
+      return;
+    }
+
+    // Obtener curso original para mantener campos que no se editan aquí
+    const original = this.servicioCursos.obtenerCursoPorId(this.cursoEditando.id);
+    const actualizado: Curso = {
+      ...(original || this.cursoEditando),
+      ...this.cursoEditando,
+      fechaActualizacion: new Date()
+    };
+
+    this.servicioCursos.actualizarCurso(actualizado);
+    this.cargarCursos();
+    this.mostrarModalCurso = false;
+    this.cursoEditando = null;
+    try { document.body.classList.remove('modal-open'); } catch (e) { /* safe in SSR */ }
+    alert('Curso actualizado exitosamente.');
   }
 
   eliminarCurso(curso: Curso): void {
