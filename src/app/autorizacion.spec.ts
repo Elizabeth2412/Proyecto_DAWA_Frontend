@@ -13,9 +13,9 @@ export interface Usuario {
 })
 export class AutorizacionService {
   private usuarios: Usuario[] = [
-    { email: 'admin@agropetech.com', password: 'admin123', tipo: 'administrador', nombre: 'Administrador Principal' },
-    { email: 'instructor@agropetech.com', password: 'instructor123', tipo: 'instructor', nombre: 'Instructor Demo' },
-    { email: 'estudiante@agropetech.com', password: 'estudiante123', tipo: 'estudiante', nombre: 'Estudiante Demo' }
+    { email: 'elizabeth@gmail.com', password: 'admin123', tipo: 'administrador', nombre: 'Elizabeth' },
+    { email: 'leslie@gmail.com', password: 'instructor123', tipo: 'instructor', nombre: 'Leslie' },
+    { email: 'joshua@hotmail.com', password: 'estudiante123', tipo: 'estudiante', nombre: 'Joshúa' }
   ];
 
   private usuarioActualKey = 'usuarioActual';
