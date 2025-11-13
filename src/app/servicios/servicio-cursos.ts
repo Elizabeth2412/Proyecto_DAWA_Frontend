@@ -50,7 +50,7 @@ export class ServicioCursos {
             }
           ],
           progreso: 66,
-          instructor: 'instructor@agropetech.com',
+          instructor: 'leslie@gmail.com',
           fechaCreacion: new Date('2024-01-01'),
           fechaActualizacion: new Date('2024-01-01')
         }

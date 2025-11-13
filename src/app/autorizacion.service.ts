@@ -13,16 +13,16 @@ export interface Usuario {
 })
 export class ServicioAutorizacion {
   private usuarios: Usuario[] = [
-    { email: 'admin@agropetech.com', password: 'admin123', tipo: 'administrador', nombre: 'Administrador Principal' },
-    { email: 'instructor@agropetech.com', password: 'instructor123', tipo: 'instructor', nombre: 'Instructor Demo' },
-    { email: 'estudiante@agropetech.com', password: 'estudiante123', tipo: 'estudiante', nombre: 'Estudiante Demo' }
+    { email: 'elizabeth@gmail.com', password: 'admin123', tipo: 'administrador', nombre: 'Elizabeth' },
+    { email: 'leslie@gmail.com', password: 'instructor123', tipo: 'instructor', nombre: 'Leslie' },
+    { email: 'joshua@hotmail.com', password: 'estudiante123', tipo: 'estudiante', nombre: 'Joshúa' }
   ];
 
   private readonly claveUsuarioActual = 'usuarioActual';
   private logueado = new BehaviorSubject<boolean>(this.estaLogueado());
   private usuarioActual$ = new BehaviorSubject<Usuario | null>(this.obtenerUsuarioActual());
 
-  // 🔧 Estado de sesión observable
+  // . Estado de sesión observable
   private estadoSesion = new BehaviorSubject<boolean>(this.obtenerUsuarioActual() !== null);
   cambioEstado$ = this.estadoSesion.asObservable();
 
@@ -37,7 +37,7 @@ export class ServicioAutorizacion {
     this.logueado.next(true);
     this.usuarioActual$.next(usuario);
 
-    // 🔧 Emitir cambio de estado para el header
+    // . Emitir cambio de estado para el header
     this.estadoSesion.next(true);
   }
 
@@ -46,7 +46,7 @@ export class ServicioAutorizacion {
     this.logueado.next(false);
     this.usuarioActual$.next(null);
 
-    // 🔧 Emitir cambio de estado para el header
+    // . Emitir cambio de estado para el header
     this.estadoSesion.next(false);
   }
 
