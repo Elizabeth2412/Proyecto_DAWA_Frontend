@@ -36,6 +36,11 @@ export class EstudianteDashboard implements OnInit {
     this.cargarCursos();
   }
 
+  iniciarEvaluacion(): void {
+    this.router.navigate(['/evaluacion']);
+  }
+
+
   cargarCursos(): void {
     this.cursos = this.servicioCursos.obtenerCursos();
   }
