@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { ServicioAutorizacion, Usuario } from '../autorizacion.service';
 import { ServicioCursos, Curso, Diapositiva } from '../servicios/servicio-cursos';
 import { ServicioArchivos } from '../servicios/servicio-archivos';
-import { ServicioAlmacenamientoIndexedDB } from '../servicios/servicio-almacenamiento-indexeddb';
+import { ServicioAlmacenamientoSession } from '../servicios/servicio-almacenamiento-session'; // .
 
 @Component({
   selector: 'app-instructor-dashboard',
@@ -28,9 +28,8 @@ export class InstructorDashboard implements OnInit {
     titulo: '',
     descripcion: ''
   };
-  // Objeto usado por el modal (apunta a `nuevoCurso` o a `cursoEditando` según acción)
   modalCurso: any = null;
-  // Handler para cerrar con tecla ESC (bind seguro por arrow function)
+  
   private _handleEsc = (e: KeyboardEvent) => {
     if (e.key === 'Escape' || e.key === 'Esc') {
       if (this.mostrarModalCurso) this.cerrarModalCrearCurso();
@@ -41,7 +40,7 @@ export class InstructorDashboard implements OnInit {
     private servicioAutorizacion: ServicioAutorizacion,
     private servicioCursos: ServicioCursos,
     private servicioArchivos: ServicioArchivos,
-    private almacenamientoIndexedDB: ServicioAlmacenamientoIndexedDB,
+    private almacenamientoSession: ServicioAlmacenamientoSession, // .
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
@@ -62,6 +61,12 @@ export class InstructorDashboard implements OnInit {
   onArchivoSeleccionado(evento: any): void {
     const archivo = evento.target.files[0];
     if (archivo && this.servicioArchivos.esArchivoValido(archivo)) {
+      // Verificar espacio disponible antes de aceptar el archivo
+      if (!this.almacenamientoSession.verificarEspacioDisponible(archivo.size)) {
+        alert('El archivo es demasiado grande para el almacenamiento temporal. Por favor, use un archivo más pequeño.');
+        this.limpiarInputArchivo();
+        return;
+      }
       
       this.archivoSeleccionado = archivo;
     } else {
@@ -73,7 +78,6 @@ export class InstructorDashboard implements OnInit {
   async subirArchivo(): Promise<void> {
     if (!this.archivoSeleccionado || !this.usuarioActual) return;
 
-    // Verificar que hay un curso seleccionado
     if (!this.cursoSeleccionado && !this.modoEdicion) {
       alert('Por favor, selecciona un curso antes de subir diapositivas.');
       return;
@@ -83,7 +87,8 @@ export class InstructorDashboard implements OnInit {
     try {
       const idArchivo = `archivo_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
       
-      await this.almacenamientoIndexedDB.guardarArchivoBlob(idArchivo, this.archivoSeleccionado);
+      // .: Usar sessionStorage en lugar de IndexedDB
+      await this.almacenamientoSession.guardarArchivoBlob(idArchivo, this.archivoSeleccionado);
 
       const nuevaDiapositiva: Diapositiva = {
         id: Date.now(),
@@ -97,10 +102,8 @@ export class InstructorDashboard implements OnInit {
       };
 
       if (this.modoEdicion && this.cursoEditando && this.diapositivaEditando) {
-        // Modo edición: reemplazar diapositiva existente
         await this.actualizarDiapositivaExistente(nuevaDiapositiva);
       } else {
-        // Modo creación: agregar diapositiva al curso seleccionado
         await this.agregarDiapositivaACursoExistente(nuevaDiapositiva);
       }
 
@@ -120,7 +123,7 @@ export class InstructorDashboard implements OnInit {
 
     if (this.diapositivaEditando.archivoId) {
       try {
-        await this.almacenamientoIndexedDB.borrarArchivo(this.diapositivaEditando.archivoId);
+        await this.almacenamientoSession.borrarArchivo(this.diapositivaEditando.archivoId);
       } catch (error) {
         console.warn('No se pudo eliminar el archivo anterior:', error);
       }
@@ -168,16 +171,14 @@ export class InstructorDashboard implements OnInit {
     this.limpiarInputArchivo();
   }
 
-  // Funciones para gestión de cursos
+  // Resto de los métodos permanecen igual...
   abrirModalCrearCurso(): void {
     this.nuevoCurso = { titulo: '', descripcion: '', nivel: 'Principiante', duracion: 1 };
     this.modalCurso = this.nuevoCurso;
-    // Activar el modal en el next tick para evitar problemas de render dentro de manejadores de eventos
     setTimeout(() => {
       this.mostrarModalCurso = true;
       console.log('abrirModalCrearCurso: modalCurso=', this.modalCurso, 'mostrarModalCurso=', this.mostrarModalCurso);
       try { this.cdr.detectChanges(); } catch (e) { /* safe */ }
-      // Evitar scroll de fondo y forzar que el modal se muestre encima de todo
       try { document.body.classList.add('modal-open'); } catch (e) { /* safe in SSR */ }
       try { document.addEventListener('keydown', this._handleEsc); } catch (e) { /* safe */ }
     }, 0);
@@ -203,7 +204,6 @@ export class InstructorDashboard implements OnInit {
       return;
     }
 
-
     const nuevoCurso: Curso = {
       id: 0,
       titulo: this.nuevoCurso.titulo,
@@ -228,14 +228,13 @@ export class InstructorDashboard implements OnInit {
     this.modoEdicion = false;
   }
 
-  // CORRECCIÓN: Método simplificado para manejar cambio en el select
   onCursoSeleccionado(cursoId: string): void {
-    console.log('Curso ID seleccionado:', cursoId); // Para debug
+    console.log('Curso ID seleccionado:', cursoId);
     
     if (cursoId && cursoId !== 'null') {
       const curso = this.cursos.find(c => c.id.toString() === cursoId);
       this.cursoSeleccionado = curso || null;
-      console.log('Curso seleccionado:', this.cursoSeleccionado); // Para debug
+      console.log('Curso seleccionado:', this.cursoSeleccionado);
     } else {
       this.cursoSeleccionado = null;
     }
@@ -246,22 +245,18 @@ export class InstructorDashboard implements OnInit {
   }
 
   irCrearCurso(): void {
-  this.router.navigate(['/crear-curso']);
-}
+    this.router.navigate(['/crear-curso']);
+  }
 
   verCurso(curso: Curso): void {
     alert(`Viendo curso: ${curso.titulo}`);
   }
 
   editarCurso(curso: Curso): void {
-    // Abrir modal para editar curso en lugar de usar prompt
-    // Hacemos una copia para que los cambios no se reflejen hasta guardar
     this.cursoEditando = { ...curso };
-    // Asegurar que nivel y duracion existan
     if (!this.cursoEditando.nivel) this.cursoEditando.nivel = 'Principiante';
     if (!this.cursoEditando.duracion) this.cursoEditando.duracion = 1;
     this.modalCurso = this.cursoEditando;
-    // Abrir modal en siguiente tick para forzar renderizado
     setTimeout(() => {
       this.mostrarModalCurso = true;
       console.log('editarCurso: modalCurso=', this.modalCurso, 'mostrarModalCurso=', this.mostrarModalCurso);
@@ -274,7 +269,6 @@ export class InstructorDashboard implements OnInit {
   guardarEdicionCurso(): void {
     if (!this.cursoEditando) return;
 
-    // Validaciones básicas
     if (!this.cursoEditando.titulo || !this.cursoEditando.titulo.trim()) {
       alert('Por favor, ingresa un título para el curso.');
       return;
@@ -284,7 +278,6 @@ export class InstructorDashboard implements OnInit {
       return;
     }
 
-    // Obtener curso original para mantener campos que no se editan aquí
     const original = this.servicioCursos.obtenerCursoPorId(this.cursoEditando.id);
     const actualizado: Curso = {
       ...(original || this.cursoEditando),
@@ -313,7 +306,7 @@ export class InstructorDashboard implements OnInit {
       curso.diapositivas.forEach(async diapositiva => {
         if (diapositiva.archivoId) {
           try {
-            await this.almacenamientoIndexedDB.borrarArchivo(diapositiva.archivoId);
+            await this.almacenamientoSession.borrarArchivo(diapositiva.archivoId);
           } catch (error) {
             console.warn(`No se pudo eliminar el archivo: ${diapositiva.archivoId}`, error);
           }
@@ -322,7 +315,6 @@ export class InstructorDashboard implements OnInit {
 
       this.servicioCursos.eliminarCurso(curso.id);
       
-      // Si el curso eliminado era el seleccionado, limpiar selección
       if (this.cursoSeleccionado && this.cursoSeleccionado.id === curso.id) {
         this.cursoSeleccionado = null;
       }
@@ -356,7 +348,7 @@ export class InstructorDashboard implements OnInit {
 
     try {
       if (diapositiva.archivoId) {
-        await this.almacenamientoIndexedDB.borrarArchivo(diapositiva.archivoId);
+        await this.almacenamientoSession.borrarArchivo(diapositiva.archivoId);
       }
 
       this.servicioCursos.eliminarDiapositivaDeCurso(curso.id, diapositiva.id);
@@ -376,7 +368,8 @@ export class InstructorDashboard implements OnInit {
     }
     
     try {
-      const blob = await this.almacenamientoIndexedDB.obtenerArchivoBlob(diapositiva.archivoId);
+      // .: Obtener archivo de sessionStorage
+      const blob = await this.almacenamientoSession.obtenerArchivoBlob(diapositiva.archivoId);
       if (!blob) {
         alert('Archivo no encontrado.');
         return;
@@ -395,7 +388,8 @@ export class InstructorDashboard implements OnInit {
     }
     
     try {
-      const blob = await this.almacenamientoIndexedDB.obtenerArchivoBlob(diapositiva.archivoId);
+      // .: Obtener archivo de sessionStorage
+      const blob = await this.almacenamientoSession.obtenerArchivoBlob(diapositiva.archivoId);
       if (!blob) {
         alert('Archivo no encontrado.');
         return;
@@ -431,6 +425,7 @@ export class InstructorDashboard implements OnInit {
   }
 
   cerrarSesion(): void {
+    // Limpiar archivos de sessionStorage al cerrar sesión
     this.servicioAutorizacion.cerrarSesion();
     this.router.navigate(['/login']);
   }
