@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AutorizacionService } from '../autorizacion';
+import { ServicioAutorizacion, Usuario } from '../autorizacion.service';
 
 @Component({
   selector: 'app-estudiante-dashboard',
@@ -11,11 +12,16 @@ import { AutorizacionService } from '../autorizacion';
   styleUrls: ['./estudiante-dashboard.css']
 })
 export class EstudianteDashboard {
+    usuarioActual: Usuario | null = null;
+
   constructor(
     private servicioAutorizacion: AutorizacionService,
+        private usuariologueado: ServicioAutorizacion,
     private enrutador: Router
   ) {}
-
+  ngOnInit(): void {
+    this.usuarioActual = this.usuariologueado.obtenerUsuarioActual();
+  }
   cerrarSesion(): void {
     this.servicioAutorizacion.cerrarSesion();
     this.enrutador.navigate(['/login']);
