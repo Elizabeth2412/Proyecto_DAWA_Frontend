@@ -2,3 +2,34 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/* Global modal styles to ensure overlays appear above all component-scoped stacking contexts */
+.modal-overlay {
+	position: fixed !important;
+	top: 0 !important;
+	left: 0 !important;
+	right: 0 !important;
+	bottom: 0 !important;
+	display: flex !important;
+	justify-content: center !important;
+	align-items: center !important;
+	background: rgba(0,0,0,0.55) !important;
+	z-index: 200000 !important;
+	padding: 24px !important;
+}
+
+.modal-contenido {
+	position: relative !important;
+	z-index: 200001 !important;
+	background: #fff !important;
+	border-radius: 10px !important;
+	box-shadow: 0 10px 30px rgba(2,6,23,0.35) !important;
+	width: 100% !important;
+	max-width: 720px !important;
+}
+
+/* Prevent body scroll while modal is open */
+body.modal-open {
+	overflow: hidden !important;
+	touch-action: none !important;
+}

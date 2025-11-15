@@ -5,6 +5,7 @@ import { InstructorDashboard } from './instructor-dashboard/instructor-dashboard
 import { EstudianteDashboard } from './estudiante-dashboard/estudiante-dashboard';
 import { Footer } from './footer/footer';
 import { Header } from './header/header';
+import { CrearCurso } from './crear-curso/crear-curso';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -14,5 +15,6 @@ export const routes: Routes = [
   { path: 'estudiante', component: EstudianteDashboard },
   { path: 'header', component: Header },
   { path: 'footer', component: Footer },
+  { path: 'crear-curso', component: CrearCurso },
   { path: '**', redirectTo: '/login' }
 ];
