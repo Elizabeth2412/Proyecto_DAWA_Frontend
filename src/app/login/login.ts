@@ -48,30 +48,20 @@ mensajeCarga: string = "";
       this.procesarLogin();
     }, 1500);
   }
-private procesarLogin(): void {
-  const usuario = this.servicioAutorizacion.validarCredenciales(this.email, this.password);
 
-  if (usuario) {
-    // Mostrar mensaje de acceso concedido
-    this.mensajeCarga = "Acceso concedido, redirigiendo...";
-    
-    setTimeout(() => {
+  private procesarLogin(): void {
+    // Valida credenciales usando el servicio
+    const usuario = this.servicioAutorizacion.validarCredenciales(this.email, this.password);
+
+    if (usuario) {
       this.servicioAutorizacion.iniciarSesion(usuario);
       this.redireccionarSegunTipo(usuario.tipo);
-      this.cargando = false;
-    }, 1500);
-
-  } else {
-    // Mostrar mensaje de error
-    this.mensajeCarga = "Error en las credenciales. Inténtelo nuevamente.";
-
-    setTimeout(() => {
-      this.cargando = false;
+    } else {
       this.mostrarErrorCredenciales();
-    }, 1500);
-  }
-}
+    }
 
+    this.cargando = false;
+  }
 
   private reiniciarValidaciones(): void {
     this.vacioEmail = false;

@@ -1,50 +1,374 @@
 .panel-contenedor {
-  display: flex;
-  flex-direction: column;
   min-height: 100vh;
-  background-color: #f5f5f7;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+
 }
 
-.panel-encabezado {
-  background-color: #2a7b5f;
-  color: white;
-  padding: 1.5rem 2rem;
+.panel-cabecera {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.cabecera-contenido {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 120px; 
 }
 
-.panel-encabezado h1 {
-  font-size: 1.5rem;
+.cabecera-contenido h1 {
+  color: #2d3748;
   margin: 0;
+  font-size: 1.8rem;
 }
 
 .info-usuario {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 15px;
+  color: #ffffff;
+  font-weight: 500;
 }
 
 .btn-cerrar-sesion {
-  background-color: #ff4a4a;
-  border: none;
-  padding: 0.5rem 1rem;
+  background: #e53e3e;
   color: white;
-  border-radius: 6px;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  font-weight: 500;
+  transition: background 0.3s ease;
 }
 
 .btn-cerrar-sesion:hover {
-  background-color: #e03b3b;
+  background: #c53030;
 }
 
-.panel-principal {
-  flex: 1;
+/* Sección de Estadísticas */
+.seccion-estadisticas {
+  margin-bottom: 30px;
+}
+
+.tarjetas-estadisticas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.tarjeta-estadistica {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 25px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.tarjeta-estadistica h3 {
+  margin: 0 0 10px 0;
+  color: #4a5568;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.tarjeta-estadistica .numero {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #667eea;
+  margin: 0;
+}
+
+/* Sección de Cursos */
+.seccion-cursos {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.seccion-cursos h2 {
+  color: #2d3748;
+  margin-bottom: 25px;
+  font-size: 1.5rem;
+}
+
+.lista-cursos {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #555;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tarjeta-curso {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.tarjeta-curso:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.tarjeta-curso.activo {
+  border-color: #667eea;
+}
+
+.curso-encabezado {
+  padding: 20px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.curso-info {
+  flex: 1;
+}
+
+.curso-titulo {
+  color: #2d3748;
+  margin: 0 0 10px 0;
   font-size: 1.2rem;
+}
+
+.curso-descripcion {
+  color: #718096;
+  margin: 0 0 15px 0;
+  line-height: 1.5;
+}
+
+.curso-metadata {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.badge.nivel {
+  background: #bee3f8;
+  color: #2b6cb0;
+}
+
+.badge.duracion {
+  background: #c6f6d5;
+  color: #276749;
+}
+
+.badge.instructor {
+  background: #fefcbf;
+  color: #744210;
+}
+
+.curso-progreso {
+  min-width: 200px;
+  text-align: right;
+}
+
+.progreso-contenedor {
+  margin-bottom: 10px;
+}
+
+.progreso-barra {
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+
+.progreso-llenado {
+  height: 100%;
+  background: linear-gradient(90deg, #48bb78, #68d391);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progreso-texto {
+  font-size: 0.8rem;
+  color: #718096;
+  font-weight: 500;
+}
+
+.curso-fecha {
+  font-size: 0.8rem;
+  color: #a0aec0;
+}
+
+/* Diapositivas */
+.curso-diapositivas {
+  border-top: 1px solid #e2e8f0;
+  padding: 20px;
+  background: #f7fafc;
+}
+
+.curso-diapositivas h4 {
+  color: #2d3748;
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+}
+
+.tarjeta-diapositiva {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.diapositiva-info {
+  flex: 1;
+}
+
+.diapositiva-titulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.diapositiva-titulo h5 {
+  margin: 0;
+  color: #2d3748;
+  font-size: 1rem;
+}
+
+.tipo-archivo {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.tipo-archivo.pdf {
+  background: #fed7d7;
+  color: #c53030;
+}
+
+.tipo-archivo.pptx {
+  background: #c6f6d5;
+  color: #276749;
+}
+
+.diapositiva-metadata {
+  display: flex;
+  gap: 15px;
+  font-size: 0.8rem;
+  color: #718096;
+}
+
+.diapositiva-acciones {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.checkbox-completada {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  color: #4a5568;
+  cursor: pointer;
+}
+
+.botones-accion {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-visualizar {
+  background: #bee3f8;
+  color: #2b6cb0;
+}
+
+.btn-visualizar:hover {
+  background: #90cdf4;
+}
+
+.btn-descargar {
+  background: #c6f6d5;
+  color: #276749;
+}
+
+.btn-descargar:hover {
+  background: #9ae6b4;
+}
+
+/* Estados vacíos */
+.sin-cursos,
+.sin-diapositivas {
+  text-align: center;
+  padding: 40px;
+  color: #718096;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .panel-contenedor {
+    padding: 10px;
+  }
+  
+  .cabecera-contenido {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .curso-encabezado {
+    flex-direction: column;
+  }
+  
+  .curso-progreso {
+    text-align: left;
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .tarjeta-diapositiva {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .diapositiva-acciones {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .tarjetas-estadisticas {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }

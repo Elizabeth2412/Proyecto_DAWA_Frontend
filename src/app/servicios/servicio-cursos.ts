@@ -39,8 +39,8 @@ export class ServicioCursos {
       const cursosIniciales: Curso[] = [
         {
           id: 1,
-          titulo: 'Introducción a la agricultura sostenible',
-          descripcion: 'Conceptos básicos de agricultura sostenible y prácticas ecológicas.',
+          titulo: 'Introduccion agroindustria pecuaria sostenible',
+          descripcion: 'Conceptos básicos de agroindustria pecuaria sostenible y prácticas ecológicas.',
           nivel: 'Principiante',      
           duracion: 5,               
           diapositivas: [
