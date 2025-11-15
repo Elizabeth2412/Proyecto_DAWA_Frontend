@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { AutorizacionService } from '../autorizacion';
 import { ServicioAutorizacion, Usuario } from '../autorizacion.service';
 @Component({
   selector: 'app-admin-dashboard',
@@ -15,7 +14,7 @@ export class AdminDashboard implements OnInit {
   usuarioActual: Usuario | null = null;
 
   constructor(
-    private autorizacionService: AutorizacionService,
+    private autorizacionService: ServicioAutorizacion,
     private usuariologueado: ServicioAutorizacion,
     private router: Router
   ) {}

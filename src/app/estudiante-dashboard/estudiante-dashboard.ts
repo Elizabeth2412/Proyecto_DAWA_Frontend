@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { AutorizacionService } from '../autorizacion';
 import { ServicioAutorizacion, Usuario } from '../autorizacion.service';
 
 @Component({
@@ -15,7 +14,7 @@ export class EstudianteDashboard {
     usuarioActual: Usuario | null = null;
 
   constructor(
-    private servicioAutorizacion: AutorizacionService,
+    private servicioAutorizacion: ServicioAutorizacion,
         private usuariologueado: ServicioAutorizacion,
     private enrutador: Router
   ) {}
