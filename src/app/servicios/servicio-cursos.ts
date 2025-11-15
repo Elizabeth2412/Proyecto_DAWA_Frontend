@@ -9,8 +9,8 @@ export interface Curso {
   instructor: string;
   fechaCreacion: Date;
   fechaActualizacion: Date;
-  nivel: string;     // 👈 agregado
-  duracion: number;  // 👈 agregado
+  nivel: string;    
+  duracion: number;  
 }
 
 export interface Diapositiva {
@@ -41,8 +41,8 @@ export class ServicioCursos {
           id: 1,
           titulo: 'Introducción a la agricultura sostenible',
           descripcion: 'Conceptos básicos de agricultura sostenible y prácticas ecológicas.',
-          nivel: 'Principiante',      // 👈 agregado
-          duracion: 5,                // 👈 agregado
+          nivel: 'Principiante',      
+          duracion: 5,               
           diapositivas: [
             { 
               id: 1, 

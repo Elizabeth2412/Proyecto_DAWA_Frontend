@@ -19,7 +19,7 @@ export class Login implements OnInit {
   vacioPassword: boolean = false;
   credencialesInvalidas: boolean = false;
   cargando: boolean = false; // Nuevo flag para pantalla de carga
-
+mensajeCarga: string = ""; 
   constructor(
     private servicioAutorizacion: ServicioAutorizacion,
     private router: Router
@@ -39,6 +39,8 @@ export class Login implements OnInit {
     }
 
     // Mostrar pantalla de carga antes de validar
+      this.mensajeCarga = "Se procederá a validar las credenciales de acceso...";
+
     this.cargando = true;
 
     // Simula un pequeño retardo para mostrar el mensaje de carga
@@ -46,20 +48,30 @@ export class Login implements OnInit {
       this.procesarLogin();
     }, 1500);
   }
+private procesarLogin(): void {
+  const usuario = this.servicioAutorizacion.validarCredenciales(this.email, this.password);
 
-  private procesarLogin(): void {
-    // Valida credenciales usando el servicio
-    const usuario = this.servicioAutorizacion.validarCredenciales(this.email, this.password);
-
-    if (usuario) {
+  if (usuario) {
+    // Mostrar mensaje de acceso concedido
+    this.mensajeCarga = "Acceso concedido, redirigiendo...";
+    
+    setTimeout(() => {
       this.servicioAutorizacion.iniciarSesion(usuario);
       this.redireccionarSegunTipo(usuario.tipo);
-    } else {
-      this.mostrarErrorCredenciales();
-    }
+      this.cargando = false;
+    }, 1500);
 
-    this.cargando = false;
+  } else {
+    // Mostrar mensaje de error
+    this.mensajeCarga = "Error en las credenciales. Inténtelo nuevamente.";
+
+    setTimeout(() => {
+      this.cargando = false;
+      this.mostrarErrorCredenciales();
+    }, 1500);
   }
+}
+
 
   private reiniciarValidaciones(): void {
     this.vacioEmail = false;

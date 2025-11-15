@@ -1,11 +1,12 @@
 <div class="container">
   <!-- Pantalla de carga -->
-  <div class="pantalla-carga" *ngIf="cargando">
-    <div class="caja-carga">
-      <div class="spinner"></div>
-      <p>Se procederá a validar las credenciales de acceso...</p>
-    </div>
+<div class="pantalla-carga" *ngIf="cargando">
+  <div class="caja-carga">
+    <div class="spinner"></div>
+    <p>{{ mensajeCarga }}</p>
   </div>
+</div>
+
 
   <!-- Left Panel -->
   <div class="left-panel">
