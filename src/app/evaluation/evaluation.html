@@ -1,0 +1,182 @@
+<!-- Pantalla de inicio -->
+<div *ngIf="!isStarted" class="min-h-screen bg-gradient p-6 flex-center">
+  <div class="card-container">
+    <div class="text-center mb-8">
+      <div class="icon-container">
+        <svg class="icon-large" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <h1 class="title">{{ evaluationData.title }}</h1>
+      <p class="subtitle">Pon a prueba tus conocimientos con esta evaluación</p>
+    </div>
+
+    <div class="info-section">
+      <div class="info-card">
+        <div class="info-left">
+          <svg class="icon-small" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span class="info-label">Total de preguntas</span>
+        </div>
+        <span class="info-value">{{ evaluationData.totalQuestions }}</span>
+      </div>
+
+      <div class="info-card">
+        <div class="info-left">
+          <svg class="icon-small" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span class="info-label">Duración estimada</span>
+        </div>
+        <span class="info-value">{{ evaluationData.duration }}</span>
+      </div>
+    </div>
+
+    <div class="instructions-box">
+      <h3 class="instructions-title">Instrucciones:</h3>
+      <ul class="instructions-list">
+        <li>• Lee cada pregunta cuidadosamente</li>
+        <li>• Selecciona una respuesta para cada pregunta</li>
+        <li>• Puedes navegar entre preguntas libremente</li>
+        <li>• Revisa tus respuestas antes de finalizar</li>
+      </ul>
+    </div>
+
+    <button class="btn-start" (click)="startEvaluation()">
+      Iniciar Evaluación
+      <svg class="icon-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- Pantalla de evaluación -->
+<div *ngIf="isStarted" class="evaluation-screen">
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-content">
+        <div>
+          <h2 class="header-title">{{ evaluationData.title }}</h2>
+          <p class="header-subtitle">
+            Pregunta {{ currentQuestion + 1 }} de {{ evaluationData.totalQuestions }}
+          </p>
+        </div>
+        <div class="timer">
+          <svg class="icon-timer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Tiempo restante: {{ evaluationData.duration }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-grid">
+      <!-- Área de preguntas -->
+      <div class="question-area">
+        <div class="question-card">
+          <div class="question-header">
+            <span class="question-badge">Pregunta {{ currentQuestion + 1 }}</span>
+            <h3 class="question-text">
+              {{ evaluationData.questions[currentQuestion].text }}
+            </h3>
+          </div>
+
+          <div class="options-container">
+            <button
+              *ngFor="let option of evaluationData.questions[currentQuestion].options; let i = index"
+              class="option-btn"
+              [class.selected]="selectedAnswer === i"
+              (click)="selectAnswer(i)">
+              <div class="option-content">
+                <div class="radio-btn" [class.selected]="selectedAnswer === i">
+                  <div *ngIf="selectedAnswer === i" class="radio-inner"></div>
+                </div>
+                <span class="option-text" [class.selected]="selectedAnswer === i">
+                  {{ option }}
+                </span>
+              </div>
+            </button>
+          </div>
+
+          <!-- Botones de navegación -->
+          <div class="navigation-buttons">
+            <button
+              class="btn-nav btn-prev"
+              [disabled]="currentQuestion === 0"
+              (click)="previousQuestion()">
+              <svg class="icon-arrow-left" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+              Anterior
+            </button>
+
+            <button
+              *ngIf="currentQuestion === evaluationData.totalQuestions - 1"
+              class="btn-finish"
+              (click)="finishEvaluation()">
+              Finalizar Evaluación
+            </button>
+
+            <button
+              *ngIf="currentQuestion < evaluationData.totalQuestions - 1"
+              class="btn-nav btn-next"
+              (click)="nextQuestion()">
+              Siguiente
+              <svg class="icon-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid de navegación -->
+      <div class="sidebar">
+        <div class="navigation-panel">
+          <h4 class="nav-title">Navegación de Preguntas</h4>
+          
+          <div class="questions-grid">
+            <button
+              *ngFor="let i of createRange(evaluationData.totalQuestions)"
+              class="question-number"
+              [class.answered]="getQuestionStatus(i) === 'answered'"
+              [class.current]="getQuestionStatus(i) === 'current'"
+              [class.pending]="getQuestionStatus(i) === 'pending'"
+              (click)="goToQuestion(i)">
+              {{ i + 1 }}
+            </button>
+          </div>
+
+          <div class="legend">
+            <div class="legend-item">
+              <div class="legend-color answered"></div>
+              <span>Respondidas ({{ getAnsweredCount() }})</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color current"></div>
+              <span>Actual</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color pending"></div>
+              <span>Pendientes</span>
+            </div>
+          </div>
+
+          <div class="progress-box">
+            <p>
+              <strong>Progreso:</strong> {{ getAnsweredCount() }}/{{ evaluationData.totalQuestions }} 
+              preguntas contestadas
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -9,7 +9,18 @@
 }
 
 /* Estilos del navbar */
-.navbar { background: var(--dark-bg) !important; backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); padding: 1rem 0; position: fixed; top: 0; width: 100%; z-index: 1000; border-bottom: 1px solid rgba(167, 139, 250, 0.2); }
+.navbar { 
+  background: var(--dark-bg) !important; 
+  backdrop-filter: blur(20px); 
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); 
+  padding: 1rem 0; 
+  position: fixed; 
+  top: 0; 
+  width: 100%; 
+  z-index: 1000; 
+  border-bottom: 1px solid rgba(167, 139, 250, 0.2); 
+}
+
 .navbar {
   animation: fadeInDown 0.6s ease;
 }

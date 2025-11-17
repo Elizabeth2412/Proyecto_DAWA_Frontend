@@ -6,6 +6,7 @@ import { EstudianteDashboard } from './estudiante-dashboard/estudiante-dashboard
 import { Footer } from './footer/footer';
 import { Header } from './header/header';
 import { CrearCurso } from './crear-curso/crear-curso';
+import { Evaluation } from './evaluation/evaluation';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -16,5 +17,6 @@ export const routes: Routes = [
   { path: 'header', component: Header },
   { path: 'footer', component: Footer },
   { path: 'crear-curso', component: CrearCurso },
+  { path: 'evaluacion', component: Evaluation },
   { path: '**', redirectTo: '/login' }
 ];
