@@ -1,0 +1,241 @@
+<div class="contenedor-dashboard">
+
+  <main class="principal-dashboard">
+  
+    <h1>Panel del Instructor - AGROPE-TECH</h1>
+
+    <div class="info-usuario">
+      <span>Bienvenido, {{ usuarioActual?.nombre }}</span>
+    </div>
+
+    <!-- Gestión de Cursos -->
+    <section class="seccion">      
+      <h2>Gestión de cursos</h2>
+      <div class="acciones-curso">
+
+        <!-- . BOTÓN CORRECTO PARA IR A OTRA RUTA -->
+        <button class="btn-primario" (click)="irCrearCurso()">Crear nuevo curso</button>
+
+        <button class="btn-secundario" (click)="gestionarCursos()">Gestionar cursos existentes</button>
+      </div>
+    </section>
+
+    <!-- Subida de Diapositivas -->
+    <section class="seccion">
+      <h2>Subir contenido educativo</h2>
+      <div class="area-subida">
+        <div class="tarjeta-subida">
+
+          <h3>{{ modoEdicion ? 'Actualizar Diapositiva' : 'Subir diapositivas' }}</h3>
+
+          <!-- Selección de curso -->
+          <div class="seleccion-curso" *ngIf="!modoEdicion">
+            <label for="selector-curso">Seleccionar curso:</label>
+
+            <select id="selector-curso" 
+                    [ngModel]="cursoSeleccionado?.id" 
+                    (ngModelChange)="onCursoSeleccionado($event)"
+                    name="cursoSeleccionado">
+              <option [value]="null">-- Selecciona un curso --</option>
+              <option *ngFor="let curso of cursos" [value]="curso.id">
+                {{ curso.titulo }} ({{ curso.diapositivas.length }} diapositivas)
+              </option>
+            </select>
+
+            <p *ngIf="cursoSeleccionado" class="curso-seleccionado-info">
+              Curso seleccionado: <strong>{{ cursoSeleccionado.titulo }}</strong>
+            </p>
+          </div>
+
+          <p *ngIf="modoEdicion && diapositivaEditando" class="modo-edicion">
+            Editando: <strong>{{ diapositivaEditando.titulo }}</strong>
+          </p>
+          
+          <p>Formatos soportados: PDF y PPTX (Máximo 5 MB o 5120 KB)</p>
+
+          <div class="zona-subida">
+            <input type="file" #inputArchivo (change)="onArchivoSeleccionado($event)" 
+                   accept=".pdf,.pptx" hidden>
+
+            <button class="btn-subir" (click)="inputArchivo.click()" [disabled]="cargando">
+              {{ cargando ? 'Procesando...' : 'Seleccionar Archivo' }}
+            </button>
+
+            <p class="nombre-archivo">
+              {{ archivoSeleccionado?.name || 'No se ha seleccionado ningún archivo' }}
+            </p>
+          </div>
+
+          <div class="acciones-subida">
+            <button class="btn-primario" 
+                    [disabled]="!archivoSeleccionado || cargando || (!modoEdicion && !cursoSeleccionado)" 
+                    (click)="subirArchivo()">
+              {{ cargando ? 'Procesando...' : (modoEdicion ? 'Actualizar Archivo' : 'Agregar al Curso') }}
+            </button>
+
+            <button *ngIf="modoEdicion" class="btn-secundario"
+                    (click)="limpiarEstado()" [disabled]="cargando">
+              Cancelar
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Vista Previa de Cursos -->
+    <section class="seccion">
+      <h2>Mis cursos ({{ cursos.length }})</h2>
+      <div class="grid-cursos">
+
+        <div *ngFor="let curso of cursos" 
+             class="tarjeta-curso" 
+             [class.curso-seleccionado]="cursoSeleccionado?.id === curso.id">
+
+          <div class="encabezado-curso">
+            <h3>{{ curso.titulo }}</h3>
+
+            <div class="acciones-curso-rapidas">
+              <button class="btn-pequeno btn-primario" 
+                      (click)="seleccionarCurso(curso)" 
+                      title="Seleccionar para agregar diapositivas">
+                Seleccionar
+              </button>
+
+              <button class="btn-pequeno btn-secundario"
+                      (click)="editarCurso(curso)" 
+                      title="Editar curso">
+                Editar
+              </button>
+
+              <button class="btn-pequeno btn-eliminar"
+                      (click)="eliminarCurso(curso)" 
+                      title="Eliminar curso">
+                Eliminar
+              </button>
+            </div>
+          </div>
+
+          <p class="descripcion-curso">{{ curso.descripcion }}</p>
+
+          <div class="estadisticas-curso">
+            <span>Diapositivas: {{ curso.diapositivas.length }}</span>
+            <span>Progreso: {{ curso.progreso }}%</span>
+            <span>Actualizado: {{ formatearFecha(curso.fechaActualizacion) }}</span>
+          </div>
+
+          <div class="lista-diapositivas" *ngIf="curso.diapositivas.length > 0">
+            <h4>Diapositivas:</h4>
+
+            <div *ngFor="let diapositiva of curso.diapositivas" class="item-diapositiva">
+              <div class="info-diapositiva">
+
+                <span class="nombre-diapositiva">{{ diapositiva.titulo }}</span>
+
+                <div class="detalles-diapositiva">
+                  <span class="tipo-archivo">{{ obtenerTipoLegible(diapositiva) }}</span>
+                  <span class="tamano-archivo">{{ obtenerTamanoLegible(diapositiva.tamano) }}</span>
+                  <span class="fecha-subida">{{ formatearFecha(diapositiva.fechaSubida) }}</span>
+                </div>
+
+              </div>
+
+              <div class="acciones-diapositiva">
+
+                <button class="btn-pequeno btn-secundario" 
+                        (click)="descargarArchivo(diapositiva)"
+                        title="Descargar archivo">
+                  Descargar
+                </button>
+
+                <button class="btn-pequeno btn-editar"
+                        (click)="editarDiapositiva(curso, diapositiva)"
+                        title="Reemplazar archivo">
+                  Editar
+                </button>
+
+                <button class="btn-pequeno btn-eliminar"
+                        (click)="eliminarDiapositiva(curso, diapositiva)"
+                        title="Eliminar archivo">
+                  Eliminar
+                </button>
+
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="curso.diapositivas.length === 0" class="acciones-curso">
+            <p class="sin-diapositivas">
+              Este curso no tiene diapositivas aún. 
+              ¡Selecciona el curso y agrega la primera diapositiva!
+            </p>
+          </div>
+
+        </div>
+
+        <div *ngIf="cursos.length === 0" class="sin-cursos">
+          <p>No tienes cursos creados. ¡Comienza creando tu primer curso!</p>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+</div>
+
+ <div *ngIf="mostrarModalCurso" class="modal-overlay" (click)="cerrarModalCrearCurso()" role="presentation">
+  <div class="modal-contenido" role="dialog" aria-modal="true" aria-labelledby="modalTitulo" (click)="$event.stopPropagation()">
+    <div class="card">
+      <header class="card-header">
+        <div>
+          <h2 *ngIf="!cursoEditando">Crear nuevo curso</h2>
+          <h2 *ngIf="cursoEditando">Editar curso</h2>
+          <p class="subtitle">Crea un curso rápidamente y compártelo con tus estudiantes.</p>
+        </div>
+        <button class="btn-cerrar" aria-label="Cerrar" (click)="cerrarModalCrearCurso()">×</button>
+      </header>
+
+      <form class="card-body" (ngSubmit)="$event.preventDefault()">
+        <div class="form-row">
+          <label for="titulo-curso">Título</label>
+          <input id="titulo-curso" type="text" name="titulo" [(ngModel)]="modalCurso.titulo" placeholder="Ej. Introducción a Angular" />
+        </div>
+
+        <div class="form-row">
+          <label for="descripcion-curso">Descripción</label>
+          <textarea id="descripcion-curso" name="descripcion" [(ngModel)]="modalCurso.descripcion" placeholder="Breve descripción del curso"></textarea>
+        </div>
+
+        <div class="form-row">
+          <label for="nivel-curso">Nivel</label>
+          <div class="select-wrap">
+            <select id="nivel-curso" name="nivel" [(ngModel)]="modalCurso.nivel">
+              <option value="" disabled selected>Selecciona un nivel</option>
+              <option value="Principiante">Principiante</option>
+              <option value="Intermedio">Intermedio</option>
+              <option value="Avanzado">Avanzado</option>
+            </select>
+            <span class="select-badge" *ngIf="modalCurso.nivel">{{modalCurso.nivel}}</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label for="duracion-curso">Duración</label>
+          <div class="input-with-unit">
+            <input id="duracion-curso" type="number" name="duracion" min="1" [(ngModel)]="modalCurso.duracion" placeholder="0" />
+            <span class="unit">horas</span>
+          </div>
+          <div class="muted-help">Introduce la duración estimada en horas (mín. 1).</div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn btn-secondary" (click)="cerrarModalCrearCurso()">Cancelar</button>
+          <button type="button" class="btn btn-guardar" (click)="cursoEditando ? guardarEdicionCurso() : crearCurso()">Guardar curso</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+

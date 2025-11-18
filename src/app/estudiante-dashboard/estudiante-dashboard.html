@@ -1,0 +1,130 @@
+<div class="panel-contenedor">
+
+
+  <main class="panel-principal">
+        <div class="cabecera-contenido">
+      <h1>Panel del Estudiante - AGROPE-TECH</h1>
+      <div class="info-usuario">
+        <span>Bienvenido, {{ usuarioActual?.nombre }}</span>
+      </div>
+    </div>
+    <!-- Estadísticas -->
+    <section class="seccion-estadisticas">
+      <div class="tarjetas-estadisticas">
+        <div class="tarjeta-estadistica">
+          <h3>Total cursos</h3>
+          <p class="numero">{{ obtenerEstadisticas().totalCursos }}</p>
+        </div>
+        <div class="tarjeta-estadistica">
+          <h3>Cursos completados</h3>
+          <p class="numero">{{ obtenerEstadisticas().cursosCompletados }}</p>
+        </div>
+        <div class="tarjeta-estadistica">
+          <h3>Diapositivas totales</h3>
+          <p class="numero">{{ obtenerEstadisticas().totalDiapositivas }}</p>
+        </div>
+        <div class="tarjeta-estadistica">
+          <h3>Diapositivas leidas</h3>
+          <p class="numero">{{ obtenerEstadisticas().diapositivasCompletadas }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lista de Cursos -->
+    <section class="seccion-cursos">
+      <h2>Catálogo de cursos disponibles</h2>
+      
+      <div class="lista-cursos">
+        <div *ngFor="let curso of cursos" class="tarjeta-curso" 
+             [class.activo]="cursoSeleccionado?.id === curso.id">
+          
+          <!-- Encabezado del Curso -->
+          <div class="curso-encabezado" (click)="seleccionarCurso(curso)">
+            <div class="curso-info">
+              <h3 class="curso-titulo">{{ curso.titulo }}</h3>
+              <p class="curso-descripcion">{{ curso.descripcion }}</p>
+              <div class="curso-metadata">
+                <span class="badge nivel">{{ curso.nivel }}</span>
+                <span class="badge duracion">{{ curso.duracion }} horas</span>
+                <span class="badge instructor">Por: {{ curso.instructor }}</span>
+              </div>
+            </div>
+            
+            <div class="curso-progreso">
+              <div class="progreso-contenedor">
+                <div class="progreso-barra">
+                  <div class="progreso-llenado" [style.width.%]="curso.progreso"></div>
+                </div>
+                <span class="progreso-texto">{{ curso.progreso }}% completado</span>
+              </div>
+              <div class="curso-fecha">
+                Actualizado: {{ formatearFecha(curso.fechaActualizacion) }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Diapositivas del Curso (se muestra cuando está seleccionado) -->
+          <div *ngIf="cursoSeleccionado?.id === curso.id" class="curso-diapositivas">
+            <h4>Contenido del Curso</h4>
+            
+            <div *ngIf="curso.diapositivas.length === 0" class="sin-diapositivas">
+              <p>Este curso no tiene diapositivas disponibles aún.</p>
+            </div>
+
+            <div *ngFor="let diapositiva of curso.diapositivas" class="tarjeta-diapositiva">
+              <div class="diapositiva-info">
+                <div class="diapositiva-titulo">
+                  <h5>{{ diapositiva.titulo }}</h5>
+                  <span class="tipo-archivo {{ diapositiva.tipo }}">
+                    {{ obtenerTipoLegible(diapositiva) }}
+                  </span>
+                </div>
+                
+                <div class="diapositiva-metadata">
+                  <span class="fecha">Subido: {{ formatearFecha(diapositiva.fechaSubida) }}</span>
+                  <span class="tamano">{{ obtenerTamanoLegible(diapositiva.tamano) }}</span>
+                </div>
+              </div>
+
+              <div class="diapositiva-acciones">
+                <!-- Checkbox de completado -->
+                <label class="checkbox-completada">
+                  <input type="checkbox" 
+                         [checked]="diapositiva.completada"
+                         (change)="marcarComoCompletada(diapositiva, curso)">
+                  Completada
+                </label>
+
+                <!-- Botones de acción -->
+                <div class="botones-accion">
+                  <!-- 
+                  <button class="btn btn-visualizar" 
+                          (click)="visualizarDiapositiva(diapositiva)"
+                          title="Visualizar archivo">
+                     Visualizar
+                  </button>
+                  -->
+                  <button class="btn btn-descargar" 
+                          (click)="descargarDiapositiva(diapositiva)"
+                          title="Descargar archivo">
+                     Descargar
+                  </button>
+
+                  <button class="btn btn-descargar" 
+                          (click)="iniciarEvaluacion()"
+                          title="Iniciar evaluación">
+                     Iniciar Evaluación
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="cursos.length === 0" class="sin-cursos">
+        <p>No hay cursos disponibles en este momento.</p>
+      </div>
+    </section>
+  </main>
+</div>
