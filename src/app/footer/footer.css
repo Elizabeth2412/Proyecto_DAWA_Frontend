@@ -1,8 +1,11 @@
 .footer {
-  background-color: #1b2742;
+  background: linear-gradient(135deg, #1e7145 0%, #0e5c3a 100%);
+  border-top: 2px solid rgba(139, 195, 74, 0.3);
   color: #ffffff;
   padding: 50px 20px 20px;
   font-family: 'Roboto', sans-serif;
+  position: relative;
+  overflow: hidden;
 }
 
 .footer-container {
@@ -12,6 +15,40 @@
   gap: 30px;
   max-width: 1200px;
   margin: 0 auto;
+  position: relative;
+  z-index: 10;
+}
+
+/* Efecto de cuadrados tipo Excel - Arriba derecha */
+.footer::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -10%;
+  width: 450px;
+  height: 450px;
+  background: 
+    linear-gradient(135deg, #21854f 0%, transparent 50%),
+    linear-gradient(45deg, #107c41 0%, transparent 50%);
+  border-radius: 30%;
+  opacity: 0.4;
+  transform: rotate(15deg);
+}
+
+/* Efecto de cuadrados tipo Excel - Abajo izquierda */
+.footer::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  left: -15%;
+  width: 450px;
+  height: 450px;
+  background: 
+    linear-gradient(225deg, #33a65f 0%, transparent 60%),
+    linear-gradient(315deg, #0e5c3a 0%, transparent 60%);
+  border-radius: 40%;
+  opacity: 0.3;
+  transform: rotate(-20deg);
 }
 
 .footer-logo img {
@@ -51,7 +88,7 @@
 }
 
 .footer-links ul li a:hover {
-  color: #38bdf8;
+  color: #8fbc3f;
 }
 
 .footer-contact p {
@@ -60,7 +97,7 @@
 }
 
 .footer-bottom {
-  border-top: 1px solid #1e293b;
+  border-top: 1px solid rgba(139, 195, 74, 0.2);;
   text-align: center;
   padding-top: 15px;
   margin-top: 30px;
