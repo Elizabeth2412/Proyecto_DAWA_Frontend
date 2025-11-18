@@ -112,7 +112,8 @@ mensajeCarga: string = "";
     }
   }
 
-  registrar(): void {
-    alert('Funcionalidad de registro - En desarrollo');
+  registrar() {
+    this.router.navigate(['/register']);
   }
+
 }

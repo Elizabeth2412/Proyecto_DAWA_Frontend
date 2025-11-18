@@ -8,10 +8,14 @@ import { Header } from './header/header';
 import { CrearCurso } from './crear-curso/crear-curso';
 import { Evaluation } from './evaluation/evaluation';
 import { ComunidadVirtual } from './comunidad-virtual/comunidad-virtual';
+import { Register } from './register/register';
+import { ListaUsuarios } from './lista-usuarios/lista-usuarios';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: Login },
+  { path: 'register', component: Register },
+  { path: 'lista-usuarios', component: ListaUsuarios },
   { path: 'admin', component: AdminDashboard },
   { path: 'instructor', component: InstructorDashboard },
   { path: 'estudiante', component: EstudianteDashboard },

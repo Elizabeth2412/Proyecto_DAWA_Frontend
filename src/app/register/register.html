@@ -1,0 +1,133 @@
+<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-light">
+  <div class="row w-100 shadow-lg rounded overflow-hidden" style="max-width: 1200px;">
+    
+    <!-- Left Panel -->
+    <div class="col-md-5 bg-primary text-white d-flex flex-column align-items-center justify-content-center p-5">
+      <div class="text-center">
+        <h1 class="display-4 fw-bold mb-4">¡Únete a AGROPE-TECH!</h1>
+        <p class="lead mb-4">Comienza tu experiencia de aprendizaje hoy</p>
+        
+        <div class="mt-5">
+          <p class="mb-3">¿Ya tienes una cuenta?</p>
+          <button 
+            type="button" 
+            class="btn btn-outline-light btn-lg px-5"
+            (click)="irLogin()">
+            Inicia sesión aquí
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel - Form -->
+    <div class="col-md-7 bg-white p-5">
+      <div class="form-wrapper">
+        <h2 class="text-center mb-4 fw-bold text-primary">Crear cuenta</h2>
+        
+        <form (ngSubmit)="registrarUsuario()" #formRegister="ngForm">
+          
+          <!-- Nombre -->
+          <div class="mb-3">
+            <label for="nombre" class="form-label fw-semibold">
+              <i class="bi bi-person-fill me-2"></i>Nombre
+            </label>
+            <input 
+              type="text" 
+              id="nombre"
+              name="nombre" 
+              class="form-control form-control-lg"
+              placeholder="Ingresa tu nombre"
+              [(ngModel)]="user.nombre"
+              #nombre="ngModel"
+            >
+          </div>
+
+          <!-- Apellido -->
+          <div class="mb-3">
+            <label for="apellido" class="form-label fw-semibold">
+              <i class="bi bi-person-fill me-2"></i>Apellido
+            </label>
+            <input 
+              type="text" 
+              id="apellido"
+              name="apellido" 
+              class="form-control form-control-lg"
+              placeholder="Ingresa tu apellido"
+              [(ngModel)]="user.apellido"
+              #apellido="ngModel"
+            >
+          </div>
+
+          <!-- Edad -->
+          <div class="mb-3">
+            <label for="edad" class="form-label fw-semibold">
+              <i class="bi bi-calendar-check me-2"></i>Edad
+            </label>
+            <input 
+              type="number" 
+              id="edad"
+              name="edad" 
+              class="form-control form-control-lg"
+              placeholder="Ingresa tu edad"
+              [(ngModel)]="user.edad"
+              #edad="ngModel"
+            >
+          </div>
+
+          <!-- Correo -->
+          <div class="mb-3">
+            <label for="correo" class="form-label fw-semibold">
+              <i class="bi bi-envelope-fill me-2"></i>Correo electrónico
+            </label>
+            <input 
+              type="email" 
+              id="correo"
+              name="correo" 
+              class="form-control form-control-lg"
+              placeholder="ejemplo@correo.com"
+              [(ngModel)]="user.correo"
+              #correo="ngModel"
+            >
+          </div>
+
+          <!-- Contraseña -->
+          <div class="mb-4">
+            <label for="password" class="form-label fw-semibold">
+              <i class="bi bi-lock-fill me-2"></i>Contraseña
+            </label>
+            <input 
+              type="password" 
+              id="password"
+              name="password" 
+              class="form-control form-control-lg"
+              placeholder="Mínimo 6 caracteres"
+              [(ngModel)]="user.password"
+              #password="ngModel"
+            >
+          </div>
+
+          <!-- Botón Submit -->
+          <div class="d-grid">
+            <button 
+              type="submit" 
+              class="btn btn-primary btn-lg">
+              <i class="bi bi-person-plus-fill me-2"></i>
+              Registrarme
+            </button>
+          </div>
+
+        </form>
+
+        <!-- Mensaje de ayuda -->
+        <div class="text-center mt-4">
+          <small class="text-muted">
+            Al registrarte, aceptas nuestros 
+            <a href="#" class="text-decoration-none">términos y condiciones</a>
+          </small>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
