@@ -1,10 +1,12 @@
 /* Reset y variables */
 :root {
-  --primary-gradient: linear-gradient(135deg, #233899 0%, #314068 100%);
-  --secondary-gradient: linear-gradient(135deg, #2e3574 0%, #316b7c 100%);
-  --dark-bg: rgba(15, 23, 42, 0.95);
+  --primary-gradient: linear-gradient(135deg, #4a7c2c 0%, #6b9d3e 100%);
+  --secondary-gradient: linear-gradient(135deg, #7ab852 0%, #b8c657 100%);
+  --dark-bg: rgba(30, 45, 25, 0.96);
   --light-text: #ffffff;
-  --accent-color: #262781;
+  --accent-color: #9fc54e; 
+  --yellow-accent: #d4a017;
+  --light-text: #ffffff; 
   --transition: 0.3s ease;
 }
 
@@ -14,14 +16,11 @@
   backdrop-filter: blur(20px); 
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); 
   padding: 1rem 0; 
-  position: fixed; 
+  position: sticky; 
   top: 0; 
   width: 100%; 
   z-index: 1000; 
-  border-bottom: 1px solid rgba(167, 139, 250, 0.2); 
-}
-
-.navbar {
+  border-bottom: 2px solid rgba(139, 195, 74, 0.3);
   animation: fadeInDown 0.6s ease;
 }
 
@@ -54,7 +53,9 @@
 
 .nav a:hover { 
   opacity: 1; 
-  color: #fff;
+  color: #8fbc3f; /* Color verde acento */
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
 }
 .navbar-brand {
   display: flex;
@@ -89,7 +90,7 @@
 }
 
 /* Button */
-.btn-outline-success {
+.btn-agro {
   background: var(--primary-gradient);
   border: none;
   color: var(--light-text);
@@ -97,22 +98,22 @@
   border-radius: 12px;
   font-weight: 600;
   transition: var(--transition);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(122, 184, 82, 0.4);
 }
 
-.btn-outline-success:hover {
-  transform: translateY(0);
-  box-shadow: 0 6px 25px rgba(36, 50, 112, 0.5);
-  background: linear-gradient(135deg, #2b3079 0%, #6f9bc4 100%);
+.btn-agro:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(122, 184, 82, 0.5);
+  background: linear-gradient(135deg, #5a8c3a 0%, #8fbc3f 100%);
   color: white;
 }
 
-.btn-outline-success:hover:active {
+.btn-agro:hover:active {
   transform: translateY(0);
   transition: var(--transition);  
 }
 
-.btn-outline-success:active {
+.btn-agro:active {
   transform: translateY(0);
 }
 

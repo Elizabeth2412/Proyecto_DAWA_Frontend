@@ -7,6 +7,7 @@ import { Footer } from './footer/footer';
 import { Header } from './header/header';
 import { CrearCurso } from './crear-curso/crear-curso';
 import { Evaluation } from './evaluation/evaluation';
+import { ComunidadVirtual } from './comunidad-virtual/comunidad-virtual';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -18,5 +19,6 @@ export const routes: Routes = [
   { path: 'footer', component: Footer },
   { path: 'crear-curso', component: CrearCurso },
   { path: 'evaluacion', component: Evaluation },
+  { path: 'comunidad', component:ComunidadVirtual},
   { path: '**', redirectTo: '/login' }
 ];

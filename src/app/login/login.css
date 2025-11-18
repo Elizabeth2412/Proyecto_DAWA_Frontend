@@ -42,14 +42,45 @@ html, body {
 /* Left Panel */
 .left-panel {
   flex: 1;
-  background: linear-gradient(135deg, #1a1f3a 0%, #2d3561 100%);
+  background: linear-gradient(135deg, #1e7145 0%, #0e5c3a 100%);
   position: relative;
   padding: 40px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   overflow: hidden;
+}
+
+/* Efecto de cuadrados tipo Excel */
+.left-panel::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 600px;
+  height: 600px;
+  background: 
+    linear-gradient(135deg, #21854f 0%, transparent 50%),
+    linear-gradient(45deg, #107c41 0%, transparent 50%);
+  border-radius: 30%;
+  opacity: 0.4;
+  transform: rotate(15deg);
+}
+
+.left-panel::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  left: -15%;
+  width: 500px;
+  height: 500px;
+  background: 
+    linear-gradient(225deg, #33a65f 0%, transparent 60%),
+    linear-gradient(315deg, #0e5c3a 0%, transparent 60%);
+  border-radius: 40%;
+  opacity: 0.3;
+  transform: rotate(-20deg);
 }
 
 /* Ajuste del contenido para dejar espacio visual al centro */
@@ -77,15 +108,15 @@ html, body {
 .subtitle button {
   color: aliceblue;
   font-weight: 500;
-  background-color: #6c8aff;
+  background-color: linear-gradient(135deg, #4a7c2c 50%, #6b9d3e 100%);;
   padding: 6px 8px;
   border-radius: 8px;
   transition: all 0.3s;
-  border-color: #1a1f3a;
+  border-color: #6b9d3e;
 }
 
 .subtitle button:hover { 
-  background-color: #5e7cff;
+  background-color: linear-gradient(135deg, #5a8c3a 0%, #8fbc3f 100%);;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(94, 124, 255, 0.3);
 }
@@ -156,7 +187,7 @@ input {
 .btn-primary {
   width: 100%;
   padding: 15px;
-  background: #5e7cff;
+  background: linear-gradient(135deg, #4a7c2c 0%, #6b9d3e 100%);;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -167,7 +198,7 @@ input {
   margin-top: 10px;
 }
 .btn-primary:hover {
-  background: #4a63e0;
+  background: linear-gradient(135deg, #5a8c3a 0%, #8fbc3f 100%);;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(74, 99, 224, 0.3);
 }
@@ -229,12 +260,12 @@ input {
   padding: 1rem;
   background: #f8f9fa;
   border-radius: 8px;
-  border-left: 4px solid #5e7cff;
+  border-left: 4px solid #9fc54e;
 }
 
 .demo-accounts h4 {
   margin: 0 0 0.5rem 0;
-  color: #1a1f3a;
+  color: #2d4a1f;
   font-size: 0.9rem;
 }
 
@@ -245,7 +276,7 @@ input {
 }
 
 .demo-accounts strong {
-  color: #1a1f3a;
+  color: #4a7c2c;
 }
 
 .pantalla-carga {
