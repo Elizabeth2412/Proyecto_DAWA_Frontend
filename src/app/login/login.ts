@@ -19,7 +19,7 @@ export class Login implements OnInit {
   vacioPassword: boolean = false;
   credencialesInvalidas: boolean = false;
   cargando: boolean = false; // Nuevo flag para pantalla de carga
-mensajeCarga: string = ""; 
+  mensajeCarga: string = ""; 
   constructor(
     private servicioAutorizacion: ServicioAutorizacion,
     private router: Router
