@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ServicioAutorizacion } from '../autorizacion.service';
+import { ServicioAutorizacion, Usuario } from '../autorizacion.service';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { RouterModule } from '@angular/router';
 
@@ -13,6 +13,7 @@ import { RouterModule } from '@angular/router';
 })
 export class Header implements OnInit {
   usuarioLogueado: boolean = false;
+  usuarioActual: Usuario | null = null;
 
   constructor(
     private servicioAutorizacion: ServicioAutorizacion,
@@ -29,14 +30,28 @@ export class Header implements OnInit {
     //});
 
     // Suscribirse a cambios de sesión
-    this.servicioAutorizacion.cambioEstado$.subscribe(
-      (estado) => {
-        this.usuarioLogueado = estado;
-      }
-    );
+    //this.servicioAutorizacion.cambioEstado$.subscribe(
+    //  (estado) => {
+    //    this.usuarioLogueado = estado;
+    //  }
+    //);
 
     // Verificar estado inicial
-    this.usuarioLogueado = this.servicioAutorizacion.estaLogueado();
+    //this.usuarioLogueado = this.servicioAutorizacion.estaLogueado();
+
+    this.servicioAutorizacion.obtenerObservableLogueado().subscribe(isLogged => {
+      this.usuarioLogueado = isLogged;
+
+      if (isLogged) {
+        this.usuarioActual = this.servicioAutorizacion.obtenerUsuarioActual();
+      } else {
+        this.usuarioActual = null;
+      }
+    });
+
+    // Cargar estado inicial por si ya estaba logueado
+    this.usuarioActual = this.servicioAutorizacion.obtenerUsuarioActual();
+    this.usuarioLogueado = this.usuarioActual != null;
   }
 
   manejarSesion(): void {
@@ -55,4 +70,13 @@ export class Header implements OnInit {
       this.router.navigate(['/login']);
       }
   }
+
+  redireccionarInstructorCurso(){
+    this.router.navigate(['/instructor']);
+  }
+
+  redireccionarEstudianteCurso(){
+    this.router.navigate(['/estudiante']);
+  }
+
 }

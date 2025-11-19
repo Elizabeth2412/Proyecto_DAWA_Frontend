@@ -23,14 +23,14 @@
 
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav mx-auto">
-        <li class="nav-item">
+        <!--<li class="nav-item">
           <a 
             class="nav-link px-3" 
             routerLink="/home" 
             routerLinkActive="active fw-bold text-primary">
             <i class="bi bi-house-fill me-1"></i>Inicio
           </a>
-        </li>
+        </li>-->
         <li class="nav-item">
           <a 
             class="nav-link px-3" 
@@ -66,6 +66,22 @@
         <li class="nav-item">
           <a 
             class="nav-link px-3" 
+            routerLink="/instructor"
+            routerLinkActive="active fw-bold text-primary">
+            <i class="bi bi-envelope-fill me-1"></i>Instructor-Cursos
+          </a>
+        </li>
+        <li class="nav-item">
+          <a 
+            class="nav-link px-3" 
+            routerLink="/estudiante"
+            routerLinkActive="active fw-bold text-primary">
+            <i class="bi bi-envelope-fill me-1"></i>Estudiante-Cursos
+          </a>
+        </li>
+        <li class="nav-item">
+          <a 
+            class="nav-link px-3" 
             routerLink="/comunidad"
             routerLinkActive="active fw-bold text-primary">
             <i class="bi bi-envelope-fill me-1"></i>Comunidad
@@ -74,6 +90,9 @@
       </ul>
 
       <div class="d-flex">
+        <div class="d-flex align-items-center me-3" *ngIf="usuarioActual">
+          <span class="fw-bold text-primary">{{ usuarioActual.nombre }}</span>
+        </div>
         <button 
           class="btn-agro" 
           type="button" 
