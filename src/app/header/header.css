@@ -14,11 +14,11 @@
   background: var(--dark-bg) !important; 
   backdrop-filter: blur(20px); 
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); 
-  padding: 1rem 0; 
-  position: sticky; 
+  padding: 1rem 0;  
   top: 0; 
   width: 100%; 
   z-index: 1000; 
+  /*position: sticky;*/
   border-bottom: 2px solid rgba(139, 195, 74, 0.3);
   animation: fadeInDown 0.6s ease;
 }
@@ -77,8 +77,8 @@
 .navbar-brand h2 {
   font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
   font-size: 1.5rem;
-  color: white;
-  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
+  color: var(--primary-gradient);
+  text-shadow: 1px 1px 4px rgba(62, 182, 102, 0.6);
 }
 
 .d-flex {
@@ -101,7 +101,7 @@
 .btn-agro:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 25px rgba(122, 184, 82, 0.5);
-  background: linear-gradient(135deg, #5a8c3a 0%, #8fbc3f 100%);
+  background: linear-gradient(135deg, #247451 0%, #33a65f 100%);
   color: white;
 }
 

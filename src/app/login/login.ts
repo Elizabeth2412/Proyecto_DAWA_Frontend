@@ -55,7 +55,8 @@ export class Login implements OnInit {
 
     if (usuario) {
       this.servicioAutorizacion.iniciarSesion(usuario);
-      this.redireccionarSegunTipo(usuario.tipo);
+      //this.redireccionarSegunTipo(usuario.tipo);
+      this.router.navigate(['/pagina-principal']);
     } else {
       this.mostrarErrorCredenciales();
     }

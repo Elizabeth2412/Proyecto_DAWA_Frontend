@@ -10,6 +10,7 @@ import { Evaluation } from './evaluation/evaluation';
 import { ComunidadVirtual } from './comunidad-virtual/comunidad-virtual';
 import { Register } from './register/register';
 import { ListaUsuarios } from './lista-usuarios/lista-usuarios';
+import { PaginalPrincipal } from './paginal-principal/paginal-principal';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -24,5 +25,6 @@ export const routes: Routes = [
   { path: 'crear-curso', component: CrearCurso },
   { path: 'evaluacion', component: Evaluation },
   { path: 'comunidad', component:ComunidadVirtual},
+  { path: 'pagina-principal', component: PaginalPrincipal },
   { path: '**', redirectTo: '/login' }
 ];
