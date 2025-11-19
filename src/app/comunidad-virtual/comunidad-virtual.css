@@ -28,7 +28,7 @@ h1 {
 }
 
 .btn-primary {
-  background: #2563eb;
+  background: #4a7c2c;
   color: white;
   padding: 0.5rem 1rem;
   border: none;
@@ -42,7 +42,7 @@ h1 {
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #1d4ed8;
+  background: #4a7c2c;
 }
 
 .btn-primary:disabled {
