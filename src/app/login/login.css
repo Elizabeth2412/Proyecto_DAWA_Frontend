@@ -267,15 +267,10 @@ form {
   }
 }
 
-/* ========================================
-   ESTILOS ESPECÍFICOS DE LOGIN
-   ======================================== */
-
-/* Character Image - Imagen flotante */
 .character-image {
   position: absolute;
-  left: 50%;
-  bottom: -10%;
+  left: 40%;
+  bottom: -30%;
   transform: translateX(-50%);
   width: 280px;
   height: auto;
