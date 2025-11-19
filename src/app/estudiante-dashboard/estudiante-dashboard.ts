@@ -29,10 +29,10 @@ export class EstudianteDashboard implements OnInit {
 
   ngOnInit(): void {
     this.usuarioActual = this.servicioAutorizacion.obtenerUsuarioActual();
-    if (!this.usuarioActual || this.usuarioActual.tipo !== 'estudiante') {
-      this.router.navigate(['/login']);
-      return;
-    }
+    //if (!this.usuarioActual || this.usuarioActual.tipo !== 'estudiante') {
+    //  this.router.navigate(['/login']);
+    //  return;
+    //}
     this.cargarCursos();
   }
 
