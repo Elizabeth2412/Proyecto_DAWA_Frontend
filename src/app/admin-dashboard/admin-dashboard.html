@@ -1,15 +1,99 @@
-<div class="dashboard-contenedor">
+<div class="container-fluid py-4 bg-light min-vh-100">
+  <div class="container">
 
-
-  <main class="dashboard-principal">
-  <section class="dashboard-encabezado">
-    <h1>Panel de administración - AGROPE-TECH</h1>
-    <div class="info-usuario">
-      <span>Bienvenido, Administrador</span>
-        <p>Panel de administración - En desarrollo</p>
-      <span>Bienvenido, {{ usuarioActual?.nombre }}</span>
-
+    <!-- ENCABEZADO PRINCIPAL -->
+    <div class="row mb-4">
+      <div class="col">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h1 class="display-5 fw-bold" style="color: #4a7c2c; text-shadow: 1px 1px 4px rgba(62, 182, 102, 0.6);">
+              <i class="bi bi-speedometer2 me-3"></i>
+              Panel de administración
+            </h1>
+          </div>
+        </div>
       </div>
-  </section>
-  </main>
+    </div>
+
+    <!-- CAJAS DE NAVEGACIÓN -->
+    <div class="row mb-5" *ngIf="vistaActual === 'inicio'">
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card dashboard-card h-100" (click)="cambiarVista('archivos')">
+          <div class="card-body text-center p-4">
+            <div class="dashboard-icon mb-3">
+              <i class="bi bi-files"></i>
+            </div>
+            <h4 class="card-title fw-bold">Gestión de archivos</h4>
+            <p class="card-text text-muted">
+              Administra los archivos y documentos del sistema.
+            </p>
+            <div class="dashboard-stats">
+              <span class="badge bg-primary">{{ archivos.length }} archivos</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card dashboard-card h-100" (click)="cambiarVista('usuarios')">
+          <div class="card-body text-center p-4">
+            <div class="dashboard-icon mb-3">
+              <i class="bi bi-people-fill"></i>
+            </div>
+            <h4 class="card-title fw-bold">Gestión de usuarios</h4>
+            <p class="card-text text-muted">
+              Gestiona usuarios, roles y permisos del sistema.
+            </p>
+            <div class="dashboard-stats">
+              <span class="badge bg-success">5 usuarios</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card dashboard-card h-100" (click)="cambiarVista('cursos')">
+          <div class="card-body text-center p-4">
+            <div class="dashboard-icon mb-3">
+              <i class="bi bi-journal-text"></i>
+            </div>
+            <h4 class="card-title fw-bold">Gestión de cursos</h4>
+            <p class="card-text text-muted">
+              Crea y administra cursos, módulos y contenido educativo.
+            </p>
+            <div class="dashboard-stats">
+              <span class="badge bg-warning">En desarrollo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+  
+    </div>
+
+    <!-- VISTA DE GESTIÓN DE ARCHIVOS -->
+    <div *ngIf="vistaActual === 'archivos'">
+      <app-crud-archivos></app-crud-archivos>
+    </div>
+
+    <!-- VISTA DE GESTIÓN DE USUARIOS -->
+    <div *ngIf="vistaActual === 'usuarios'">
+      <app-lista-usuarios></app-lista-usuarios>
+    </div>
+
+    <!-- OTRAS VISTAS (placeholders) -->
+    <div *ngIf="vistaActual !== 'inicio' && vistaActual !== 'archivos' && vistaActual !== 'usuarios' && vistaActual !== 'diapositivas'">
+      <div class="card">
+        <div class="card-body text-center py-5">
+          <i class="bi bi-tools display-1 text-muted mb-3"></i>
+          <h3>Módulo en Desarrollo</h3>
+          <p class="text-muted">Esta sección está actualmente en desarrollo.</p>
+          <button class="btn btn-primary" (click)="cambiarVista('inicio')">
+            Volver al Panel Principal
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>
