@@ -21,6 +21,7 @@ export class ServicioAutorizacion {
     { email: 'joshua@hotmail.com', password: 'estudiante123', tipo: 'estudiante', nombre: 'Joshúa' },
     { email: 'jonacas2000@outlook.com', password: '123456', tipo: 'estudiante', nombre: 'Jonathan' }
   ];
+
   // --- Claves para almacenamiento ---
   private readonly claveUsuarioActual = 'usuarioActual';
   private readonly claveUsuarios = 'usuarios';
@@ -67,7 +68,7 @@ export class ServicioAutorizacion {
     correo: string;
     password: string;
   }): { exito: boolean; mensaje: string } {
-    // Validar si el correo ya existe
+
     const existeUsuario = this.usuarios.find(u => u.email === nuevoUsuario.correo);
     
     if (existeUsuario) {
