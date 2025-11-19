@@ -1,0 +1,9 @@
+:root {
+  --primary-gradient: linear-gradient(135deg, #4a7c2c 0%, #6b9d3e 100%);
+}
+
+.bg-green-gradient {
+  background: var(--primary-gradient)!important;
+}
+.tipo-pdf { background: #000000; color: #dc3545; }
+.tipo-pptx { background: #000000; color: #fd0d0d; }

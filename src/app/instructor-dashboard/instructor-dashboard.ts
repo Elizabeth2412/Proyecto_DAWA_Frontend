@@ -403,7 +403,7 @@ export class InstructorDashboard implements OnInit {
 
   obtenerTamanoLegible(tamanoBytes?: number): string {
     if (!tamanoBytes) return 'N/A';
-    return this.servicioArchivos.obtenerTamañoArchivoLegible(tamanoBytes);
+    return this.servicioArchivos.obtenerTamanoArchivoLegible(tamanoBytes);
   }
 
   obtenerTipoLegible(diapositiva: Diapositiva): string {

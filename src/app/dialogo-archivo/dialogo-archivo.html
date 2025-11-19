@@ -1,0 +1,84 @@
+<div class="dialogo-overlay" (click)="cerrarDialogo()">
+  <div class="dialogo-contenido" (click)="$event.stopPropagation()">
+    <div class="dialogo-cabecera">
+      <h3>{{ archivo ? 'Modificar archivo' : 'nuevo archivo' }}</h3>
+      <button class="btn-cerrar" (click)="cerrarDialogo()">&times;</button>
+    </div>
+    
+    <div class="dialogo-cuerpo">
+      <form (ngSubmit)="guardar()">
+        <div class="form-group">
+          <label for="nombre">Nombre del archivo:</label>
+          <input 
+            type="text" 
+            id="nombre" 
+            [(ngModel)]="datosArchivo.nombre" 
+            name="nombre"
+            class="form-control"
+            required>
+        </div>
+
+        <div class="form-group">
+          <label for="tipo">Tipo de archivo:</label>
+          <select 
+            id="tipo" 
+            [(ngModel)]="datosArchivo.tipo" 
+            name="tipo"
+            class="form-control"
+            required>
+            <option value="PDF">PDF</option>
+            <option value="PPTX">PowerPoint</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="tamano">Tamaño (bytes):</label>
+          <input 
+            type="number" 
+            id="tamano" 
+            [(ngModel)]="datosArchivo.tamano" 
+            name="tamano"
+            class="form-control"
+            min="1"
+            required>
+          <small class="texto-ayuda">
+            Tamaño actual: {{ servicioArchivos.obtenerTamanoLegible(datosArchivo.tamano || 0) }}
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label for="descripcion">Descripción:</label>
+          <textarea 
+            id="descripcion" 
+            [(ngModel)]="datosArchivo.descripcion" 
+            name="descripcion"
+            class="form-control"
+            rows="3"
+            required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="estado">Estado:</label>
+          <select 
+            id="estado" 
+            [(ngModel)]="datosArchivo.estado" 
+            name="estado"
+            class="form-control"
+            required>
+            <option value="Disponible">Disponible</option>
+            <option value="NoDisponible">No disponible</option>
+          </select>
+        </div>
+
+        <div class="dialogo-acciones">
+          <button type="button" class="btn btn-secundario" (click)="cerrarDialogo()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primario">
+            {{ archivo ? 'Actualizar' : 'Crear' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

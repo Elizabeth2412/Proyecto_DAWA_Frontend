@@ -1,11 +1,24 @@
 import { Injectable } from '@angular/core';
-
+export interface Archivo{
+  id:number;
+  nombre: string;
+  tipo:string;
+  tamano:number;
+  fechaSubida:Date;
+  descripcion: string;
+  usuario: string;
+  estado: 'Disponible' | 'NoDisponible';
+}
 @Injectable({
   providedIn: 'root'
 })
 export class ServicioArchivos {
-
-  constructor() { }
+  private archivos: Archivo[]=[];
+  private readonly  ARCHIVOS= 'archivos_agropetech';
+  constructor() {
+    this.cargarArchivos();
+    this.inicializarDatos();
+   }
 
   esArchivoValido(archivo: File): boolean {
     const tiposPermitidos = [
@@ -153,7 +166,7 @@ export class ServicioArchivos {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
-  obtenerTamañoArchivoLegible(bytes: number): string {
+  obtenerTamanoArchivoLegible(bytes: number): string {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const tamanos = ['Bytes', 'KB', 'MB', 'GB'];
@@ -170,5 +183,113 @@ export class ServicioArchivos {
     } else {
       return 'Archivo';
     }
+  }
+///////////////////////////////////////////////////////
+private cargarArchivos():void{
+  const archivosGuardados=localStorage.getItem(this.ARCHIVOS);
+  if(archivosGuardados){
+  this.archivos= JSON.parse(archivosGuardados).map((archivo:any)=>({
+    ...archivo,
+    fechaSubida: new Date(archivo.fechaSubida)
+  }));
+}
+}
+
+
+private inicializarDatos():void{
+    if (this.archivos.length === 0) {
+
+this.archivos = [
+  {
+    id: 101,
+    nombre: "Manual Riego por Goteo",
+    tipo: "PDF",
+    tamano: 855000,
+    fechaSubida: new Date('2025-09-20'),
+    descripcion: "Guía práctica para sistemas de riego localizado.",
+    usuario: "leslie@gmail.com",
+    estado: "Disponible"
+  },
+  {
+    id: 102,
+    nombre: "Video Poda Tomate",
+    tipo: "PDF",
+    tamano: 855000,
+    fechaSubida: new Date('2025-09-20'),
+    descripcion: "Tutorial sobre las técnicas de poda para cultivo de tomate.",
+    usuario: "leslie@gmail.com",
+    estado: "Disponible"
+  },
+  {
+    id: 103,
+    nombre: "Plantilla Ficha Suelo",
+    tipo: "PDF",
+    tamano: 855000,
+    fechaSubida: new Date('2025-09-20'),
+    descripcion: "Cálculo para el registro de análisis de suelos.",
+    usuario: "leslie@gmail.com",
+    estado: "Disponible"
+  },
+  {
+    id: 104,
+    nombre: "Presentación Sanidad",
+    tipo: "PPTX",
+    tamano: 855000,
+    fechaSubida: new Date('2025-09-20'),
+    descripcion: "Diapositivas sobre el control de plagas y enfermedades comunes.",
+    usuario: "leslie@gmail.com",
+    estado: "NoDisponible"
+  },
+  {
+    id: 105,
+    nombre: "Certificado Curso Base",
+    tipo: "PPTX",
+    tamano: 855000,
+    fechaSubida: new Date('2025-09-20'),
+    descripcion: "Certificados de módulos básicos.",
+    usuario: "leslie@gmail.com",
+    estado: "Disponible"
+  }
+];
+
+ }}
+ obtenerArchivos(): Archivo[]{
+  return [...this.archivos];
+ }
+ obtenerArchivosPorId(id:number):Archivo|undefined{
+  return this.archivos.find(archivo=>archivo.id===id);
+ }
+  private guardarArchivos(): void {
+    localStorage.setItem(this.ARCHIVOS, JSON.stringify(this.archivos));
+  }
+  agregarArchivo(archivo: Omit<Archivo, 'id'>): void {
+    const nuevoId = this.archivos.length > 0 ? Math.max(...this.archivos.map(a => a.id)) + 1 : 1;
+    const nuevoArchivo: Archivo = {
+      ...archivo,
+      id: nuevoId
+    };
+    this.archivos.push(nuevoArchivo);
+    this.guardarArchivos();
+  }
+
+  actualizarArchivo(id: number, archivoActualizado: Partial<Archivo>): void {
+    const indice = this.archivos.findIndex(archivo => archivo.id === id);
+    if (indice !== -1) {
+      this.archivos[indice] = { ...this.archivos[indice], ...archivoActualizado };
+      this.guardarArchivos();
+    }
+  }
+
+  eliminarArchivo(id: number): void {
+    this.archivos = this.archivos.filter(archivo => archivo.id !== id);
+    this.guardarArchivos();
+  }
+
+  obtenerTamanoLegible(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const tamanos = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + tamanos[i];
   }
 }
