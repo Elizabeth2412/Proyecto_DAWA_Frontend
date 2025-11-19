@@ -50,19 +50,33 @@ export class Login implements OnInit {
   }
 
   private procesarLogin(): void {
-    // Valida credenciales usando el servicio
-    const usuario = this.servicioAutorizacion.validarCredenciales(this.email, this.password);
+  // Cambia el mensaje mientras valida
+  this.mensajeCarga = "Validando credenciales...";
+  
+  // Validación real con el servicio
+  const usuario = this.servicioAutorizacion.validarCredenciales(this.email, this.password);
 
-    if (usuario) {
+  if (usuario) {
+    // Si son correctas
+    this.mensajeCarga = " Acceso concedido. Redirigiendo...";
+    
+    setTimeout(() => {
       this.servicioAutorizacion.iniciarSesion(usuario);
-      //this.redireccionarSegunTipo(usuario.tipo);
       this.router.navigate(['/pagina-principal']);
-    } else {
-      this.mostrarErrorCredenciales();
-    }
+      this.cargando = false;
+    }, 1500);
 
-    this.cargando = false;
+  } else {
+    // Si son incorrectas
+    this.mensajeCarga = " Error: credenciales incorrectas.";
+
+    setTimeout(() => {
+      this.cargando = false;
+      this.mostrarErrorCredenciales();
+    }, 1500);
   }
+}
+
 
   private reiniciarValidaciones(): void {
     this.vacioEmail = false;
