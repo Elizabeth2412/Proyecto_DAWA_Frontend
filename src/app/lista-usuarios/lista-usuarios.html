@@ -8,12 +8,10 @@
         <div class="d-flex justify-content-between align-items-center">
           <div>
             <h1 class="display-5 fw-bold" style="color: #4a7c2c; text-shadow: 1px 1px 4px rgba(62, 182, 102, 0.6);">
-              <i class="bi bi-people-fill me-3"></i>
               Gestión de usuarios
             </h1>
             <p class="text-muted">Administra todos los usuarios del sistema</p>
           </div>
-
         </div>
       </div>
     </div>
@@ -22,7 +20,7 @@
     <section class="dashboard-contenido mb-4">
       <div class="acciones-superiores d-flex flex-wrap justify-content-between align-items-center">
         <button class="btn-agregar d-flex align-items-center mb-2" (click)="abrirDialogoNuevoUsuario()">
-          <i class="btn-agregar"></i> Registrar nuevo usuario
+           Registrar nuevo usuario
         </button>
 
         <div class="controles-tabla d-flex gap-3 mb-2">
@@ -49,12 +47,11 @@
       <div class="card-header text-white" style="background: linear-gradient(135deg, #4a7c2c 0%, #6b9d3e 100%);">
         <div class="d-flex justify-content-between align-items-center">
           <h5 class="mb-0">
-            <i class="bi bi-table me-2"></i>
             Lista de Usuarios ({{ usuariosFiltrados.length }})
           </h5>
-
         </div>
       </div>
+
       <div class="card-body p-0">
         <div class="table-responsive">
           <table class="table table-hover table-striped mb-0">
@@ -68,58 +65,62 @@
                 <th scope="col" class="text-center">Acciones</th>
               </tr>
             </thead>
+
             <tbody>
               <tr *ngFor="let usuario of usuariosFiltrados; let i = index">
                 <td class="text-center fw-bold">{{ i + 1 }}</td>
+
+                <!-- Nombre con icono (solo rol) -->
                 <td>
                   <div class="d-flex align-items-center">
                     <i [class]="'bi ' + obtenerIconoTipo(usuario.tipo) + ' me-2 text-primary'"></i>
                     <span>{{ usuario.nombre }} {{ usuario.apellido || '' }}</span>
                   </div>
                 </td>
-                <td>
-                  <i class="bi bi-envelope me-2 text-muted"></i>
-                  {{ usuario.email }}
-                </td>
+
+                <td>{{ usuario.email }}</td>
+
                 <td class="text-center">
                   <span *ngIf="usuario.edad" class="badge bg-secondary">{{ usuario.edad }} años</span>
                   <span *ngIf="!usuario.edad" class="text-muted">-</span>
                 </td>
+
+                <!-- Rol (mantiene icono del rol) -->
                 <td class="text-center">
                   <span [class]="obtenerClaseTipo(usuario.tipo)">
                     <i [class]="'bi ' + obtenerIconoTipo(usuario.tipo) + ' me-1'"></i>
                     {{ usuario.tipo | titlecase }}
                   </span>
                 </td>
+
                 <td class="text-center">
                   <div class="btn-group" role="group">
                     <button 
                       class="btn btn-sm btn-outline-primary"
                       (click)="editarUsuario(usuario)"
                       title="Editar usuario">
-                      <i class="bi bi-pencil-square me-1"></i>
                       Editar
                     </button>
+
                     <button 
                       class="btn btn-sm btn-outline-danger"
                       (click)="eliminarUsuario(usuario.email)"
                       title="Eliminar usuario"
                       [disabled]="usuario.email === usuarioActual?.email">
-                      <i class="bi bi-trash-fill me-1"></i>
                       Eliminar
                     </button>
                   </div>
+
                   <small *ngIf="usuario.email === usuarioActual?.email" class="text-muted d-block mt-1">
                     (No puedes eliminarte a ti mismo)
                   </small>
                 </td>
               </tr>
-              
+
               <!-- Mensaje cuando no hay usuarios -->
               <tr *ngIf="usuariosFiltrados.length === 0">
                 <td colspan="6" class="text-center py-5">
-                  <i class="bi bi-search display-1 text-muted"></i>
-                  <p class="text-muted mt-3">No se encontraron usuarios que coincidan con la búsqueda</p>
+                  No se encontraron usuarios que coincidan con la búsqueda
                 </td>
               </tr>
             </tbody>
@@ -135,20 +136,18 @@
 <div class="modal fade show d-block" *ngIf="mostrarModalEdicion" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header text-white"  style="background: linear-gradient(135deg, #4a7c2c 0%, #6b9d3e 100%);">
-        <h5 class="modal-title">
-          <i class="bi bi-pencil-square me-2"></i>
-          Editar Usuario
-        </h5>
+
+      <div class="modal-header text-white" style="background: linear-gradient(135deg, #4a7c2c 0%, #6b9d3e 100%);">
+        <h5 class="modal-title">Editar Usuario</h5>
         <button type="button" class="btn-close btn-close-white" (click)="cerrarModalEdicion()"></button>
       </div>
+
       <div class="modal-body">
         <form>
-          <!-- Correo (solo lectura) -->
+
+          <!-- Correo -->
           <div class="mb-3">
-            <label class="form-label fw-semibold">
-              <i class="bi bi-envelope me-2"></i>Correo Electrónico
-            </label>
+            <label class="form-label fw-semibold">Correo Electrónico</label>
             <input 
               type="email" 
               class="form-control"
@@ -161,9 +160,7 @@
 
           <!-- Nombre -->
           <div class="mb-3">
-            <label class="form-label fw-semibold">
-              <i class="bi bi-person me-2"></i>Nombre
-            </label>
+            <label class="form-label fw-semibold">Nombre</label>
             <input 
               type="text" 
               class="form-control"
@@ -175,9 +172,7 @@
 
           <!-- Apellido -->
           <div class="mb-3">
-            <label class="form-label fw-semibold">
-              <i class="bi bi-person me-2"></i>Apellido
-            </label>
+            <label class="form-label fw-semibold">Apellido</label>
             <input 
               type="text" 
               class="form-control"
@@ -188,9 +183,7 @@
 
           <!-- Edad -->
           <div class="mb-3">
-            <label class="form-label fw-semibold">
-              <i class="bi bi-calendar-check me-2"></i>Edad
-            </label>
+            <label class="form-label fw-semibold">Edad</label>
             <input 
               type="number" 
               class="form-control"
@@ -201,11 +194,9 @@
               max="120">
           </div>
 
-          <!-- Tipo de Usuario -->
+          <!-- Tipo -->
           <div class="mb-3">
-            <label class="form-label fw-semibold">
-              <i class="bi bi-shield-check me-2"></i>Rol de Usuario
-            </label>
+            <label class="form-label fw-semibold">Rol de Usuario</label>
             <select 
               class="form-select"
               [(ngModel)]="usuarioForm.tipo"
@@ -215,16 +206,19 @@
               <option value="administrador">Administrador</option>
             </select>
           </div>
+
         </form>
       </div>
+
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="cerrarModalEdicion()">
-          <i class="bi bi-x-circle me-2"></i>Cancelar
+          Cancelar
         </button>
         <button type="button" class="btn btn-primary" (click)="guardarEdicion()">
-          <i class="bi bi-save me-2"></i>Guardar Cambios
+          Guardar Cambios
         </button>
       </div>
+
     </div>
   </div>
 </div>
@@ -233,6 +227,7 @@
 <div class="modal-overlay" *ngIf="mostrarModalNuevo" (click)="cerrarModalNuevo()">
   <div class="modal-contenido" (click)="$event.stopPropagation()">
     <div class="card">
+      
       <header class="card-header">
         <div>
           <h2>Registrar nuevo usuario</h2>
@@ -242,6 +237,7 @@
       </header>
 
       <form class="card-body" (ngSubmit)="$event.preventDefault()">
+        
         <div class="form-row">
           <label for="nombre-nuevo">Nombre *</label>
           <input id="nombre-nuevo" type="text" name="nombre" 
@@ -297,6 +293,7 @@
           <button type="button" class="btn btn-secondary" (click)="cerrarModalNuevo()">Cancelar</button>
           <button type="button" class="btn btn-guardar" (click)="registrarNuevoUsuario()">Registrar usuario</button>
         </div>
+
       </form>
     </div>
   </div>
