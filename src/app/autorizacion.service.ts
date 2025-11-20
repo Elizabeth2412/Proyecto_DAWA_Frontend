@@ -19,7 +19,9 @@ export class ServicioAutorizacion {
     { email: 'elizabeth@gmail.com', password: 'admin123', tipo: 'administrador', nombre: 'Elizabeth', edad:20 },
     { email: 'leslie@gmail.com', password: 'instructor123', tipo: 'instructor', nombre: 'Leslie', edad:20 },
     { email: 'joshua@hotmail.com', password: 'estudiante123', tipo: 'estudiante', nombre: 'Joshúa', edad:20 },
-    { email: 'jonacas2000@outlook.com', password: '123456', tipo: 'estudiante', nombre: 'Jonathan', edad:20 }
+    { email: 'jonacas2000@outlook.com', password: '123456', tipo: 'estudiante', nombre: 'Jonathan', edad:20 },
+    { email: 'juan@outlook.com', password: '123456', tipo: 'estudiante', nombre: 'Juan', edad:20 }
+
   ];
 
   // --- Claves para almacenamiento ---

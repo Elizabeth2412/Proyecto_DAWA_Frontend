@@ -14,13 +14,30 @@ import { ServicioAutorizacion, Usuario } from '../autorizacion.service';
 })
 export class ListaUsuarios implements OnInit {
   usuarios: Usuario[] = [];
+  usuariosFiltrados: Usuario[] = [];
+  usuarioActual: Usuario | null = null;
   usuarioEditando: Usuario | null = null;
-  mostrarModal: boolean = false;
+  mostrarModalEdicion: boolean = false;
+  mostrarModalNuevo: boolean = false;
   
+  // Filtros
+  terminoBusqueda: string = '';
+  filtroRol: string = '';
+
+  // Formularios
   usuarioForm = {
     email: '',
     nombre: '',
     apellido: '',
+    edad: 0,
+    tipo: 'estudiante' as 'administrador' | 'instructor' | 'estudiante'
+  };
+
+  nuevoUsuario = {
+    nombre: '',
+    apellido: '',
+    email: '',
+    password: '',
     edad: 0,
     tipo: 'estudiante' as 'administrador' | 'instructor' | 'estudiante'
   };
@@ -32,12 +49,32 @@ export class ListaUsuarios implements OnInit {
 
   ngOnInit(): void {
     this.cargarUsuarios();
+    this.usuarioActual = this.servicioAutorizacion.obtenerUsuarioActual();
   }
 
   cargarUsuarios(): void {
     this.usuarios = this.servicioAutorizacion.obtenerTodosUsuarios();
+    this.usuariosFiltrados = [...this.usuarios];
   }
 
+  filtrarUsuarios(): void {
+    this.usuariosFiltrados = this.usuarios.filter(usuario => {
+      const coincideBusqueda = !this.terminoBusqueda || 
+        usuario.nombre.toLowerCase().includes(this.terminoBusqueda.toLowerCase()) ||
+        usuario.email.toLowerCase().includes(this.terminoBusqueda.toLowerCase()) ||
+        (usuario.apellido && usuario.apellido.toLowerCase().includes(this.terminoBusqueda.toLowerCase()));
+      
+      const coincideRol = !this.filtroRol || usuario.tipo === this.filtroRol;
+      
+      return coincideBusqueda && coincideRol;
+    });
+  }
+
+  contarUsuariosPorRol(rol: string): number {
+    return this.usuarios.filter(usuario => usuario.tipo === rol).length;
+  }
+
+  // Funciones para el modal de edición
   editarUsuario(usuario: Usuario): void {
     this.usuarioEditando = usuario;
     this.usuarioForm = {
@@ -47,11 +84,17 @@ export class ListaUsuarios implements OnInit {
       edad: usuario.edad || 0,
       tipo: usuario.tipo
     };
-    this.mostrarModal = true;
+    this.mostrarModalEdicion = true;
   }
 
   guardarEdicion(): void {
     if (this.usuarioEditando) {
+      // Validaciones
+      if (!this.usuarioForm.nombre.trim()) {
+        alert('Por favor, ingresa un nombre válido.');
+        return;
+      }
+
       const usuarioActualizado: Usuario = {
         ...this.usuarioEditando,
         nombre: this.usuarioForm.nombre,
@@ -67,7 +110,7 @@ export class ListaUsuarios implements OnInit {
 
       if (resultado.exito) {
         alert(resultado.mensaje);
-        this.cerrarModal();
+        this.cerrarModalEdicion();
         this.cargarUsuarios();
       } else {
         alert(resultado.mensaje);
@@ -75,8 +118,85 @@ export class ListaUsuarios implements OnInit {
     }
   }
 
+  cerrarModalEdicion(): void {
+    this.mostrarModalEdicion = false;
+    this.usuarioEditando = null;
+    this.usuarioForm = {
+      email: '',
+      nombre: '',
+      apellido: '',
+      edad: 0,
+      tipo: 'estudiante'
+    };
+  }
+
+  // Funciones para el modal de nuevo usuario
+  abrirDialogoNuevoUsuario(): void {
+    this.nuevoUsuario = {
+      nombre: '',
+      apellido: '',
+      email: '',
+      password: '',
+      edad: 0,
+      tipo: 'estudiante'
+    };
+    this.mostrarModalNuevo = true;
+  }
+
+  registrarNuevoUsuario(): void {
+    // Validaciones
+    if (!this.nuevoUsuario.nombre.trim()) {
+      alert('Por favor, ingresa un nombre válido.');
+      return;
+    }
+
+    if (!this.nuevoUsuario.email.trim()) {
+      alert('Por favor, ingresa un correo electrónico válido.');
+      return;
+    }
+
+    if (!this.nuevoUsuario.password || this.nuevoUsuario.password.length < 6) {
+      alert('La contraseña debe tener al menos 6 caracteres.');
+      return;
+    }
+
+    const resultado = this.servicioAutorizacion.registrarUsuario({
+      nombre: this.nuevoUsuario.nombre,
+      apellido: this.nuevoUsuario.apellido,
+      correo: this.nuevoUsuario.email,
+      password: this.nuevoUsuario.password,
+      edad: this.nuevoUsuario.edad
+    });
+
+    if (resultado.exito) {
+      alert(resultado.mensaje);
+      this.cerrarModalNuevo();
+      this.cargarUsuarios();
+    } else {
+      alert(resultado.mensaje);
+    }
+  }
+
+  cerrarModalNuevo(): void {
+    this.mostrarModalNuevo = false;
+    this.nuevoUsuario = {
+      nombre: '',
+      apellido: '',
+      email: '',
+      password: '',
+      edad: 0,
+      tipo: 'estudiante'
+    };
+  }
+
   eliminarUsuario(email: string): void {
-    const confirmacion = confirm('¿Estás seguro de que deseas eliminar este usuario?');
+    // No permitir eliminarse a sí mismo
+    if (this.usuarioActual && this.usuarioActual.email === email) {
+      alert('No puedes eliminar tu propia cuenta.');
+      return;
+    }
+
+    const confirmacion = confirm('¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.');
     
     if (confirmacion) {
       const resultado = this.servicioAutorizacion.eliminarUsuario(email);
@@ -88,18 +208,6 @@ export class ListaUsuarios implements OnInit {
         alert(resultado.mensaje);
       }
     }
-  }
-
-  cerrarModal(): void {
-    this.mostrarModal = false;
-    this.usuarioEditando = null;
-    this.usuarioForm = {
-      email: '',
-      nombre: '',
-      apellido: '',
-      edad: 0,
-      tipo: 'estudiante'
-    };
   }
 
   obtenerClaseTipo(tipo: string): string {
@@ -129,6 +237,6 @@ export class ListaUsuarios implements OnInit {
   }
 
   volver(): void {
-    this.router.navigate(['/admin']);
+    this.router.navigate(['/admin-dashboard']);
   }
 }

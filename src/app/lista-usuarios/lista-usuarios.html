@@ -13,20 +13,47 @@
             </h1>
             <p class="text-muted">Administra todos los usuarios del sistema</p>
           </div>
-          <button class="btn btn-outline-secondary" (click)="volver()">
-            <i class="bi bi-arrow-left me-2"></i>Volver
-          </button>
+
         </div>
       </div>
     </div>
 
+    <!-- Controles Superiores -->
+    <section class="dashboard-contenido mb-4">
+      <div class="acciones-superiores d-flex flex-wrap justify-content-between align-items-center">
+        <button class="btn-agregar d-flex align-items-center mb-2" (click)="abrirDialogoNuevoUsuario()">
+          <i class="btn-agregar"></i> Registrar nuevo usuario
+        </button>
+
+        <div class="controles-tabla d-flex gap-3 mb-2">
+          <input 
+            type="text"
+            placeholder="Buscar usuarios..."
+            class="buscador form-control"
+            [(ngModel)]="terminoBusqueda"
+            (input)="filtrarUsuarios()"
+          >
+
+          <select class="form-select" [(ngModel)]="filtroRol" (change)="filtrarUsuarios()">
+            <option value="">Todos los roles</option>
+            <option value="administrador">Administrador</option>
+            <option value="instructor">Instructor</option>
+            <option value="estudiante">Estudiante</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
     <!-- Tabla de Usuarios -->
     <div class="card shadow-sm">
       <div class="card-header text-white" style="background: linear-gradient(135deg, #4a7c2c 0%, #6b9d3e 100%);">
-        <h5 class="mb-0">
-          <i class="bi bi-table me-2"></i>
-          Lista de Usuarios ({{ usuarios.length }})
-        </h5>
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="bi bi-table me-2"></i>
+            Lista de Usuarios ({{ usuariosFiltrados.length }})
+          </h5>
+
+        </div>
       </div>
       <div class="card-body p-0">
         <div class="table-responsive">
@@ -42,7 +69,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let usuario of usuarios; let i = index">
+              <tr *ngFor="let usuario of usuariosFiltrados; let i = index">
                 <td class="text-center fw-bold">{{ i + 1 }}</td>
                 <td>
                   <div class="d-flex align-items-center">
@@ -55,7 +82,7 @@
                   {{ usuario.email }}
                 </td>
                 <td class="text-center">
-                  <span *ngIf="usuario.edad">{{ usuario.edad }} años</span>
+                  <span *ngIf="usuario.edad" class="badge bg-secondary">{{ usuario.edad }} años</span>
                   <span *ngIf="!usuario.edad" class="text-muted">-</span>
                 </td>
                 <td class="text-center">
@@ -76,19 +103,23 @@
                     <button 
                       class="btn btn-sm btn-outline-danger"
                       (click)="eliminarUsuario(usuario.email)"
-                      title="Eliminar usuario">
+                      title="Eliminar usuario"
+                      [disabled]="usuario.email === usuarioActual?.email">
                       <i class="bi bi-trash-fill me-1"></i>
                       Eliminar
                     </button>
                   </div>
+                  <small *ngIf="usuario.email === usuarioActual?.email" class="text-muted d-block mt-1">
+                    (No puedes eliminarte a ti mismo)
+                  </small>
                 </td>
               </tr>
               
               <!-- Mensaje cuando no hay usuarios -->
-              <tr *ngIf="usuarios.length === 0">
+              <tr *ngIf="usuariosFiltrados.length === 0">
                 <td colspan="6" class="text-center py-5">
-                  <i class="bi bi-inbox display-1 text-muted"></i>
-                  <p class="text-muted mt-3">No hay usuarios registrados</p>
+                  <i class="bi bi-search display-1 text-muted"></i>
+                  <p class="text-muted mt-3">No se encontraron usuarios que coincidan con la búsqueda</p>
                 </td>
               </tr>
             </tbody>
@@ -101,7 +132,7 @@
 </div>
 
 <!-- Modal de Edición -->
-<div class="modal fade show d-block" *ngIf="mostrarModal" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+<div class="modal fade show d-block" *ngIf="mostrarModalEdicion" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header text-white"  style="background: linear-gradient(135deg, #4a7c2c 0%, #6b9d3e 100%);">
@@ -109,7 +140,7 @@
           <i class="bi bi-pencil-square me-2"></i>
           Editar Usuario
         </h5>
-        <button type="button" class="btn-close btn-close-white" (click)="cerrarModal()"></button>
+        <button type="button" class="btn-close btn-close-white" (click)="cerrarModalEdicion()"></button>
       </div>
       <div class="modal-body">
         <form>
@@ -138,7 +169,8 @@
               class="form-control"
               [(ngModel)]="usuarioForm.nombre"
               name="nombre"
-              placeholder="Ingresa el nombre">
+              placeholder="Ingresa el nombre"
+              required>
           </div>
 
           <!-- Apellido -->
@@ -164,7 +196,9 @@
               class="form-control"
               [(ngModel)]="usuarioForm.edad"
               name="edad"
-              placeholder="Ingresa la edad">
+              placeholder="Ingresa la edad"
+              min="1"
+              max="120">
           </div>
 
           <!-- Tipo de Usuario -->
@@ -184,13 +218,86 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModalEdicion()">
           <i class="bi bi-x-circle me-2"></i>Cancelar
         </button>
         <button type="button" class="btn btn-primary" (click)="guardarEdicion()">
           <i class="bi bi-save me-2"></i>Guardar Cambios
         </button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Nuevo Usuario -->
+<div class="modal-overlay" *ngIf="mostrarModalNuevo" (click)="cerrarModalNuevo()">
+  <div class="modal-contenido" (click)="$event.stopPropagation()">
+    <div class="card">
+      <header class="card-header">
+        <div>
+          <h2>Registrar nuevo usuario</h2>
+          <p class="subtitle">Agrega un nuevo usuario al sistema</p>
+        </div>
+        <button class="btn-cerrar" aria-label="Cerrar" (click)="cerrarModalNuevo()">×</button>
+      </header>
+
+      <form class="card-body" (ngSubmit)="$event.preventDefault()">
+        <div class="form-row">
+          <label for="nombre-nuevo">Nombre *</label>
+          <input id="nombre-nuevo" type="text" name="nombre" 
+                 [(ngModel)]="nuevoUsuario.nombre" 
+                 placeholder="Ingresa el nombre" 
+                 required />
+        </div>
+
+        <div class="form-row">
+          <label for="apellido-nuevo">Apellido</label>
+          <input id="apellido-nuevo" type="text" name="apellido" 
+                 [(ngModel)]="nuevoUsuario.apellido" 
+                 placeholder="Ingresa el apellido" />
+        </div>
+
+        <div class="form-row">
+          <label for="email-nuevo">Correo Electrónico *</label>
+          <input id="email-nuevo" type="email" name="email" 
+                 [(ngModel)]="nuevoUsuario.email" 
+                 placeholder="ejemplo@correo.com" 
+                 required />
+        </div>
+
+        <div class="form-row">
+          <label for="password-nuevo">Contraseña *</label>
+          <input id="password-nuevo" type="password" name="password" 
+                 [(ngModel)]="nuevoUsuario.password" 
+                 placeholder="Mínimo 6 caracteres" 
+                 minlength="6"
+                 required />
+          <div class="muted-help">La contraseña debe tener al menos 6 caracteres</div>
+        </div>
+
+        <div class="form-row">
+          <label for="edad-nuevo">Edad</label>
+          <input id="edad-nuevo" type="number" name="edad" 
+                 [(ngModel)]="nuevoUsuario.edad" 
+                 placeholder="Ingresa la edad"
+                 min="1"
+                 max="120" />
+        </div>
+
+        <div class="form-row">
+          <label for="tipo-nuevo">Rol de Usuario *</label>
+          <select id="tipo-nuevo" name="tipo" [(ngModel)]="nuevoUsuario.tipo" required>
+            <option value="estudiante">Estudiante</option>
+            <option value="instructor">Instructor</option>
+            <option value="administrador">Administrador</option>
+          </select>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn btn-secondary" (click)="cerrarModalNuevo()">Cancelar</button>
+          <button type="button" class="btn btn-guardar" (click)="registrarNuevoUsuario()">Registrar usuario</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
