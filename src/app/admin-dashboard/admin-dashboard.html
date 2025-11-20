@@ -62,13 +62,11 @@
               Crea y administra cursos, módulos y contenido educativo.
             </p>
             <div class="dashboard-stats">
-              <span class="badge bg-warning">En desarrollo</span>
+              <span class="badge bg-warning">5 cursos</span>
             </div>
           </div>
         </div>
       </div>
-
-  
     </div>
 
     <!-- VISTA DE GESTIÓN DE ARCHIVOS -->
@@ -81,8 +79,18 @@
       <app-lista-usuarios></app-lista-usuarios>
     </div>
 
+
+    <!-- VISTA DE GESTIÓN DE CURSOS -->
+    <div *ngIf="vistaActual === 'cursos'">
+      <app-crear-curso></app-crear-curso>
+    </div>
+
+
+
+
+
     <!-- OTRAS VISTAS (placeholders) -->
-    <div *ngIf="vistaActual !== 'inicio' && vistaActual !== 'archivos' && vistaActual !== 'usuarios' && vistaActual !== 'diapositivas'">
+    <!--<div *ngIf="vistaActual !== 'inicio' && vistaActual !== 'archivos' && vistaActual !== 'usuarios' && vistaActual !== 'diapositivas'">
       <div class="card">
         <div class="card-body text-center py-5">
           <i class="bi bi-tools display-1 text-muted mb-3"></i>
@@ -95,5 +103,5 @@
       </div>
     </div>
 
-  </div>
+  </div>-->
 </div>

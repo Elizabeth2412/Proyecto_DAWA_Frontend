@@ -1,4 +1,117 @@
-<div class="crear-curso-container">
+<!-- ========== VISTA TABLA (PARA ADMIN) ========== -->
+<div *ngIf="modo === 'tabla'" style="padding: 40px; background-color: #f5f5f5; min-height: 100vh;">
+  <div class="mb-4">
+    <button class="btn btn-outline-secondary" (click)="volver()">
+      <i class="bi bi-arrow-left me-2"></i>
+      Volver al Panel
+    </button>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header tabla-header">
+      <h4 class="mb-0">
+        <i class="bi bi-journal-text me-2"></i>
+        Gestión de Cursos
+      </h4>
+    </div>
+    
+    <div class="card-body">
+      <!-- Buscador -->
+      <div class="mb-3">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>🔍 Buscar curso</mat-label>
+          <input matInput (keyup)="applyFilter($event)" 
+                 placeholder="Buscar por título, nivel o instructor...">
+        </mat-form-field>
+      </div>
+
+      <!-- Contador -->
+      <div class="mb-3">
+        <span class="badge bg-success">
+          Total: {{ dataSource?.filteredData?.length || 0 }} cursos
+        </span>
+      </div>
+
+      <!-- Tabla -->
+      <div class="table-responsive">
+        <table mat-table [dataSource]="dataSource" class="w-100 tabla-cursos">
+          
+          <!-- Columna # -->
+          <ng-container matColumnDef="numero">
+            <th mat-header-cell *matHeaderCellDef class="columna-header">#</th>
+            <td mat-cell *matCellDef="let curso; let i = index" class="columna-celda">{{ i + 1 }}</td>
+          </ng-container>
+
+          <!-- Columna Título -->
+          <ng-container matColumnDef="titulo">
+            <th mat-header-cell *matHeaderCellDef class="columna-header">Título del Curso</th>
+            <td mat-cell *matCellDef="let curso" class="columna-celda">
+              <strong>{{ curso.titulo }}</strong>
+            </td>
+          </ng-container>
+
+          <!-- Columna Nivel -->
+          <ng-container matColumnDef="nivel">
+            <th mat-header-cell *matHeaderCellDef class="columna-header">Nivel</th>
+            <td mat-cell *matCellDef="let curso" class="columna-celda">
+              <span class="badge-nivel" [ngClass]="getNivelClass(curso.nivel)">
+                {{ curso.nivel }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Columna Duración -->
+          <ng-container matColumnDef="duracion">
+            <th mat-header-cell *matHeaderCellDef class="columna-header">Duración</th>
+            <td mat-cell *matCellDef="let curso" class="columna-celda">
+              {{ curso.duracion }} horas
+            </td>
+          </ng-container>
+
+          <!-- Columna Instructor -->
+          <ng-container matColumnDef="instructor">
+            <th mat-header-cell *matHeaderCellDef class="columna-header">Instructor</th>
+            <td mat-cell *matCellDef="let curso" class="columna-celda">
+              {{ curso.instructor }}
+            </td>
+          </ng-container>
+
+          <!-- Columna Acciones -->
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef class="columna-header">Acciones</th>
+            <td mat-cell *matCellDef="let curso" class="columna-celda">
+              <button mat-stroked-button color="primary" 
+                      class="btn-accion me-2" 
+                      (click)="editarCurso(curso)">
+                Editar
+              </button>
+              <button mat-stroked-button color="warn" 
+                      class="btn-accion"
+                      (click)="eliminarCurso(curso)">
+                Eliminar
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="fila-tabla"></tr>
+
+          <!-- Sin datos -->
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell text-center py-5" colspan="6">
+              <i class="bi bi-inbox display-4 text-muted d-block mb-3"></i>
+              <p class="text-muted mb-0">No se encontraron cursos</p>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ========== VISTA FORMULARIO (PARA INSTRUCTOR) ========== -->
+<div *ngIf="modo === 'formulario'" class="crear-curso-container">
   <div class="card">
     <header class="card-header">
       <h2>Crear nuevo curso</h2>
