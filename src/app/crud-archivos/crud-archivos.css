@@ -1,9 +1,195 @@
+/* 
+   PALETA PRINCIPAL
+ */
 :root {
-  --primary-gradient: linear-gradient(135deg, #4a7c2c 0%, #6b9d3e 100%);
+  --verde-oscuro: #1e7145;
+  --verde-medio: #21854f;
+  --verde-claro: #4a7c2c;
+  --verde-claro2: #6b9d3e;
+  --gris-texto: #666;
+  --gris-claro: #f8f9fa;
+  --gradiente-verde: linear-gradient(135deg, #4a7c2c 0%, #6b9d3e 100%);
 }
 
-.bg-green-gradient {
-  background: var(--primary-gradient)!important;
+/* 
+   TITULOS Y ENCABEZADO
+ */
+h1.display-5 {
+  color: var(--verde-claro);
+  text-shadow: 1px 1px 4px rgba(62, 182, 102, 0.6);
 }
-.tipo-pdf { background: #000000; color: #dc3545; }
-.tipo-pptx { background: #000000; color: #fd0d0d; }
+
+.text-muted {
+  color: #777 !important;
+}
+
+/* 
+   BOTÓN PRINCIPAL (Agregar archivo)
+ */
+.btn-agregar {
+  background: linear-gradient(135deg, #1e7145 0%, #21854f 100%);
+  border: none;
+  color: white !important;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+
+.btn-agregar:hover {
+   background: #145c35;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(30, 113, 69, 0.4);
+}
+
+/* 
+   CONTROLES SUPERIORES
+ */
+.buscador {
+  border-radius: 8px;
+  padding: 10px;
+  border: 2px solid #e5e7eb;
+  transition: border-color 0.2s ease;
+}
+
+.buscador:focus {
+  border-color: var(--verde-medio);
+  box-shadow: 0 0 6px rgba(33, 133, 79, 0.3);
+}
+
+.form-select {
+  border-radius: 8px;
+  border: 2px solid #e5e7eb;
+}
+
+/* 
+   TABLA
+ */
+.card {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.card-header {
+  background: var(--gradiente-verde);
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(76, 175, 80, 0.08);
+}
+
+.nombre-archivo {
+  color: var(--verde-oscuro);
+}
+
+.descripcion {
+  max-width: 300px;
+  white-space: normal;
+}
+
+/* 
+   BADGES (tipo archivo)
+ */
+.badge-tipo {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Estilos personalizados para tipos de archivo */
+.tipo-pdf {
+  background: #8b0000;
+  color: white;
+}
+
+.tipo-docx {
+  background: #185abd;
+  color: white;
+}
+
+.tipo-xlsx {
+  background: #1e7145;
+  color: white;
+}
+
+.tipo-pptx {
+  background: #d24726;
+  color: white;
+}
+
+/* 
+   ESTADO DEL ARCHIVO
+ */
+.badge-estado {
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  border-radius: 12px;
+}
+
+/* Verde brillante para DISPONIBLE */
+.estado-disponible {
+  background-color: #1e7145 !important;
+  color: white !important;
+  box-shadow: 0 0 6px rgba(30, 113, 69, 0.4);
+}
+
+/* Rojo fuerte para NO DISPONIBLE */
+.estado-nodisponible {
+  background-color: #c0392b !important;
+  color: white !important;
+  box-shadow: 0 0 6px rgba(192, 57, 43, 0.4);
+}
+/* 
+   ACCIONES - Botones
+ */
+.btn-modificar {
+  background: linear-gradient(135deg, #1e7145 0%, #21854f 100%);
+  border: none;
+  color: white !important;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+
+.btn-modificar:hover {
+  background: #145c35;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(30, 113, 69, 0.4);
+}
+
+.btn-eliminar {
+  background: #b02a37;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.btn-eliminar:hover {
+  background: #922b31;
+  transform: scale(1.05);
+}
+
+/* 
+   RESPONSIVE
+ */
+@media (max-width: 768px) {
+  .acciones-superiores {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .controles-tabla {
+    width: 100%;
+  }
+
+  .buscador {
+    width: 100%;
+  }
+
+  .form-select {
+    width: 100%;
+  }
+}

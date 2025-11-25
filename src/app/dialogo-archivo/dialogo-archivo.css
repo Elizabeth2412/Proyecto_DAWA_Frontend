@@ -131,3 +131,77 @@
   background: #5a6268;
   transform: translateY(-1px);
 }
+/* Estilos para la zona de subida de archivos */
+.zona-subida {
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 15px;
+  background-color: #f9f9f9;
+}
+
+.zona-subida:hover {
+  border-color: #4a7c2c;
+  background-color: #f0f7e9;
+}
+
+.btn-subir {
+  background-color: #4a7c2c;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.btn-subir:hover:not(:disabled) {
+  background-color: #3a641c;
+}
+
+.btn-subir:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.btn-limpiar {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+.btn-limpiar:hover {
+  background-color: #545b62;
+}
+
+.info-archivo {
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #e9f7e9;
+  border-radius: 5px;
+  border-left: 4px solid #4a7c2c;
+}
+
+.info-archivo p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.texto-ayuda {
+  color: #6c757d;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+/* Estados de carga */
+.cargando {
+  opacity: 0.7;
+  pointer-events: none;
+}

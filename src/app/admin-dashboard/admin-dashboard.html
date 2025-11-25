@@ -45,7 +45,7 @@
               Gestiona usuarios, roles y permisos del sistema.
             </p>
             <div class="dashboard-stats">
-              <span class="badge bg-success">5 usuarios</span>
+              <span class="badge bg-success">{{ totalUsuarios }} usuarios</span>
             </div>
           </div>
         </div>
@@ -62,7 +62,7 @@
               Crea y administra cursos, módulos y contenido educativo.
             </p>
             <div class="dashboard-stats">
-              <span class="badge bg-warning">5 cursos</span>
+              <span class="badge bg-warning">{{ totalCursos }} cursos</span>
             </div>
           </div>
         </div>
@@ -79,29 +79,87 @@
       <app-lista-usuarios></app-lista-usuarios>
     </div>
 
-
     <!-- VISTA DE GESTIÓN DE CURSOS -->
     <div *ngIf="vistaActual === 'cursos'">
-      <app-crear-curso></app-crear-curso>
+<app-crear-curso
+    (cursoEditado)="onCursoEditado($event)"
+    (cursoGuardado)="onCursoGuardado($event)">
+</app-crear-curso>
+
     </div>
 
+  </div>
+</div>
 
+<!-- MODAL PARA EDITAR CURSO -->
+<div *ngIf="mostrarModalCurso && cursoEditando" class="modal-overlay" (click)="cerrarModal()">
+  <div class="modal-contenido" (click)="$event.stopPropagation()">
+    <div class="card">
+      <header class="card-header">
+        <div>
+          <h2>Editar curso</h2>
+          <p class="subtitle">Modifica la información del curso</p>
+        </div>
+        <button class="btn-cerrar" (click)="cerrarModal()">×</button>
+      </header>
 
+      <form class="card-body" (ngSubmit)="guardarEdicionCurso()">
+        <div class="form-row">
+          <label for="titulo-curso">Título</label>
+          <input id="titulo-curso" type="text" 
+                 [(ngModel)]="cursoEditando.titulo" 
+                 name="titulo" 
+                 placeholder="Ej. Introducción a Angular" 
+                 required />
+        </div>
 
+        <div class="form-row">
+          <label for="descripcion-curso">Descripción</label>
+          <textarea id="descripcion-curso" 
+                    [(ngModel)]="cursoEditando.descripcion" 
+                    name="descripcion" 
+                    placeholder="Breve descripción del curso" 
+                    required></textarea>
+        </div>
 
-    <!-- OTRAS VISTAS (placeholders) -->
-    <!--<div *ngIf="vistaActual !== 'inicio' && vistaActual !== 'archivos' && vistaActual !== 'usuarios' && vistaActual !== 'diapositivas'">
-      <div class="card">
-        <div class="card-body text-center py-5">
-          <i class="bi bi-tools display-1 text-muted mb-3"></i>
-          <h3>Módulo en Desarrollo</h3>
-          <p class="text-muted">Esta sección está actualmente en desarrollo.</p>
-          <button class="btn btn-primary" (click)="cambiarVista('inicio')">
-            Volver al Panel Principal
+        <div class="form-row">
+          <label for="nivel-curso">Nivel</label>
+          <div class="select-wrap">
+            <select id="nivel-curso" 
+                    [(ngModel)]="cursoEditando.nivel" 
+                    name="nivel" 
+                    required>
+              <option value="" disabled>Selecciona un nivel</option>
+              <option value="Principiante">Principiante</option>
+              <option value="Intermedio">Intermedio</option>
+              <option value="Avanzado">Avanzado</option>
+            </select>
+            <span class="select-badge" *ngIf="cursoEditando.nivel">{{cursoEditando.nivel}}</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label for="duracion-curso">Duración</label>
+          <div class="input-with-unit">
+            <input id="duracion-curso" type="number" 
+                   [(ngModel)]="cursoEditando.duracion" 
+                   name="duracion" 
+                   min="1" 
+                   placeholder="0" 
+                   required />
+            <span class="unit">horas</span>
+          </div>
+          <div class="muted-help">Introduce la duración estimada en horas (mín. 1).</div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+          <button type="submit" class="btn btn-guardar" 
+[disabled]="!cursoEditando.titulo.trim() || !cursoEditando.descripcion.trim()">
+            Actualizar curso
           </button>
         </div>
-      </div>
+      </form>
     </div>
-
-  </div>-->
+  </div>
 </div>

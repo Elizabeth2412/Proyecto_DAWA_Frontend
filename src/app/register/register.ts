@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ServicioAutorizacion } from '../autorizacion.service';
-
+import { ServicioUsuarios } from '../servicios/servicio-usuarios';
 @Component({
   selector: 'app-register',
   standalone: true,                       
@@ -24,7 +24,7 @@ export class Register {
 
   constructor(
     private router: Router,
-    private servicioAutorizacion: ServicioAutorizacion
+    private servicioUsuario: ServicioUsuarios
   ) {}
 
   irLogin() {
@@ -35,7 +35,7 @@ export class Register {
     console.log('Usuario a registrar:', this.user);
     
     // Registrar el usuario usando el servicio
-    const resultado = this.servicioAutorizacion.registrarUsuario(this.user);
+    const resultado = this.servicioUsuario.registrarUsuario(this.user);
     
     if (resultado.exito) {
       // Registro exitoso

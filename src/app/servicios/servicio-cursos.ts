@@ -1,27 +1,17 @@
 import { Injectable } from '@angular/core';
+import { Archivo } from './servicio-archivos';
 
 export interface Curso {
   id: number;
   titulo: string;
   descripcion: string;
-  diapositivas: Diapositiva[];
+  archivos: Archivo[];
   progreso: number;
   instructor: string;
   fechaCreacion: Date;
   fechaActualizacion: Date;
   nivel: string;    
   duracion: number;  
-}
-
-export interface Diapositiva {
-  id: number;
-  titulo: string;
-  archivo: string;
-  tipo: 'pdf' | 'pptx';
-  completada: boolean;
-  archivoId?: string;
-  fechaSubida: Date;
-  tamano?: number;
 }
 
 @Injectable({
@@ -43,14 +33,17 @@ export class ServicioCursos {
           descripcion: 'Conceptos básicos de agroindustria pecuaria sostenible y prácticas ecológicas.',
           nivel: 'Principiante',      
           duracion: 5,               
-          diapositivas: [
+          archivos: [ 
             { 
               id: 1, 
-              titulo: 'Introducción', 
-              archivo: 'intro.pdf', 
-              tipo: 'pdf', 
-              completada: true,
-              fechaSubida: new Date('2024-01-01')
+              nombre: 'Introducción',  
+              tipo: 'PDF',  
+              tamano: 1024000,
+              fechaSubida: new Date('2024-01-01'),
+              descripcion: 'Archivo de introducción al curso',
+              usuario: 'leslie@gmail.com',
+              estado: 'Disponible',
+              archivoId: 'intro_001'
             }
           ],
           progreso: 66,
@@ -59,7 +52,6 @@ export class ServicioCursos {
           fechaActualizacion: new Date('2024-01-01')
         }
       ];
-
       this.guardarCursos(cursosIniciales);
     }
   }
@@ -69,19 +61,18 @@ export class ServicioCursos {
     if (!cursosAlmacenamiento) return [];
     
     const cursos = JSON.parse(cursosAlmacenamiento);
-
     return cursos.map((curso: any) => ({
       ...curso,
       fechaCreacion: new Date(curso.fechaCreacion),
       fechaActualizacion: new Date(curso.fechaActualizacion),
-      diapositivas: curso.diapositivas.map((diapositiva: any) => ({
-        ...diapositiva,
-        fechaSubida: new Date(diapositiva.fechaSubida)
+      archivos: curso.archivos.map((archivo: any) => ({
+        ...archivo,
+        fechaSubida: new Date(archivo.fechaSubida)
       }))
     }));
   }
 
-  guardarCursos(cursos: Curso[]): void {
+  private guardarCursos(cursos: Curso[]): void {
     try {
       localStorage.setItem(this.claveCursos, JSON.stringify(cursos));
     } catch (error) {
@@ -122,46 +113,64 @@ export class ServicioCursos {
     return this.obtenerCursos().find(curso => curso.id === id);
   }
 
-  agregarDiapositivaACurso(idCurso: number, nuevaDiapositiva: Diapositiva): void {
+  agregarArchivoACurso(idCurso: number, nuevoArchivo: Archivo): void {
     const cursos = this.obtenerCursos();
     const curso = cursos.find(c => c.id === idCurso);
     if (curso) {
-      nuevaDiapositiva.id = this.generarIdDiapositivaUnico(curso.diapositivas);
-      nuevaDiapositiva.fechaSubida = new Date();
-      curso.diapositivas.push(nuevaDiapositiva);
+      nuevoArchivo.id = this.generarIdArchivoUnico(curso.archivos);
+      nuevoArchivo.fechaSubida = new Date();
+      curso.archivos.push(nuevoArchivo);
       curso.fechaActualizacion = new Date();
       this.guardarCursos(cursos);
     }
   }
 
-  actualizarDiapositivaEnCurso(idCurso: number, diapositivaActualizada: Diapositiva): void {
+  actualizarArchivoEnCurso(idCurso: number, archivoActualizada: Archivo): void {
     const cursos = this.obtenerCursos();
     const curso = cursos.find(c => c.id === idCurso);
     if (curso) {
-      const indice = curso.diapositivas.findIndex(d => d.id === diapositivaActualizada.id);
+      const indice = curso.archivos.findIndex(d => d.id === archivoActualizada.id);
       if (indice !== -1) {
-        curso.diapositivas[indice] = diapositivaActualizada;
+        curso.archivos[indice] = archivoActualizada;
         curso.fechaActualizacion = new Date();
         this.guardarCursos(cursos);
       }
     }
   }
 
-  eliminarDiapositivaDeCurso(idCurso: number, idDiapositiva: number): void {
+  eliminarArchivoDeCurso(idCurso: number, idArchivo: number): void {
     const cursos = this.obtenerCursos();
     const curso = cursos.find(c => c.id === idCurso);
     if (curso) {
-      curso.diapositivas = curso.diapositivas.filter(d => d.id !== idDiapositiva);
+      curso.archivos = curso.archivos.filter(d => d.id !== idArchivo);
       curso.fechaActualizacion = new Date();
       this.guardarCursos(cursos);
     }
+  }
+
+  // Métodos para gestión de cursos desde el dashboard
+  prepararEdicionCurso(curso: Curso): Curso {
+    const cursoEditando = { ...curso };
+    if (!cursoEditando.nivel) cursoEditando.nivel = 'Principiante';
+    if (!cursoEditando.duracion) cursoEditando.duracion = 1;
+    return cursoEditando;
+  }
+
+  validarCurso(curso: Curso): { valido: boolean; mensaje: string } {
+    if (!curso.titulo || !curso.titulo.trim()) {
+      return { valido: false, mensaje: 'Por favor, ingresa un título para el curso.' };
+    }
+    if (!curso.descripcion || !curso.descripcion.trim()) {
+      return { valido: false, mensaje: 'Por favor, ingresa una descripción para el curso.' };
+    }
+    return { valido: true, mensaje: '' };
   }
 
   private generarIdUnico(cursos: Curso[]): number {
     return cursos.length > 0 ? Math.max(...cursos.map(c => c.id)) + 1 : 1;
   }
 
-  private generarIdDiapositivaUnico(diapositivas: Diapositiva[]): number {
-    return diapositivas.length > 0 ? Math.max(...diapositivas.map(d => d.id)) + 1 : 1;
+  private generarIdArchivoUnico(archivos: Archivo[]): number {
+    return archivos.length > 0 ? Math.max(...archivos.map(d => d.id)) + 1 : 1;
   }
 }

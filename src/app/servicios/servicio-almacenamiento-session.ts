@@ -86,22 +86,35 @@ export class ServicioAlmacenamientoSession {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => {
-        const base64 = reader.result as string;
-        resolve(base64.split(',')[1]); // Remover el prefijo data:application/...
+        if (reader.result && typeof reader.result === 'string') {
+          const base64 = reader.result.split(',')[1]; // Remover el prefijo data:application/...
+          resolve(base64);
+        } else {
+          reject(new Error('No se pudo leer el archivo como base64'));
+        }
       };
-      reader.onerror = reject;
+      reader.onerror = () => {
+        reject(new Error('Error al leer el archivo: ' + reader.error?.message));
+      };
+      reader.onabort = () => {
+        reject(new Error('Lectura del archivo abortada'));
+      };
       reader.readAsDataURL(blob);
     });
   }
 
   private base64ToBlob(base64: string, tipo: string): Promise<Blob> {
-    return new Promise((resolve) => {
-      const binaryString = atob(base64);
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
+    return new Promise((resolve, reject) => {
+      try {
+        const binaryString = atob(base64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        resolve(new Blob([bytes], { type: tipo }));
+      } catch (error) {
+        reject(new Error('Error al convertir base64 a Blob: ' + error));
       }
-      resolve(new Blob([bytes], { type: tipo }));
     });
   }
 
@@ -116,5 +129,20 @@ export class ServicioAlmacenamientoSession {
     }
     
     clavesAEliminar.forEach(clave => sessionStorage.removeItem(clave));
+  }
+
+  // Método para verificar si hay espacio suficiente antes de guardar
+  async verificarYGuardarArchivo(id: string, archivo: Blob): Promise<boolean> {
+    if (!this.verificarEspacioDisponible(archivo.size)) {
+      throw new Error('Espacio insuficiente en sessionStorage');
+    }
+
+    try {
+      await this.guardarArchivoBlob(id, archivo);
+      return true;
+    } catch (error) {
+      console.error('Error al verificar y guardar archivo:', error);
+      throw error;
+    }
   }
 }

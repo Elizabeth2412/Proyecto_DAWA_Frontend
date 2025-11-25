@@ -3,8 +3,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ServicioAutorizacion, Usuario } from '../autorizacion.service';
-
+import { ServicioAutorizacion } from '../autorizacion.service';
+import { ServicioUsuarios, Usuario } from '../servicios/servicio-usuarios';
 @Component({
   selector: 'app-lista-usuarios',
   standalone: true,
@@ -44,6 +44,7 @@ export class ListaUsuarios implements OnInit {
 
   constructor(
     private servicioAutorizacion: ServicioAutorizacion,
+    private servicioUsuario: ServicioUsuarios,
     private router: Router
   ) {}
 
@@ -89,7 +90,14 @@ export class ListaUsuarios implements OnInit {
 
   guardarEdicion(): void {
     if (this.usuarioEditando) {
+
       // Validaciones
+          if (this.usuarioActual && this.usuarioEditando.email === this.usuarioActual.email) {
+      if (this.usuarioForm.tipo !== this.usuarioActual.tipo) {
+        alert('No puedes cambiar tu propio rol de administrador.');
+        return;
+      }
+    }
       if (!this.usuarioForm.nombre.trim()) {
         alert('Por favor, ingresa un nombre válido.');
         return;
@@ -103,7 +111,7 @@ export class ListaUsuarios implements OnInit {
         tipo: this.usuarioForm.tipo
       };
 
-      const resultado = this.servicioAutorizacion.actualizarUsuario(
+      const resultado = this.servicioUsuario.actualizarUsuario(
         this.usuarioEditando.email,
         usuarioActualizado
       );
@@ -160,7 +168,7 @@ export class ListaUsuarios implements OnInit {
       return;
     }
 
-    const resultado = this.servicioAutorizacion.registrarUsuario({
+    const resultado = this.servicioUsuario.registrarUsuario({
       nombre: this.nuevoUsuario.nombre,
       apellido: this.nuevoUsuario.apellido,
       correo: this.nuevoUsuario.email,
@@ -199,7 +207,7 @@ export class ListaUsuarios implements OnInit {
     const confirmacion = confirm('¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.');
     
     if (confirmacion) {
-      const resultado = this.servicioAutorizacion.eliminarUsuario(email);
+      const resultado = this.servicioUsuario.eliminarUsuario(email);
       
       if (resultado.exito) {
         alert(resultado.mensaje);

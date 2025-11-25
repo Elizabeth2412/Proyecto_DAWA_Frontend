@@ -18,12 +18,12 @@
           <p class="numero">{{ obtenerEstadisticas().cursosCompletados }}</p>
         </div>
         <div class="tarjeta-estadistica">
-          <h3>Diapositivas totales</h3>
-          <p class="numero">{{ obtenerEstadisticas().totalDiapositivas }}</p>
+          <h3>Archivos totales</h3>
+          <p class="numero">{{ obtenerEstadisticas().totalArchivos }}</p>
         </div>
         <div class="tarjeta-estadistica">
-          <h3>Diapositivas leidas</h3>
-          <p class="numero">{{ obtenerEstadisticas().diapositivasCompletadas }}</p>
+          <h3>Archivos leidas</h3>
+          <p class="numero">{{ obtenerEstadisticas().archivosVistos  }}</p>
         </div>
       </div>
     </section>
@@ -61,35 +61,35 @@
             </div>
           </div>
 
-          <!-- Diapositivas del Curso (se muestra cuando está seleccionado) -->
-          <div *ngIf="cursoSeleccionado?.id === curso.id" class="curso-diapositivas">
+          <div *ngIf="cursoSeleccionado?.id === curso.id" class="curso-archivo">
             <h4>Contenido del Curso</h4>
             
-            <div *ngIf="curso.diapositivas.length === 0" class="sin-diapositivas">
-              <p>Este curso no tiene diapositivas disponibles aún.</p>
+            <div *ngIf="curso.archivos.length === 0" class="sin-archivo">
+              <p>Este curso no tiene archivos disponibles aún.</p>
             </div>
 
-            <div *ngFor="let diapositiva of curso.diapositivas" class="tarjeta-diapositiva">
-              <div class="diapositiva-info">
-                <div class="diapositiva-titulo">
-                  <h5>{{ diapositiva.titulo }}</h5>
-                  <span class="tipo-archivo {{ diapositiva.tipo }}">
-                    {{ obtenerTipoLegible(diapositiva) }}
+            <div *ngFor="let archivo of curso.archivos" class="tarjeta-archivo">
+              <div class="archivo-info">
+                <div class="archivo-nombre">
+                  <h5>{{ archivo.nombre }}</h5>
+                  <span class="tipo-archivo {{ archivo.tipo }}">
+                    {{ obtenerTipoLegible(archivo) }}
                   </span>
                 </div>
                 
-                <div class="diapositiva-metadata">
-                  <span class="fecha">Subido: {{ formatearFecha(diapositiva.fechaSubida) }}</span>
-                  <span class="tamano">{{ obtenerTamanoLegible(diapositiva.tamano) }}</span>
+                <div class="archivo-metadata">
+                  <span class="fecha">Subido: {{ formatearFecha(archivo.fechaSubida) }}</span>
+                  <span class="tamano">{{ obtenerTamanoLegible(archivo.tamano) }}</span>
                 </div>
               </div>
 
-              <div class="diapositiva-acciones">
+              <div class="archivo-acciones">
                 <!-- Checkbox de completado -->
                 <label class="checkbox-completada">
                   <input type="checkbox" 
-                         [checked]="diapositiva.completada"
-                         (change)="marcarComoCompletada(diapositiva, curso)">
+[checked]="archivo.estado === 'Disponible'"
+(change)="toggleEstadoArchivo(archivo, curso)"
+                         >
                   Completada
                 </label>
 
@@ -97,13 +97,13 @@
                 <div class="botones-accion">
                   <!-- 
                   <button class="btn btn-visualizar" 
-                          (click)="visualizarDiapositiva(diapositiva)"
+                          (click)="visualizarArchivo(archivo)"
                           title="Visualizar archivo">
                      Visualizar
                   </button>
                   -->
                   <button class="btn btn-descargar" 
-                          (click)="descargarDiapositiva(diapositiva)"
+                          (click)="descargarArchivo(archivo)"
                           title="Descargar archivo">
                      Descargar
                   </button>

@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { ServicioAutorizacion, Usuario } from '../autorizacion.service';
-import { ServicioCursos, Curso, Diapositiva } from '../servicios/servicio-cursos';
-import { ServicioArchivos } from '../servicios/servicio-archivos';
+import { ServicioAutorizacion } from '../autorizacion.service';
+import { ServicioCursos, Curso } from '../servicios/servicio-cursos';
+import { ServicioArchivos, Archivo } from '../servicios/servicio-archivos';
 import { ServicioAlmacenamientoSession } from '../servicios/servicio-almacenamiento-session';
+import { Usuario } from '../servicios/servicio-usuarios';
 
 @Component({
   selector: 'app-estudiante-dashboard',
@@ -29,17 +30,12 @@ export class EstudianteDashboard implements OnInit {
 
   ngOnInit(): void {
     this.usuarioActual = this.servicioAutorizacion.obtenerUsuarioActual();
-    //if (!this.usuarioActual || this.usuarioActual.tipo !== 'estudiante') {
-    //  this.router.navigate(['/login']);
-    //  return;
-    //}
     this.cargarCursos();
   }
 
   iniciarEvaluacion(): void {
     this.router.navigate(['/evaluacion']);
   }
-
 
   cargarCursos(): void {
     this.cursos = this.servicioCursos.obtenerCursos();
@@ -49,38 +45,38 @@ export class EstudianteDashboard implements OnInit {
     this.cursoSeleccionado = this.cursoSeleccionado?.id === curso.id ? null : curso;
   }
 
-  async visualizarDiapositiva(diapositiva: Diapositiva): Promise<void> {
-    if (!diapositiva.archivoId) {
+  async visualizarArchivo(archivo: Archivo): Promise<void> {
+    if (!archivo.archivoId) {
       alert('No hay archivo asociado para visualizar.');
       return;
     }
     
     try {
-      const blob = await this.almacenamientoSession.obtenerArchivoBlob(diapositiva.archivoId);
+      const blob = await this.almacenamientoSession.obtenerArchivoBlob(archivo.archivoId);
       if (!blob) {
         alert('Archivo no encontrado.');
         return;
       }
-      this.servicioArchivos.visualizarArchivoDesdeBlob(blob, diapositiva.archivo);
+      this.servicioArchivos.visualizarArchivoDesdeBlob(blob, archivo.nombre);
     } catch (error) {
       console.error('Error al visualizar archivo:', error);
       alert('Error al cargar el archivo para visualización.');
     }
   }
 
-  async descargarDiapositiva(diapositiva: Diapositiva): Promise<void> {
-    if (!diapositiva.archivoId) {
+  async descargarArchivo(archivo: Archivo): Promise<void> {
+    if (!archivo.archivoId) {
       alert('No hay archivo para descargar.');
       return;
     }
     
     try {
-      const blob = await this.almacenamientoSession.obtenerArchivoBlob(diapositiva.archivoId);
+      const blob = await this.almacenamientoSession.obtenerArchivoBlob(archivo.archivoId);
       if (!blob) {
         alert('Archivo no encontrado.');
         return;
       }
-      this.servicioArchivos.descargarArchivoDesdeBlob(blob, diapositiva.archivo);
+      this.servicioArchivos.descargarArchivoDesdeBlob(blob, archivo.nombre);
     } catch (error) {
       console.error('Error al descargar archivo:', error);
       alert('Error al cargar el archivo para descarga.');
@@ -92,52 +88,46 @@ export class EstudianteDashboard implements OnInit {
     return this.servicioArchivos.obtenerTamanoArchivoLegible(tamanoBytes);
   }
 
-  obtenerTipoLegible(diapositiva: Diapositiva): string {
-    return this.servicioArchivos.obtenerTipoArchivoLegible(diapositiva.tipo, diapositiva.archivo);
+  obtenerTipoLegible(archivo: Archivo): string {
+    return this.servicioArchivos.obtenerTipoArchivoLegible(archivo.tipo, archivo.nombre);
   }
 
   formatearFecha(fecha: Date): string {
-    return fecha.toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+    return this.servicioArchivos.formatearFecha(fecha);
   }
 
   calcularProgresoCurso(curso: Curso): number {
-    const totalDiapositivas = curso.diapositivas.length;
-    if (totalDiapositivas === 0) return 0;
+    const totalArchivos = curso.archivos.length;
+    if (totalArchivos === 0) return 0;
     
-    const diapositivasCompletadas = curso.diapositivas.filter(d => d.completada).length;
-    return Math.round((diapositivasCompletadas / totalDiapositivas) * 100);
-  }
-
-  marcarComoCompletada(diapositiva: Diapositiva, curso: Curso): void {
-    diapositiva.completada = !diapositiva.completada;
-    this.servicioCursos.actualizarDiapositivaEnCurso(curso.id, diapositiva);
-    
-    // Recalcular progreso del curso
-    const progreso = this.calcularProgresoCurso(curso);
-    curso.progreso = progreso;
-    this.servicioCursos.actualizarCurso(curso);
+    const archivosVistos = curso.archivos.filter(a => a.estado === 'Disponible').length;
+    return Math.round((archivosVistos / totalArchivos) * 100);
   }
 
   obtenerEstadisticas() {
     const totalCursos = this.cursos.length;
     const cursosCompletados = this.cursos.filter(curso => curso.progreso === 100).length;
-    const totalDiapositivas = this.cursos.reduce((total, curso) => total + curso.diapositivas.length, 0);
-    const diapositivasCompletadas = this.cursos.reduce((total, curso) => 
-      total + curso.diapositivas.filter(d => d.completada).length, 0
+    const totalArchivos = this.cursos.reduce((total, curso) => total + curso.archivos.length, 0);
+    const archivosVistos = this.cursos.reduce((total, curso) => 
+      total + curso.archivos.filter(a => a.estado === 'Disponible').length, 0
     );
 
     return {
       totalCursos,
       cursosCompletados,
-      totalDiapositivas,
-      diapositivasCompletadas
+      totalArchivos,
+      archivosVistos
     };
   }
-
+toggleEstadoArchivo(archivo: Archivo, curso: Curso): void {
+  archivo.estado = archivo.estado === 'Disponible' ? 'NoDisponible' : 'Disponible';
+  
+  // Actualizar el progreso del curso
+  curso.progreso = this.calcularProgresoCurso(curso);
+  
+  // Opcional: Guardar los cambios en el servicio
+  this.servicioCursos.actualizarCurso(curso);
+}
   cerrarSesion(): void {
     this.servicioAutorizacion.cerrarSesion();
     this.router.navigate(['/login']);

@@ -20,13 +20,12 @@
       </div>
     </section>
 
-    <!-- Subida de Diapositivas -->
     <section class="seccion">
       <h2>Subir contenido educativo</h2>
       <div class="area-subida">
         <div class="tarjeta-subida">
 
-          <h3>{{ modoEdicion ? 'Actualizar Diapositiva' : 'Subir diapositivas' }}</h3>
+          <h3>{{ modoEdicion ? 'Actualizar archivo' : 'Subir archivo' }}</h3>
 
           <!-- Selección de curso -->
           <div class="seleccion-curso" *ngIf="!modoEdicion">
@@ -38,7 +37,7 @@
                     name="cursoSeleccionado">
               <option [value]="null">-- Selecciona un curso --</option>
               <option *ngFor="let curso of cursos" [value]="curso.id">
-                {{ curso.titulo }} ({{ curso.diapositivas.length }} diapositivas)
+{{ curso.titulo }} ({{ curso.archivos.length }} archivos)
               </option>
             </select>
 
@@ -47,8 +46,8 @@
             </p>
           </div>
 
-          <p *ngIf="modoEdicion && diapositivaEditando" class="modo-edicion">
-            Editando: <strong>{{ diapositivaEditando.titulo }}</strong>
+          <p *ngIf="modoEdicion && archivoEditando" class="modo-edicion">
+            Editando: <strong>{{ archivoEditando.nombre }}</strong>
           </p>
           
           <p>Formatos soportados: PDF y PPTX (Máximo 5 MB o 5120 KB)</p>
@@ -82,6 +81,12 @@
         </div>
       </div>
     </section>
+<!-- VISTA DE TABLA DE CURSOS (para Instructor) -->
+<div *ngIf="vistaActual === 'cursos'">
+
+  <app-crear-curso></app-crear-curso>
+
+</div>
 
 
     <!-- Vista Previa de Cursos -->
@@ -99,7 +104,7 @@
             <div class="acciones-curso-rapidas">
               <button class="btn-pequeno btn-primario" 
                       (click)="seleccionarCurso(curso)" 
-                      title="Seleccionar para agregar diapositivas">
+                      title="Seleccionar para agregar archivos">
                 Seleccionar
               </button>
 
@@ -120,43 +125,43 @@
           <p class="descripcion-curso">{{ curso.descripcion }}</p>
 
           <div class="estadisticas-curso">
-            <span>Diapositivas: {{ curso.diapositivas.length }}</span>
+            <span>Archivos: {{ curso.archivos.length }}</span>
             <span>Progreso: {{ curso.progreso }}%</span>
             <span>Actualizado: {{ formatearFecha(curso.fechaActualizacion) }}</span>
           </div>
 
-          <div class="lista-diapositivas" *ngIf="curso.diapositivas.length > 0">
-            <h4>Diapositivas:</h4>
+          <div class="lista-archivo" *ngIf="curso.archivos.length > 0">
+            <h4>Archivos:</h4>
 
-            <div *ngFor="let diapositiva of curso.diapositivas" class="item-diapositiva">
-              <div class="info-diapositiva">
+            <div *ngFor="let archivo of curso.archivos" class="item-archivo">
+              <div class="info-archivo">
 
-                <span class="nombre-diapositiva">{{ diapositiva.titulo }}</span>
+                <span class="nombre-archivo">{{ archivo.nombre }}</span>
 
-                <div class="detalles-diapositiva">
-                  <span class="tipo-archivo">{{ obtenerTipoLegible(diapositiva) }}</span>
-                  <span class="tamano-archivo">{{ obtenerTamanoLegible(diapositiva.tamano) }}</span>
-                  <span class="fecha-subida">{{ formatearFecha(diapositiva.fechaSubida) }}</span>
+                <div class="detalles-archivo">
+                  <span class="tipo-archivo">{{ obtenerTipoLegible(archivo) }}</span>
+                  <span class="tamano-archivo">{{ obtenerTamanoLegible(archivo.tamano) }}</span>
+                  <span class="fecha-subida">{{ formatearFecha(archivo.fechaSubida) }}</span>
                 </div>
 
               </div>
 
-              <div class="acciones-diapositiva">
+              <div class="acciones-archivo">
 
                 <button class="btn-pequeno btn-secundario" 
-                        (click)="descargarArchivo(diapositiva)"
+                        (click)="descargarArchivo(archivo)"
                         title="Descargar archivo">
                   Descargar
                 </button>
 
                 <button class="btn-pequeno btn-editar"
-                        (click)="editarDiapositiva(curso, diapositiva)"
+                        (click)="editarArchivo(curso, archivo)"
                         title="Reemplazar archivo">
                   Editar
                 </button>
 
                 <button class="btn-pequeno btn-eliminar"
-                        (click)="eliminarDiapositiva(curso, diapositiva)"
+                        (click)="eliminarArchivo(curso, archivo)"
                         title="Eliminar archivo">
                   Eliminar
                 </button>
@@ -165,10 +170,10 @@
             </div>
           </div>
 
-          <div *ngIf="curso.diapositivas.length === 0" class="acciones-curso">
-            <p class="sin-diapositivas">
-              Este curso no tiene diapositivas aún. 
-              ¡Selecciona el curso y agrega la primera diapositiva!
+          <div *ngIf="curso.archivos.length === 0" class="acciones-curso">
+            <p class="sin-archivo">
+              Este curso no tiene archivos aún. 
+              ¡Selecciona el curso y agrega el primer archivo!
             </p>
           </div>
 
@@ -184,8 +189,8 @@
   </main>
 
 </div>
-
- <div *ngIf="mostrarModalCurso" class="modal-overlay" (click)="cerrarModalCrearCurso()" role="presentation">
+<!-- Modal para editar curso -->
+<div *ngIf="mostrarModalCurso" class="modal-overlay" (click)="cerrarModalCrearCurso()" role="presentation">
   <div class="modal-contenido" role="dialog" aria-modal="true" aria-labelledby="modalTitulo" (click)="$event.stopPropagation()">
     <div class="card">
       <header class="card-header">
@@ -232,10 +237,11 @@
 
         <div class="actions">
           <button type="button" class="btn btn-secondary" (click)="cerrarModalCrearCurso()">Cancelar</button>
-          <button type="button" class="btn btn-guardar" (click)="cursoEditando ? guardarEdicionCurso() : crearCurso()">Guardar curso</button>
+          <button type="button" class="btn btn-guardar" (click)="cursoEditando ? guardarEdicionCurso() : crearCurso()">
+            {{ cursoEditando ? 'Actualizar curso' : 'Guardar curso' }}
+          </button>
         </div>
       </form>
     </div>
   </div>
 </div>
-
