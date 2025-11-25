@@ -1,12 +1,52 @@
 <div class="dialogo-overlay" (click)="cerrarDialogo()">
   <div class="dialogo-contenido" (click)="$event.stopPropagation()">
     <div class="dialogo-cabecera">
-      <h3>{{ archivo ? 'Modificar archivo' : 'nuevo archivo' }}</h3>
+      <h3>{{ archivo ? 'Modificar archivo' : 'Nuevo archivo' }}</h3>
       <button class="btn-cerrar" (click)="cerrarDialogo()">&times;</button>
     </div>
     
     <div class="dialogo-cuerpo">
       <form (ngSubmit)="guardar()">
+        
+        <!-- Sección de subida de archivo - Disponible tanto para nuevo como modificar -->
+        <div class="form-group">
+          <label for="inputArchivo">
+            {{ archivo ? 'Reemplazar archivo (PDF/PPTX)' : 'Subir archivo (PDF/PPTX)' }}:
+          </label>
+          <div class="zona-subida">
+            <input type="file" #inputArchivo id="inputArchivo" 
+                   (change)="onArchivoSeleccionado($event)" 
+                   accept=".pdf,.pptx" hidden>
+            
+            <button type="button" class="btn-subir" 
+                    (click)="inputArchivo.click()" 
+                    [disabled]="cargando">
+              {{ cargando ? 'Procesando...' : (archivo ? 'Seleccionar nuevo archivo' : 'Seleccionar Archivo') }}
+            </button>
+            
+            <!-- Información del archivo seleccionado -->
+            <div *ngIf="archivoSeleccionado" class="info-archivo">
+              <p><strong>Archivo seleccionado:</strong> {{ archivoSeleccionado.name }}</p>
+              <p><strong>Tamaño:</strong> {{ servicioArchivos.obtenerTamanoLegible(archivoSeleccionado.size) }}</p>
+              <button type="button" class="btn-limpiar" (click)="limpiarArchivo()">
+                Cancelar
+              </button>
+            </div>
+            
+            <!-- Información del archivo existente (solo en modificar) -->
+            <div *ngIf="archivo && !archivoSeleccionado" class="info-archivo-existente">
+              <p><strong>Archivo actual:</strong> {{ archivo.nombre }}.{{ archivo.tipo.toLowerCase() }}</p>
+              <p><strong>Tamaño:</strong> {{ servicioArchivos.obtenerTamanoLegible(archivo.tamano) }}</p>
+
+            </div>
+            
+            <p *ngIf="!archivoSeleccionado && !archivo" class="texto-ayuda">
+              Formatos soportados: PDF y PPTX
+            </p>
+          </div>
+        </div>
+
+        <!-- Campos del formulario -->
         <div class="form-group">
           <label for="nombre">Nombre del archivo:</label>
           <input 
@@ -71,11 +111,11 @@
         </div>
 
         <div class="dialogo-acciones">
-          <button type="button" class="btn btn-secundario" (click)="cerrarDialogo()">
+          <button type="button" class="btn btn-secundario" (click)="cerrarDialogo()" [disabled]="cargando">
             Cancelar
           </button>
-          <button type="submit" class="btn btn-primario">
-            {{ archivo ? 'Actualizar' : 'Crear' }}
+          <button type="submit" class="btn btn-primario" [disabled]="cargando">
+            {{ cargando ? 'Procesando...' : (archivo ? 'Actualizar' : 'Crear') }}
           </button>
         </div>
       </form>

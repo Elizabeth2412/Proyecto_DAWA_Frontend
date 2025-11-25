@@ -2,25 +2,28 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
 import { Router } from '@angular/router';
-import { ServicioAutorizacion, Usuario } from '../autorizacion.service';
-import { ServicioCursos, Curso, Diapositiva } from '../servicios/servicio-cursos';
-import { ServicioArchivos } from '../servicios/servicio-archivos';
+import { ServicioAutorizacion } from '../autorizacion.service';
+import { ServicioCursos, Curso } from '../servicios/servicio-cursos';
+import { ServicioArchivos, Archivo } from '../servicios/servicio-archivos';
 import { ServicioAlmacenamientoSession } from '../servicios/servicio-almacenamiento-session'; // .
-
+import { Usuario } from '../servicios/servicio-usuarios';
+import { CrearCurso } from '../crear-curso/crear-curso';
 @Component({
   selector: 'app-instructor-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule], 
+  imports: [CommonModule, FormsModule, CrearCurso], 
   templateUrl: './instructor-dashboard.html',
   styleUrls: ['./instructor-dashboard.css']
 })
 export class InstructorDashboard implements OnInit {
   usuarioActual: Usuario | null = null;
   archivoSeleccionado: File | null = null;
+  vistaActual: string = 'inicio';
+
   cursos: Curso[] = [];
   cargando: boolean = false;
   cursoEditando: Curso | null = null;
-  diapositivaEditando: Diapositiva | null = null;
+  archivoEditando: Archivo | null = null;
   modoEdicion: boolean = false;
   cursoSeleccionado: Curso | null = null;
   mostrarModalCurso: boolean = false;
@@ -53,125 +56,92 @@ export class InstructorDashboard implements OnInit {
     //}
     this.cargarCursos();
   }
-
-  cargarCursos(): void {
-    this.cursos = this.servicioCursos.obtenerCursosPorInstructor(this.usuarioActual!.email);
-  }
-
-  onArchivoSeleccionado(evento: any): void {
-    const archivo = evento.target.files[0];
-    if (archivo && this.servicioArchivos.esArchivoValido(archivo)) {
-      // Verificar espacio disponible antes de aceptar el archivo
-      if (!this.almacenamientoSession.verificarEspacioDisponible(archivo.size)) {
-        alert('El archivo es demasiado grande para el almacenamiento temporal. Por favor, use un archivo más pequeño.');
-        this.limpiarInputArchivo();
-        return;
-      }
-      
-      this.archivoSeleccionado = archivo;
+ cargarCursos(): void {
+    // CORRECCIÓN: Manejar cuando el usuario es null
+    if (this.usuarioActual && this.usuarioActual.email) {
+      this.cursos = this.servicioCursos.obtenerCursosPorInstructor(this.usuarioActual.email);
     } else {
-      alert('Por favor, selecciona un archivo PDF o PPTX válido.');
-      this.limpiarInputArchivo();
+      // Si no hay usuario autenticado, mostrar todos los cursos o cursos de invitado
+      this.cursos = this.servicioCursos.obtenerCursos().filter(curso => 
+        curso.instructor === 'invitado@gmail.com' || !curso.instructor
+      );
     }
   }
-
-  async subirArchivo(): Promise<void> {
-    if (!this.archivoSeleccionado || !this.usuarioActual) return;
-
-    if (!this.cursoSeleccionado && !this.modoEdicion) {
-      alert('Por favor, selecciona un curso antes de subir diapositivas.');
+  async onArchivoSeleccionado(evento: any): Promise<void> {
+    const resultado = await this.servicioArchivos.procesarArchivoSeleccionado(evento);
+    
+    if (resultado.error) {
+      alert(resultado.error);
       return;
     }
+    
+    this.archivoSeleccionado = resultado.archivo;
+  }
+ async subirArchivo(): Promise<void> {
+  if (!this.archivoSeleccionado || !this.usuarioActual) return;
 
-    this.cargando = true;
-    try {
-      const idArchivo = `archivo_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-      
-      // .: Usar sessionStorage en lugar de IndexedDB
-      await this.almacenamientoSession.guardarArchivoBlob(idArchivo, this.archivoSeleccionado);
+  this.cargando = true;
+  
+  const resultado = await this.servicioArchivos.subirArchivo(
+    this.archivoSeleccionado,
+    this.cursoSeleccionado,
+    this.modoEdicion,
+    this.cursoEditando,
+    this.archivoEditando,
+    this.usuarioActual.email
+  );
 
-      const nuevaDiapositiva: Diapositiva = {
-        id: Date.now(),
-        titulo: this.eliminarExtension(this.archivoSeleccionado.name),
-        archivo: this.archivoSeleccionado.name,
-        tipo: this.archivoSeleccionado.type.includes('pdf') ? 'pdf' : 'pptx',
-        completada: false,
-        archivoId: idArchivo,
+  if (resultado.exito) {
+    if (resultado.necesitaActualizar && this.cursoEditando && this.archivoEditando) {
+      // Actualizar Archivo existente en el curso
+      const archivoActualizada: Archivo = {
+        ...this.archivoEditando,
+        nombre: this.servicioArchivos.eliminarExtension(this.archivoSeleccionado.name),
+        tipo: this.archivoSeleccionado.name.toLowerCase().endsWith('.pdf') ? 'PDF' : 'PPTX',
+        archivoId: `archivo_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
         fechaSubida: new Date(),
         tamano: this.archivoSeleccionado.size
       };
 
-      if (this.modoEdicion && this.cursoEditando && this.diapositivaEditando) {
-        await this.actualizarDiapositivaExistente(nuevaDiapositiva);
-      } else {
-        await this.agregarDiapositivaACursoExistente(nuevaDiapositiva);
-      }
-
-      this.cargarCursos();
-      this.limpiarEstado();
+      this.servicioCursos.actualizarArchivoEnCurso(
+        this.cursoEditando.id, 
+        archivoActualizada
+      );
       
-    } catch (error) {
-      console.error('Error al subir archivo:', error);
-      alert('Error al subir el archivo. Por favor, intente nuevamente.');
-    } finally {
-      this.cargando = false;
-    }
-  }
-
-  private async actualizarDiapositivaExistente(nuevaDiapositiva: Diapositiva): Promise<void> {
-    if (!this.cursoEditando || !this.diapositivaEditando) return;
-
-    if (this.diapositivaEditando.archivoId) {
-      try {
-        await this.almacenamientoSession.borrarArchivo(this.diapositivaEditando.archivoId);
-      } catch (error) {
-        console.warn('No se pudo eliminar el archivo anterior:', error);
-      }
+    } else if (resultado.Archivo && this.cursoSeleccionado) {
+      // Agregar nueva Archivo al curso
+      this.servicioCursos.agregarArchivoACurso(
+        this.cursoSeleccionado.id, 
+        resultado.Archivo
+      );
     }
 
-    const diapositivaActualizada: Diapositiva = {
-      ...this.diapositivaEditando,
-      titulo: nuevaDiapositiva.titulo,
-      archivo: nuevaDiapositiva.archivo,
-      tipo: nuevaDiapositiva.tipo,
-      archivoId: nuevaDiapositiva.archivoId,
-      fechaSubida: new Date(),
-      tamano: nuevaDiapositiva.tamano
-    };
-
-    this.servicioCursos.actualizarDiapositivaEnCurso(
-      this.cursoEditando.id, 
-      diapositivaActualizada
-    );
-
-    alert(`Archivo "${nuevaDiapositiva.archivo}" actualizado exitosamente.`);
+    // Sincronizar UNA SOLA VEZ después de todas las operaciones
+    this.servicioArchivos.sincronizarArchivosDesdeCursos(this.cursos);
+    
+    this.cargarCursos();
+    this.limpiarEstado();
+    alert(resultado.mensaje);
+  } else {
+    alert(resultado.mensaje);
   }
-
-  private async agregarDiapositivaACursoExistente(nuevaDiapositiva: Diapositiva): Promise<void> {
-    if (!this.cursoSeleccionado) return;
-
-    this.servicioCursos.agregarDiapositivaACurso(this.cursoSeleccionado.id, nuevaDiapositiva);
-    alert(`Diapositiva "${nuevaDiapositiva.archivo}" agregada exitosamente al curso "${this.cursoSeleccionado.titulo}".`);
-  }
-
-  private eliminarExtension(nombreArchivo: string): string {
-    return nombreArchivo.replace(/\.[^/.]+$/, "");
-  }
-
+  
+  this.cargando = false;
+}
   private limpiarInputArchivo(): void {
     const inputArchivo = document.querySelector('input[type="file"]') as HTMLInputElement;
     if (inputArchivo) inputArchivo.value = '';
   }
 
+
   limpiarEstado(): void {
     this.archivoSeleccionado = null;
     this.cursoEditando = null;
-    this.diapositivaEditando = null;
+    this.archivoEditando = null;
     this.modoEdicion = false;
     this.limpiarInputArchivo();
   }
 
-  // Resto de los métodos permanecen igual...
   abrirModalCrearCurso(): void {
     this.nuevoCurso = { titulo: '', descripcion: '', nivel: 'Principiante', duracion: 1 };
     this.modalCurso = this.nuevoCurso;
@@ -210,7 +180,7 @@ export class InstructorDashboard implements OnInit {
       descripcion: this.nuevoCurso.descripcion,
       nivel: this.nuevoCurso.nivel || 'Principiante',   
       duracion: this.nuevoCurso.duracion || 1,          
-      diapositivas: [],
+      archivos: [],
       progreso: 0,
       instructor: this.usuarioActual!.email,
       fechaCreacion: new Date(),
@@ -239,9 +209,14 @@ export class InstructorDashboard implements OnInit {
       this.cursoSeleccionado = null;
     }
   }
+ gestionarCursos(): void {
+    this.vistaActual = 'cursos';
+    CrearCurso.modoGlobal = 'tabla';
+  }
 
-  gestionarCursos(): void {
-    alert('Selecciona un curso de la lista para agregar diapositivas.');
+  volverInicio(): void {
+    this.vistaActual = 'inicio';
+    CrearCurso.modoGlobal = 'formulario';
   }
 
   irCrearCurso(): void {
@@ -253,10 +228,10 @@ export class InstructorDashboard implements OnInit {
   }
 
   editarCurso(curso: Curso): void {
-    this.cursoEditando = { ...curso };
-    if (!this.cursoEditando.nivel) this.cursoEditando.nivel = 'Principiante';
-    if (!this.cursoEditando.duracion) this.cursoEditando.duracion = 1;
+    // Usar el servicio para preparar el curso para edición
+    this.cursoEditando = this.servicioCursos.prepararEdicionCurso(curso);
     this.modalCurso = this.cursoEditando;
+    
     setTimeout(() => {
       this.mostrarModalCurso = true;
       console.log('editarCurso: modalCurso=', this.modalCurso, 'mostrarModalCurso=', this.mostrarModalCurso);
@@ -269,15 +244,14 @@ export class InstructorDashboard implements OnInit {
   guardarEdicionCurso(): void {
     if (!this.cursoEditando) return;
 
-    if (!this.cursoEditando.titulo || !this.cursoEditando.titulo.trim()) {
-      alert('Por favor, ingresa un título para el curso.');
-      return;
-    }
-    if (!this.cursoEditando.descripcion || !this.cursoEditando.descripcion.trim()) {
-      alert('Por favor, ingresa una descripción para el curso.');
+    // Usar validación del servicio
+    const validacion = this.servicioCursos.validarCurso(this.cursoEditando);
+    if (!validacion.valido) {
+      alert(validacion.mensaje);
       return;
     }
 
+    // Usar el servicio para actualizar el curso
     const original = this.servicioCursos.obtenerCursoPorId(this.cursoEditando.id);
     const actualizado: Curso = {
       ...(original || this.cursoEditando),
@@ -292,27 +266,28 @@ export class InstructorDashboard implements OnInit {
     try { document.body.classList.remove('modal-open'); } catch (e) { /* safe in SSR */ }
     alert('Curso actualizado exitosamente.');
   }
-
+  
   eliminarCurso(curso: Curso): void {
     const confirmar = window.confirm(
       `¿Está seguro de que desea eliminar el curso "${curso.titulo}"?\n\n` +
-      `Esta acción eliminará ${curso.diapositivas.length} diapositiva(s) y no se puede deshacer.`
+      `Esta acción eliminará ${curso.archivos.length} Archivo(s) y no se puede deshacer.`
     );
 
     if (!confirmar) return;
 
     try {
       // Eliminar todos los archivos asociados del curso
-      curso.diapositivas.forEach(async diapositiva => {
-        if (diapositiva.archivoId) {
+      curso.archivos.forEach(async Archivo => {
+        if (Archivo.archivoId) {
           try {
-            await this.almacenamientoSession.borrarArchivo(diapositiva.archivoId);
+            await this.almacenamientoSession.borrarArchivo(Archivo.archivoId);
           } catch (error) {
-            console.warn(`No se pudo eliminar el archivo: ${diapositiva.archivoId}`, error);
+            console.warn(`No se pudo eliminar el archivo: ${Archivo.archivoId}`, error);
           }
         }
       });
 
+      // Usar el servicio para eliminar el curso
       this.servicioCursos.eliminarCurso(curso.id);
       
       if (this.cursoSeleccionado && this.cursoSeleccionado.id === curso.id) {
@@ -327,11 +302,10 @@ export class InstructorDashboard implements OnInit {
     }
   }
 
-  // Funciones para diapositivas
-  async editarDiapositiva(curso: Curso, diapositiva: Diapositiva): Promise<void> {
+  async editarArchivo(curso: Curso, Archivo: Archivo): Promise<void> {
     this.modoEdicion = true;
     this.cursoEditando = curso;
-    this.diapositivaEditando = diapositiva;
+    this.archivoEditando = Archivo;
     
     const inputArchivo = document.querySelector('input[type="file"]') as HTMLInputElement;
     if (inputArchivo) {
@@ -339,65 +313,41 @@ export class InstructorDashboard implements OnInit {
     }
   }
 
-  async eliminarDiapositiva(curso: Curso, diapositiva: Diapositiva): Promise<void> {
-    const confirmar = window.confirm(
-      `¿Está seguro de que desea eliminar la diapositiva "${diapositiva.titulo}"?\n\nEsta acción no se puede deshacer.`
-    );
+async eliminarArchivo(curso: Curso, archivo: Archivo): Promise<void> {
+  const confirmar = window.confirm(
+    `¿Está seguro de que desea eliminar el archivo "${archivo.nombre}"?\n\nEsta acción no se puede deshacer.`
+  );
 
-    if (!confirmar) return;
+  if (!confirmar) return;
 
-    try {
-      if (diapositiva.archivoId) {
-        await this.almacenamientoSession.borrarArchivo(diapositiva.archivoId);
-      }
+  // Eliminar archivo asociado
+  const resultadoArchivo = await this.servicioArchivos.eliminarArchivoDeArchivo(archivo);
+  
+  if (resultadoArchivo.exito) {
+    // Eliminar Archivo del curso
+    this.servicioCursos.eliminarArchivoDeCurso(curso.id, archivo.id);
+    
+    // Eliminar también del listado general de archivos
+    this.servicioArchivos.eliminarArchivo(archivo.id);
+    
+    this.cargarCursos();
+    alert('Archivo eliminado exitosamente.');
+  } else {
+    alert(resultadoArchivo.mensaje);
+  }
+}
 
-      this.servicioCursos.eliminarDiapositivaDeCurso(curso.id, diapositiva.id);
-
-      this.cargarCursos();
-      alert('Diapositiva eliminada exitosamente.');
-    } catch (error) {
-      console.error('Error al eliminar diapositiva:', error);
-      alert('Error al eliminar la diapositiva. Por favor, intente nuevamente.');
+  async visualizarArchivo(Archivo: Archivo): Promise<void> {
+    const resultado = await this.servicioArchivos.visualizarArchivo(Archivo);
+    if (!resultado.exito) {
+      alert(resultado.mensaje);
     }
   }
 
-  async visualizarArchivo(diapositiva: Diapositiva): Promise<void> {
-    if (!diapositiva.archivoId) {
-      alert('No hay archivo asociado para previsualizar.');
-      return;
-    }
-    
-    try {
-      // .: Obtener archivo de sessionStorage
-      const blob = await this.almacenamientoSession.obtenerArchivoBlob(diapositiva.archivoId);
-      if (!blob) {
-        alert('Archivo no encontrado.');
-        return;
-      }
-      this.servicioArchivos.visualizarArchivoDesdeBlob(blob, diapositiva.archivo);
-    } catch (error) {
-      console.error('Error al visualizar archivo:', error);
-      alert('Error al cargar el archivo para visualización.');
-    }
-  }
-
-  async descargarArchivo(diapositiva: Diapositiva): Promise<void> {
-    if (!diapositiva.archivoId) {
-      alert('No hay archivo para descargar.');
-      return;
-    }
-    
-    try {
-      // .: Obtener archivo de sessionStorage
-      const blob = await this.almacenamientoSession.obtenerArchivoBlob(diapositiva.archivoId);
-      if (!blob) {
-        alert('Archivo no encontrado.');
-        return;
-      }
-      this.servicioArchivos.descargarArchivoDesdeBlob(blob, diapositiva.archivo);
-    } catch (error) {
-      console.error('Error al descargar archivo:', error);
-      alert('Error al cargar el archivo para descarga.');
+  async descargarArchivo(Archivo: Archivo): Promise<void> {
+    const resultado = await this.servicioArchivos.descargarArchivoDeArchivo(Archivo);
+    if (!resultado.exito) {
+      alert(resultado.mensaje);
     }
   }
 
@@ -406,27 +356,13 @@ export class InstructorDashboard implements OnInit {
     return this.servicioArchivos.obtenerTamanoArchivoLegible(tamanoBytes);
   }
 
-  obtenerTipoLegible(diapositiva: Diapositiva): string {
-    if (diapositiva.tipo === 'pdf' || diapositiva.archivo.toLowerCase().endsWith('.pdf')) {
-      return 'PDF Document';
-    } else if (diapositiva.tipo === 'pptx' || diapositiva.archivo.toLowerCase().endsWith('.pptx')) {
-      return 'PowerPoint Presentation';
-    } else {
-      return 'Archivo';
-    }
+  obtenerTipoLegible(Archivo: Archivo): string {
+    return this.servicioArchivos.obtenerTipoArchivoLegibleParaArchivo(Archivo);
   }
 
   formatearFecha(fecha: Date): string {
-    return fecha.toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+    return this.servicioArchivos.formatearFecha(fecha);
   }
 
-  cerrarSesion(): void {
-    // Limpiar archivos de sessionStorage al cerrar sesión
-    this.servicioAutorizacion.cerrarSesion();
-    this.router.navigate(['/login']);
-  }
+
 }

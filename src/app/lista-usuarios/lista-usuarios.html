@@ -209,7 +209,8 @@
             <select 
               class="form-select"
               [(ngModel)]="usuarioForm.tipo"
-              name="tipo">
+              name="tipo"
+              [disabled]="usuarioForm.email === usuarioActual?.email">
               <option value="estudiante">Estudiante</option>
               <option value="instructor">Instructor</option>
               <option value="administrador">Administrador</option>

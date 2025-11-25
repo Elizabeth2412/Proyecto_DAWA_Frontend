@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ServicioAutorizacion, Usuario } from '../autorizacion.service';
+import { ServicioAutorizacion} from '../autorizacion.service';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { RouterModule } from '@angular/router';
-
+import { Usuario } from '../servicios/servicio-usuarios';
 @Component({
   selector: 'app-header',
   standalone: true,

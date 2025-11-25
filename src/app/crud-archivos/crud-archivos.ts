@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ServicioArchivos, Archivo } from '../servicios/servicio-archivos';
 import { DialogoArchivoComponent } from '../dialogo-archivo/dialogo-archivo';
+import { ServicioCursos } from '../servicios/servicio-cursos';
 
 @Component({
   selector: 'app-crud-archivos',
@@ -20,15 +21,27 @@ export class CrudArchivos implements OnInit {
   terminoBusqueda: string = '';
   filtroEstado: string = '';
 
-  constructor(private servicioArchivos: ServicioArchivos) {}
+  constructor(
+    private servicioArchivos: ServicioArchivos,
+    private servicioCursos: ServicioCursos
+  ) {}
 
   ngOnInit(): void {
     this.cargarArchivos();
   }
 
   cargarArchivos(): void {
-    this.archivos = this.servicioArchivos.obtenerArchivos();
+    // Obtener todos los cursos para sincronizar archivos
+    const cursos = this.servicioCursos.obtenerCursos();
+    
+    // Sincronizar archivos desde cursos (solo una vez)
+    this.servicioArchivos.sincronizarArchivosDesdeCursos(cursos);
+    
+    // Obtener todos los archivos (sin duplicados)
+    this.archivos = this.servicioArchivos.obtenerTodosLosArchivos();
     this.archivosFiltrados = [...this.archivos];
+    
+    console.log('Archivos cargados:', this.archivos.length);
   }
 
   filtrarArchivos(): void {
@@ -56,13 +69,20 @@ export class CrudArchivos implements OnInit {
   cerrarDialogo(): void {
     this.mostrarDialogo = false;
     this.archivoSeleccionado = null;
+    // Recargar para reflejar cambios
     this.cargarArchivos();
   }
 
   eliminarArchivo(id: number): void {
-    if (confirm('¿Estás seguro de que deseas eliminar este archivo? Esta acción no se puede deshacer.')) {
-      this.servicioArchivos.eliminarArchivo(id);
-      this.cargarArchivos();
+    if (confirm('¿Estás seguro de que deseas eliminar este archivo? Esta acción eliminará el archivo de todos los cursos donde esté asignado.')) {
+      // Usar el método completo que elimina tanto del listado como de los cursos
+      this.servicioArchivos.eliminarArchivoCompleto(id);
+      
+      // Recargar la lista actualizada
+      this.archivos = this.servicioArchivos.obtenerTodosLosArchivos();
+      this.filtrarArchivos();
+      
+      alert('Archivo eliminado exitosamente de todos los cursos.');
     }
   }
 

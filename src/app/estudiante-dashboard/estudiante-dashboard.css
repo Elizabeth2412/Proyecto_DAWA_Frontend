@@ -213,20 +213,20 @@
   color: #a0aec0;
 }
 
-/* Diapositivas */
-.curso-diapositivas {
+/* archivos */
+.curso-archivo {
   border-top: 1px solid #e2e8f0;
   padding: 20px;
   background: #f7fafc;
 }
 
-.curso-diapositivas h4 {
+.curso-archivo h4 {
   color: #2d3748;
   margin-bottom: 20px;
   font-size: 1.1rem;
 }
 
-.tarjeta-diapositiva {
+.tarjeta-archivo {
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
@@ -238,18 +238,18 @@
   gap: 15px;
 }
 
-.diapositiva-info {
+.archivo-info {
   flex: 1;
 }
 
-.diapositiva-titulo {
+.archivo-titulo {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-bottom: 8px;
 }
 
-.diapositiva-titulo h5 {
+.archivo-titulo h5 {
   margin: 0;
   color: #2d3748;
   font-size: 1rem;
@@ -273,14 +273,14 @@
   color: #276749;
 }
 
-.diapositiva-metadata {
+.archivo-metadata {
   display: flex;
   gap: 15px;
   font-size: 0.8rem;
   color: #718096;
 }
 
-.diapositiva-acciones {
+.archivo-acciones {
   display: flex;
   align-items: center;
   gap: 15px;
@@ -330,7 +330,7 @@
 
 /* Estados vacíos */
 .sin-cursos,
-.sin-diapositivas {
+.sin-archivo {
   text-align: center;
   padding: 40px;
   color: #718096;
@@ -357,12 +357,12 @@
     width: 100%;
   }
   
-  .tarjeta-diapositiva {
+  .tarjeta-archivo {
     flex-direction: column;
     align-items: flex-start;
   }
   
-  .diapositiva-acciones {
+  .archivo-acciones {
     width: 100%;
     justify-content: space-between;
   }
