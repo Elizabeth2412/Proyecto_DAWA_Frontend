@@ -11,6 +11,7 @@ import { ComunidadVirtual } from './comunidad-virtual/comunidad-virtual';
 import { Register } from './register/register';
 import { ListaUsuarios } from './lista-usuarios/lista-usuarios';
 import { PaginalPrincipal } from './paginal-principal/paginal-principal';
+import { ListaCursosComponent } from './lista-cursos/lista-cursos.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -24,7 +25,11 @@ export const routes: Routes = [
   { path: 'footer', component: Footer },
   { path: 'crear-curso', component: CrearCurso },
   { path: 'evaluacion', component: Evaluation },
-  { path: 'comunidad', component:ComunidadVirtual},
+  { path: 'comunidad', component: ComunidadVirtual },
   { path: 'pagina-principal', component: PaginalPrincipal },
-  { path: '**', redirectTo: '/login' }
+  { path: 'cursos', component: ListaCursosComponent },
+  { path: 'cursos/nuevo', component: CrearCurso },
+  { path: 'cursos/editar/:id', component: CrearCurso },
+
+  { path: '**', redirectTo: '/login' },
 ];
