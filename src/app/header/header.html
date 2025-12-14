@@ -50,7 +50,7 @@
         <li class="nav-item">
           <a 
             class="nav-link px-3" 
-            routerLink="usuarioLogueado ? '/lista-usuarios' : null"
+            [routerLink]="usuarioLogueado ? '/lista-usuarios' : null"
             (click)="verificarAcceso($event)" 
             routerLinkActive="active fw-bold text-verde-custom">
             <i class="bi bi-journal-text me-1"></i>Usuarios
@@ -67,15 +67,16 @@
         <li class="nav-item">
           <a 
             class="nav-link px-3" 
-            routerLink="/instructor"
-            routerLinkActive="active fw-bold text-verde-custom">
+            [routerLink]="usuarioLogueado ? '/instructor' : null"
+            routerLinkActive="active fw-bold text-verde-custom"
+            (click)="verificarAcceso($event)" >
             <i class="bi bi-envelope-fill me-1"></i>Instructores
           </a>
         </li>
         <li class="nav-item">
           <a 
             class="nav-link px-3"
-            routerLink="/estudiante"
+            [routerLink]="usuarioLogueado ? '/estudiante' : null"
             (click)="verificarAcceso($event)" 
             routerLinkActive="active fw-bold text-verde-custom">
             <i class="bi bi-envelope-fill me-1"></i>Cursos
@@ -93,7 +94,13 @@
 
       <div class="d-flex">
         <div class="d-flex align-items-center me-3" *ngIf="usuarioActual">
-          <span class="fw-bold text-primary">{{ usuarioActual.nombre }}</span>
+          <div class="avatar-circle me-2">
+            <mat-icon>person</mat-icon>
+          </div>
+          <div>
+            <span class="fw-bold text-dark d-block">{{ usuarioActual.nombre }}</span>
+            <span class="badge bg-success">{{ usuarioActual.tipo }}</span>
+          </div>
         </div>
         <button 
           class="btn-agro" 

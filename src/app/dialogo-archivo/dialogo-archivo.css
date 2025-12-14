@@ -113,12 +113,12 @@
 }
 
 .btn-primario {
-  background: #4a6cf7;
+  background:#21854f 100%;
   color: white;
 }
 
 .btn-primario:hover {
-  background: #3a5ce5;
+  background: #1e7145 ;
   transform: translateY(-1px);
 }
 

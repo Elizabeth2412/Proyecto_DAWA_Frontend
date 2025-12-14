@@ -856,10 +856,7 @@
 
 
 
-
-/* ============================================
-   ESTILOS PARA GESTIÓN DE EVALUACIONES
-   ============================================ */
+/*ESTILOS PARA GESTIÓN DE EVALUACIONES*/
 
 /* Variables */
 :root {
@@ -872,9 +869,7 @@
   --gradiente-verde: linear-gradient(135deg, #1e7145 0%, #21854f 100%);
 }
 
-/* ============================================
-   TÍTULOS Y ENCABEZADO
-   ============================================ */
+/* Titulos y encabezado*/
 h1.display-5 {
   color: var(--verde-claro);
   text-shadow: 1px 1px 4px rgba(62, 182, 102, 0.6);
@@ -886,17 +881,13 @@ h1.display-5 {
   font-size: 0.95rem;
 }
 
-/* ============================================
-   CONTENEDOR DASHBOARD 
-   ============================================ */
+/* Contenedor Dashboard */
 .dashboard-contenido {
   padding: 1.5rem;
   border-radius: 12px;
 }
 
-/* ============================================
-   ACCIONES SUPERIORES Y CONTROLES
-   ============================================ */
+/* Acciones superiores y controles */
 .acciones-superiores {
   gap: 1rem;
   margin-bottom: 0;
@@ -937,9 +928,7 @@ h1.display-5 {
   outline: none;
 }
 
-/* ============================================
-   CARD Y TABLA
-   ============================================ */
+/* Card y Tabla */
 .card {
   border-radius: 12px;
   overflow: hidden;
@@ -965,9 +954,7 @@ h1.display-5 {
   padding: 0;
 }
 
-/* ============================================
-   TABLA
-   ============================================ */
+/* Tabla */
 .table {
   margin-bottom: 0;
   font-size: 0.92rem;
@@ -999,18 +986,13 @@ h1.display-5 {
   background-color: rgba(76, 175, 80, 0.06);
 }
 
-/* ============================================
-   COLUMNAS ESPECÍFICAS
-   ============================================ */
+
 .nombre-evaluacion {
   color: var(--verde-oscuro);
   font-weight: 600;
   font-size: 0.95rem;
 }
 
-/* ============================================
-   BADGES - MÓDULO
-   ============================================ */
 .badge-modulo {
   font-size: 0.75rem;
   font-weight: 600;
@@ -1025,9 +1007,6 @@ h1.display-5 {
   text-align: center;
 }
 
-/* ============================================
-   BADGES - ESTADO
-   ============================================ */
 .badge-estado {
   font-weight: 600;
   font-size: 0.8rem;
@@ -1052,9 +1031,7 @@ h1.display-5 {
   box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
 }
 
-/* ============================================
-   ACCIONES (Botones de tabla)
-   ============================================ */
+/* Acciones (Botones de tabla) */
 .acciones {
   white-space: nowrap;
   align-items: center;
@@ -1196,9 +1173,7 @@ h1.display-5 {
   color: #1e5bb8;
 }
 
-/* ============================================
-   BOTONES
-   ============================================ */
+/* Botones */
 .btn-secondary {
   background-color: #6c757d !important;
   border-color: #6c757d !important;
@@ -1326,9 +1301,7 @@ h1.display-5 {
 
 
 
-/* ============================================
-   MODAL/DIALOG PARA FORMULARIO
-   ============================================ */
+/* Modal */
 
 /* Overlay oscuro de fondo */
 .modal-overlay {
@@ -1491,16 +1464,7 @@ h1.display-5 {
   }
 }
 
-
-
-
-
-
-
-/* ============================================
-   MODAL DE INICIO DE EVALUACIÓN
-   CSS sin conflictos con otros estilos
-   ============================================ */
+/* Modal de inicio de evaluación */
 
 /* Overlay del modal de inicio */
 .modal-overlay-evaluation {
