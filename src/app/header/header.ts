@@ -4,10 +4,11 @@ import { ServicioAutorizacion} from '../autorizacion.service';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { RouterModule } from '@angular/router';
 import { Usuario } from '../servicios/servicio-usuarios';
+import { MatIcon } from '@angular/material/icon';
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, RouterModule],
+  imports: [CommonModule, RouterLink, RouterLinkActive, RouterModule, MatIcon],
   templateUrl: './header.html',
   styleUrls: ['./header.css']
 })
