@@ -21,6 +21,8 @@
 }
 
 .card-container {
+  margin-top: 4rem;
+  margin-bottom: 4rem;
   max-width: 42rem;
   width: 100%;
   background: white;
@@ -521,4 +523,1391 @@
     width: 100%;
     justify-content: center;
   }
+}
+
+
+
+
+
+
+/* Variables */
+:root {
+  --verde-oscuro: #1e7145;
+  --verde-medio: #21854f;
+  --verde-claro: #4a7c2c;
+}
+
+/* Card y header */
+.card {
+  border-radius: 12px !important;
+  overflow: hidden;
+  border: none !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1) !important;
+  margin-bottom: 50px;
+}
+
+.card-header.tabla-header {
+  background-color: #5a8c47 !important;
+  color: white !important;
+  padding: 1rem 1.5rem !important;
+  border-bottom: none !important;
+}
+
+.card-header h4 {
+  font-weight: 600 !important;
+  font-size: 1.1rem !important;
+  margin: 0 !important;
+}
+
+/* Buscador y controles */
+.buscador {
+  min-width: 300px;
+  border-radius: 8px;
+  padding: 10px 16px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.buscador:focus {
+  border-color: var(--verde-medio);
+  box-shadow: 0 0 0 3px rgba(33, 133, 79, 0.1);
+  outline: none;
+}
+
+.form-select {
+  min-width: 180px;
+  border-radius: 8px;
+  padding: 10px 16px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.form-select:focus {
+  border-color: var(--verde-medio);
+  box-shadow: 0 0 0 3px rgba(33, 133, 79, 0.1);
+  outline: none;
+}
+
+/* Botón Nueva Evaluación */
+.btn.btn-success {
+  background-color: var(--verde-medio) !important;
+  border-color: var(--verde-medio) !important;
+  border-radius: 8px !important;
+  padding: 10px 20px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn.btn-success:hover {
+  background-color: var(--verde-oscuro) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(33, 133, 79, 0.3) !important;
+}
+
+/* Badge contador */
+.badge.bg-success {
+  background-color: var(--verde-medio) !important;
+  padding: 8px 16px !important;
+  border-radius: 20px !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+}
+
+/* Tabla */
+.table {
+  margin-bottom: 0;
+  font-size: 0.92rem;
+}
+
+.table thead th {
+  background-color: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  padding: 1rem 0.75rem;
+  border-bottom: 2px solid #dee2e6;
+  white-space: nowrap;
+}
+
+.table tbody td {
+  padding: 1rem 0.75rem;
+  vertical-align: middle;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.table-hover tbody tr {
+  transition: all 0.2s ease;
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(76, 175, 80, 0.06);
+}
+
+/* Nombre de evaluación */
+.nombre-evaluacion {
+  color: var(--verde-oscuro);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* Badge módulo */
+.badge-modulo {
+  background: linear-gradient(135deg, #2b7de9 0%, #1e5bb8 100%);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  display: inline-block;
+}
+
+/* Badge estado */
+.badge-estado {
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 6px 14px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  display: inline-block;
+  min-width: 100px;
+  text-align: center;
+}
+
+.estado-activa {
+  background-color: #1e7145 !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(30, 113, 69, 0.3);
+}
+
+.estado-inactiva {
+  background-color: #dc3545 !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+/* Acciones */
+.acciones {
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.acciones button {
+  margin: 0;
+  cursor: pointer;
+  position: relative;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+}
+
+/* Tooltip */
+.acciones button:hover::before {
+  content: attr(title);
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 1000;
+  font-weight: 500;
+}
+
+.btn-agregar {
+  background: linear-gradient(135deg, #1e7145 0%, #21854f 100%);
+  border: none;
+  color: white !important;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+
+.btn-agregar:hover {
+   background: #145c35;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(30, 113, 69, 0.4);
+}
+
+/* Botón Ver */
+.acciones .btn-ver {
+  color: #1e7145 !important;
+}
+
+.acciones .btn-ver:hover {
+  background: rgba(30, 113, 69, 0.1);
+  transform: scale(1.15);
+}
+
+.acciones .btn-ver mat-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+/* Botón Modificar */
+.acciones .btn-modificar {
+  color: #2b7de9 !important;
+}
+
+.acciones .btn-modificar:hover {
+  background: rgba(43, 125, 233, 0.1);
+  transform: scale(1.15);
+}
+
+.acciones .btn-modificar i {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+/* Botón Eliminar */
+.acciones .btn-eliminar {
+  color: #dc3545;
+}
+
+.acciones .btn-eliminar:hover {
+  background: rgba(220, 53, 69, 0.1);
+  transform: scale(1.15);
+}
+
+.acciones .btn-eliminar mat-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+/* Mensaje vacío */
+.table tbody tr td[colspan] {
+  padding: 3rem 1rem;
+  font-size: 1rem;
+  color: #999;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .buscador,
+  .form-select {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .table {
+    font-size: 0.85rem;
+  }
+
+  .table thead th,
+  .table tbody td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .acciones button {
+    width: 34px;
+    height: 34px;
+  }
+
+  .acciones button mat-icon {
+    font-size: 1rem !important;
+  }
+
+  .badge-estado,
+  .badge-modulo {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
+}
+
+@media (max-width: 576px) {
+  .card-header h4 {
+    font-size: 1rem;
+  }
+
+  .acciones {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .acciones button {
+    width: 100%;
+    border-radius: 8px;
+  }
+}
+
+
+
+
+
+/* ============================================
+   ESTILOS PARA GESTIÓN DE EVALUACIONES
+   ============================================ */
+
+/* Variables */
+:root {
+  --verde-oscuro: #1e7145;
+  --verde-medio: #21854f;
+  --verde-claro: #4a7c2c;
+  --verde-claro2: #6b9d3e;
+  --gris-texto: #666;
+  --gris-claro: #f8f9fa;
+  --gradiente-verde: linear-gradient(135deg, #1e7145 0%, #21854f 100%);
+}
+
+/* ============================================
+   TÍTULOS Y ENCABEZADO
+   ============================================ */
+h1.display-5 {
+  color: var(--verde-claro);
+  text-shadow: 1px 1px 4px rgba(62, 182, 102, 0.6);
+  margin-bottom: 0.5rem;
+}
+
+.text-muted {
+  color: #777 !important;
+  font-size: 0.95rem;
+}
+
+/* ============================================
+   CONTENEDOR DASHBOARD 
+   ============================================ */
+.dashboard-contenido {
+  padding: 1.5rem;
+  border-radius: 12px;
+}
+
+/* ============================================
+   ACCIONES SUPERIORES Y CONTROLES
+   ============================================ */
+.acciones-superiores {
+  gap: 1rem;
+  margin-bottom: 0;
+}
+
+.controles-tabla {
+  flex: 1;
+  max-width: 600px;
+}
+
+.buscador {
+  min-width: 250px;
+  border-radius: 8px;
+  padding: 10px 16px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.buscador:focus {
+  border-color: var(--verde-medio);
+  box-shadow: 0 0 0 3px rgba(33, 133, 79, 0.1);
+  outline: none;
+}
+
+.form-select {
+  min-width: 180px;
+  border-radius: 8px;
+  padding: 10px 16px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.form-select:focus {
+  border-color: var(--verde-medio);
+  box-shadow: 0 0 0 3px rgba(33, 133, 79, 0.1);
+  outline: none;
+}
+
+/* ============================================
+   CARD Y TABLA
+   ============================================ */
+.card {
+  border-radius: 12px;
+  overflow: hidden;
+  border: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 50px;
+}
+
+.card-header {
+  background-color: #5a8c47;
+  padding: 1rem 1.5rem;
+  border-bottom: none;
+}
+
+.card-header h5 {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin: 0;
+  color: white;
+}
+
+.card-body {
+  padding: 0;
+}
+
+/* ============================================
+   TABLA
+   ============================================ */
+.table {
+  margin-bottom: 0;
+  font-size: 0.92rem;
+}
+
+.table thead th {
+  background-color: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  padding: 1rem 0.75rem;
+  border-bottom: 2px solid #dee2e6;
+  white-space: nowrap;
+}
+
+.table tbody td {
+  padding: 1rem 0.75rem;
+  vertical-align: middle;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.table-hover tbody tr {
+  transition: all 0.2s ease;
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(76, 175, 80, 0.06);
+}
+
+/* ============================================
+   COLUMNAS ESPECÍFICAS
+   ============================================ */
+.nombre-evaluacion {
+  color: var(--verde-oscuro);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* ============================================
+   BADGES - MÓDULO
+   ============================================ */
+.badge-modulo {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #6c5ce7;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  min-width: 80px;
+  text-align: center;
+}
+
+/* ============================================
+   BADGES - ESTADO
+   ============================================ */
+.badge-estado {
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 6px 14px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  display: inline-block;
+  min-width: 100px;
+  text-align: center;
+}
+
+.estado-activa {
+  background-color: #1e7145 !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(30, 113, 69, 0.3);
+}
+
+.estado-inactiva {
+  background-color: #dc3545 !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+/* ============================================
+   ACCIONES (Botones de tabla)
+   ============================================ */
+.acciones {
+  white-space: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  display: flex;
+}
+
+.acciones button {
+  margin: 0;
+  cursor: pointer;
+  position: relative;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+}
+
+/* Tooltip en hover */
+.acciones button:hover::before {
+  content: attr(title);
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 1000;
+  font-weight: 500;
+}
+
+/* Botón Ver */
+.acciones .btn-ver {
+  color: #6c5ce7 !important;
+}
+
+.acciones .btn-ver:hover {
+  background: rgba(108, 92, 231, 0.1);
+  transform: scale(1.15);
+}
+
+/* Botón Modificar */
+.acciones .btn-modificar {
+  color: #2b7de9 !important;
+
+}
+
+.acciones .btn-modificar:hover {
+  background: rgba(43, 125, 233, 0.1);
+  transform: scale(1.15);
+}
+
+/* Botón Eliminar */
+.acciones .btn-eliminar {
+  color: #dc3545;
+}
+
+.acciones .btn-eliminar:hover {
+  background: rgba(220, 53, 69, 0.1);
+  transform: scale(1.15);
+}
+
+.acciones button mat-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+
+.form-label {
+  color: #333;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.form-control,
+.form-select {
+  border-radius: 8px !important;
+  border: 2px solid #e5e7eb !important;
+  padding: 12px 16px !important;
+  font-size: 1rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--verde-medio) !important;
+  box-shadow: 0 0 0 3px rgba(33, 133, 79, 0.1) !important;
+  outline: none !important;
+}
+
+.form-control-lg {
+  padding: 14px 18px !important;
+  font-size: 1.05rem !important;
+  width: 96%;
+}
+
+.form-select-lg {
+  padding: 14px 18px !important;
+  font-size: 1.05rem !important;
+}
+
+/* Radio buttons */
+.form-check-input {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid #dee2e6;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 10px;
+}
+
+.form-check-input:checked {
+  background-color: var(--verde-medio) !important;
+  border-color: var(--verde-medio) !important;
+}
+
+.form-check-label {
+  font-size: 1rem;
+  margin-left: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Alert info */
+.alert-info {
+  background-color: #e7f5ff;
+  border-left: 4px solid #2b7de9;
+  border-radius: 8px;
+  color: #1e5bb8;
+}
+
+/* ============================================
+   BOTONES
+   ============================================ */
+.btn-secondary {
+  background-color: #6c757d !important;
+  border-color: #6c757d !important;
+  border-radius: 8px !important;
+  padding: 12px 24px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3) !important;
+}
+
+.btn-success {
+  background-color: var(--verde-medio) !important;
+  border-color: var(--verde-medio) !important;
+  border-radius: 8px !important;
+  padding: 12px 24px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-success:hover {
+  background-color: var(--verde-oscuro) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(33, 133, 79, 0.3) !important;
+}
+
+
+.table tbody tr td[colspan] {
+  padding: 3rem 1rem;
+  font-size: 1rem;
+  color: #999;
+}
+
+
+.bi {
+  vertical-align: middle;
+}
+
+@media (max-width: 992px) {
+  .acciones-superiores {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+
+  .controles-tabla {
+    max-width: 100%;
+    flex-direction: column;
+  }
+
+  .buscador,
+  .form-select {
+    width: 96%;
+  }
+}
+
+@media (max-width: 768px) {
+  .table {
+    font-size: 0.85rem;
+  }
+
+  .table thead th,
+  .table tbody td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .acciones button {
+    width: 34px;
+    height: 34px;
+  }
+
+  .acciones button mat-icon {
+    font-size: 1rem !important;
+  }
+
+  .badge-modulo,
+  .badge-estado {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
+
+  .form-control,
+  .form-select {
+    font-size: 0.95rem !important;
+    padding: 10px 14px !important;
+  }
+
+  .btn {
+    padding: 10px 20px !important;
+    font-size: 0.95rem !important;
+  }
+
+  .d-flex.gap-3 {
+    flex-direction: column !important;
+  }
+
+  .btn {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .card-header h5 {
+    font-size: 1rem;
+  }
+
+  h1.display-5 {
+    font-size: 1.75rem;
+  }
+
+  .acciones {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .acciones button {
+    width: 100%;
+  }
+}
+
+
+
+
+/* ============================================
+   MODAL/DIALOG PARA FORMULARIO
+   ============================================ */
+
+/* Overlay oscuro de fondo */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Contenedor del diálogo */
+.modal-dialog-evaluacion {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Header del modal */
+.modal-header-evaluacion {
+  background: linear-gradient(135deg, #1e7145 0%, #21854f 100%);
+  color: white;
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: none;
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+  color: white;
+}
+
+.modal-subtitle {
+  font-size: 0.9rem;
+  margin: 0;
+  opacity: 0.9;
+  color: white;
+}
+
+.btn-close-modal {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+}
+
+.btn-close-modal:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+/* Body del modal */
+.modal-body-evaluacion {
+  padding: 2rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Scroll personalizado para el modal */
+.modal-body-evaluacion::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-body-evaluacion::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.modal-body-evaluacion::-webkit-scrollbar-thumb {
+  background: #21854f;
+  border-radius: 10px;
+}
+
+.modal-body-evaluacion::-webkit-scrollbar-thumb:hover {
+  background: #1e7145;
+}
+
+/* Responsive para el modal */
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 10px;
+  }
+
+  .modal-dialog-evaluacion {
+    max-width: 100%;
+    max-height: 95vh;
+    border-radius: 12px;
+  }
+
+  .modal-header-evaluacion {
+    padding: 1rem 1.5rem;
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
+  }
+
+  .modal-subtitle {
+    font-size: 0.85rem;
+  }
+
+  .modal-body-evaluacion {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .modal-header-evaluacion {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .btn-close-modal {
+    align-self: flex-end;
+  }
+}
+
+
+
+
+
+
+
+/* ============================================
+   MODAL DE INICIO DE EVALUACIÓN
+   CSS sin conflictos con otros estilos
+   ============================================ */
+
+/* Overlay del modal de inicio */
+.modal-overlay-evaluation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  animation: fadeInEvalModal 0.3s ease;
+}
+
+@keyframes fadeInEvalModal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Contenedor del Modal de Evaluación */
+.modal-dialog-evaluation {
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+  max-width: 650px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: slideUpEvalModal 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+@keyframes slideUpEvalModal {
+  from {
+    transform: translateY(60px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Header del Modal de Evaluación */
+.modal-header-evaluation {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-bottom: 1px solid #e9ecef;
+}
+
+/* Botón de cerrar del modal de evaluación */
+.btn-close-evaluation {
+  background: #f1f3f5;
+  border: none;
+  color: #495057;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.btn-close-evaluation:hover {
+  background: #e9ecef;
+  transform: rotate(90deg);
+}
+
+.btn-close-evaluation mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+}
+
+/* Body del Modal de Evaluación */
+.modal-body-evaluation {
+  padding: 2.5rem 2.5rem 2rem 2.5rem;
+  overflow-y: auto;
+  flex: 1;
+  text-align: center;
+}
+
+/* Icono principal del modal */
+.icon-container-eval {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 24px;
+  margin-bottom: 1.75rem;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  animation: pulseIconEval 2s ease-in-out infinite;
+}
+
+@keyframes pulseIconEval {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+  }
+}
+
+.icon-large-eval {
+  font-size: 48px !important;
+  width: 48px !important;
+  height: 48px !important;
+  color: white;
+}
+
+/* Título y Subtítulo del Modal */
+.title-eval {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0 0 0.75rem 0;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.subtitle-eval {
+  font-size: 1rem;
+  color: #718096;
+  margin: 0 0 2rem 0;
+  line-height: 1.5;
+}
+
+/* Sección de Información del Modal */
+.info-section-eval {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.info-card-eval {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border: 2px solid #e9ecef;
+  border-radius: 16px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+}
+
+.info-card-eval:hover {
+  border-color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+}
+
+.info-left-eval {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.icon-small-eval {
+  font-size: 24px !important;
+  width: 24px !important;
+  height: 24px !important;
+  color: #667eea;
+  flex-shrink: 0;
+}
+
+.info-label-eval {
+  font-size: 0.875rem;
+  color: #4a5568;
+  font-weight: 500;
+  text-align: left;
+}
+
+.info-value-eval {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #667eea;
+  flex-shrink: 0;
+}
+
+/* Caja de Instrucciones del Modal */
+.instructions-box-eval {
+  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+  border: 2px solid #c7d2fe;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.instructions-title-eval {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #4c1d95;
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.instructions-title-eval mat-icon {
+  font-size: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+  color: #4c1d95;
+}
+
+.instructions-list-eval {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.instructions-list-eval li {
+  font-size: 0.925rem;
+  color: #5b21b6;
+  margin-bottom: 0.625rem;
+  line-height: 1.5;
+  padding-left: 0.5rem;
+}
+
+.instructions-list-eval li:last-child {
+  margin-bottom: 0;
+}
+
+/* Botón de Inicio del Modal */
+.btn-start-eval {
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 1rem 2rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.35);
+  letter-spacing: 0.3px;
+}
+
+.btn-start-eval:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(102, 126, 234, 0.5);
+}
+
+.btn-start-eval:active {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-start-eval mat-icon {
+  font-size: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+  transition: transform 0.3s ease;
+}
+
+.btn-start-eval:hover mat-icon {
+  transform: translateX(4px);
+}
+
+/* Scrollbar personalizada del modal de evaluación */
+.modal-body-evaluation::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-body-evaluation::-webkit-scrollbar-track {
+  background: #f1f3f5;
+  border-radius: 10px;
+}
+
+.modal-body-evaluation::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
+  border: 2px solid #f1f3f5;
+}
+
+.modal-body-evaluation::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #5568d3 0%, #6a3f8f 100%);
+}
+
+/* Responsive para tablets */
+@media (max-width: 768px) {
+  .modal-overlay-evaluation {
+    padding: 15px;
+  }
+
+  .modal-dialog-evaluation {
+    max-width: 100%;
+    border-radius: 20px;
+  }
+
+  .modal-body-evaluation {
+    padding: 2rem 1.75rem 1.75rem 1.75rem;
+  }
+
+  .title-eval {
+    font-size: 1.625rem;
+  }
+
+  .subtitle-eval {
+    font-size: 0.925rem;
+  }
+
+  .info-section-eval {
+    grid-template-columns: 1fr;
+    gap: 0.875rem;
+  }
+}
+
+/* Responsive para móviles */
+@media (max-width: 576px) {
+  .modal-dialog-evaluation {
+    border-radius: 16px;
+    max-height: 95vh;
+  }
+
+  .modal-body-evaluation {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .icon-container-eval {
+    width: 72px;
+    height: 72px;
+    margin-bottom: 1.5rem;
+  }
+
+  .icon-large-eval {
+    font-size: 40px !important;
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .title-eval {
+    font-size: 1.5rem;
+  }
+
+  .subtitle-eval {
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .info-card-eval {
+    padding: 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .info-left-eval {
+    width: 100%;
+  }
+
+  .info-value-eval {
+    align-self: flex-end;
+  }
+
+  .instructions-box-eval {
+    padding: 1.25rem;
+  }
+
+  .instructions-list-eval li {
+    font-size: 0.875rem;
+  }
+
+  .btn-start-eval {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+
+.btn-start-eval:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #999;
+  pointer-events: none;
+}
+
+.btn-start-eval:disabled:hover {
+  background-color: #999;
+  transform: none;
+  box-shadow: none;
 }

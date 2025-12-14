@@ -24,6 +24,9 @@ export class ServicioCursos {
     this.inicializarDatos();
   }
 
+  /**
+   * Inicializa los datos de cursos en el almacenamiento local si no existen
+   */
   private inicializarDatos(): void {
     if (!localStorage.getItem(this.claveCursos)) {
       const cursosIniciales: Curso[] = [
@@ -56,22 +59,35 @@ export class ServicioCursos {
     }
   }
 
+  /**
+   * Obtiene todos los cursos almacenados
+   * @returns la lista de cursos
+   */
   obtenerCursos(): Curso[] {
     const cursosAlmacenamiento = localStorage.getItem(this.claveCursos);
     if (!cursosAlmacenamiento) return [];
     
     const cursos = JSON.parse(cursosAlmacenamiento);
+    if (!Array.isArray(cursos)) return [];
+    
     return cursos.map((curso: any) => ({
       ...curso,
       fechaCreacion: new Date(curso.fechaCreacion),
       fechaActualizacion: new Date(curso.fechaActualizacion),
-      archivos: curso.archivos.map((archivo: any) => ({
-        ...archivo,
-        fechaSubida: new Date(archivo.fechaSubida)
-      }))
+      archivos: Array.isArray(curso.archivos)
+      ? curso.archivos.map((archivo: any) => ({
+          ...archivo,
+          fechaSubida: new Date(archivo.fechaSubida)
+        }))
+      : []
     }));
   }
 
+
+ /**
+  * Guarda la lista de cursos en el almacenamiento local
+  * @param cursos lista de cursos a guardar
+  */
   private guardarCursos(cursos: Curso[]): void {
     try {
       localStorage.setItem(this.claveCursos, JSON.stringify(cursos));
@@ -81,6 +97,11 @@ export class ServicioCursos {
     }
   }
 
+
+  /**
+   * Agrega un nuevo curso
+   * @param curso curso a agregar
+   */
   agregarCurso(curso: Curso): void {
     const cursos = this.obtenerCursos();
     curso.id = this.generarIdUnico(cursos);
@@ -90,6 +111,10 @@ export class ServicioCursos {
     this.guardarCursos(cursos);
   }
 
+  /**
+   * Actualiza un curso existente
+   * @param cursoActualizado 
+   */
   actualizarCurso(cursoActualizado: Curso): void {
     const cursos = this.obtenerCursos();
     const indice = cursos.findIndex(c => c.id === cursoActualizado.id);
@@ -100,19 +125,41 @@ export class ServicioCursos {
     }
   }
 
+
+  /**
+   * Elimina un curso por su ID
+   */
   eliminarCurso(id: number): void {
     const cursos = this.obtenerCursos().filter(c => c.id !== id);
     this.guardarCursos(cursos);
   }
 
+
+  /**
+   * Obtiene los cursos asociados a un instructor específico
+   * @param emailInstructor email del instructor
+   * @returns lista de cursos del instructor
+   */
   obtenerCursosPorInstructor(emailInstructor: string): Curso[] {
     return this.obtenerCursos().filter(curso => curso.instructor === emailInstructor);
   }
 
+
+  /**
+   * Obtiene un curso por su ID
+   * @param id ID del curso
+   * @returns curso encontrado o undefined
+   */
   obtenerCursoPorId(id: number): Curso | undefined {
     return this.obtenerCursos().find(curso => curso.id === id);
   }
 
+
+  /**
+   * Agrega un archivo a un curso específico
+   * @param idCurso ID del curso al que se agregará el archivo
+   * @param nuevoArchivo archivo a agregar
+   */
   agregarArchivoACurso(idCurso: number, nuevoArchivo: Archivo): void {
     const cursos = this.obtenerCursos();
     const curso = cursos.find(c => c.id === idCurso);
@@ -125,6 +172,12 @@ export class ServicioCursos {
     }
   }
 
+
+  /**
+   * Actualiza un archivo en un curso específico
+   * @param idCurso   ID del curso
+   * @param archivoActualizada  archivo actualizado
+   */
   actualizarArchivoEnCurso(idCurso: number, archivoActualizada: Archivo): void {
     const cursos = this.obtenerCursos();
     const curso = cursos.find(c => c.id === idCurso);
@@ -138,6 +191,12 @@ export class ServicioCursos {
     }
   }
 
+
+  /**
+   * Elimina un archivo de un curso específico
+   * @param idCurso ID del curso
+   * @param idArchivo ID del archivo a eliminar
+   */
   eliminarArchivoDeCurso(idCurso: number, idArchivo: number): void {
     const cursos = this.obtenerCursos();
     const curso = cursos.find(c => c.id === idCurso);
@@ -149,6 +208,12 @@ export class ServicioCursos {
   }
 
   // Métodos para gestión de cursos desde el dashboard
+
+  /**
+   * Prepara un curso para edición
+   * @param curso curso a editar
+   * @returns curso listo para edición
+   */
   prepararEdicionCurso(curso: Curso): Curso {
     const cursoEditando = { ...curso };
     if (!cursoEditando.nivel) cursoEditando.nivel = 'Principiante';
@@ -156,6 +221,12 @@ export class ServicioCursos {
     return cursoEditando;
   }
 
+
+  /**
+   * Valida un curso antes de guardarlo
+   * @param curso curso a validar
+   * @returns objeto con la validación y mensaje
+   */
   validarCurso(curso: Curso): { valido: boolean; mensaje: string } {
     if (!curso.titulo || !curso.titulo.trim()) {
       return { valido: false, mensaje: 'Por favor, ingresa un título para el curso.' };
@@ -166,10 +237,21 @@ export class ServicioCursos {
     return { valido: true, mensaje: '' };
   }
 
+  /**
+   * Genera un ID único para un nuevo curso
+   * @param cursos lista de cursos existentes
+   * @returns ID único para el nuevo curso
+   */
   private generarIdUnico(cursos: Curso[]): number {
     return cursos.length > 0 ? Math.max(...cursos.map(c => c.id)) + 1 : 1;
   }
 
+
+  /**
+   * Genera un ID único para un nuevo archivo dentro de un curso
+   * @param archivos  lista de archivos existentes en el curso
+   * @returns ID único para el nuevo archivo
+   */
   private generarIdArchivoUnico(archivos: Archivo[]): number {
     return archivos.length > 0 ? Math.max(...archivos.map(d => d.id)) + 1 : 1;
   }

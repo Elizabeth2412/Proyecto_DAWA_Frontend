@@ -11,11 +11,14 @@ import { Usuario } from '../servicios/servicio-usuarios';
 import { ServicioUsuarios } from '../servicios/servicio-usuarios';
 import { ServicioCursos } from '../servicios/servicio-cursos';
 import { Curso } from '../servicios/servicio-cursos';
+import { MatIcon } from "@angular/material/icon";
+import { ServiceEvaluacion } from '../servicios/service-evaluacion';
+import { Evaluation } from '../evaluation/evaluation';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, CrudArchivos, ListaUsuarios, CrearCurso],
+  imports: [CommonModule, FormsModule, CrudArchivos, ListaUsuarios, CrearCurso, MatIcon, Evaluation],
   templateUrl: './admin-dashboard.html',
   styleUrls: ['./admin-dashboard.css']
 })
@@ -25,6 +28,7 @@ export class AdminDashboard implements OnInit {
   vistaActual: string = 'inicio';
   totalUsuarios: number = 0;
   totalCursos: number = 0;
+  totalEvaluaciones: number = 0;
   cursoEditando: Curso | null = null;
   mostrarModalCurso: boolean = false;
 
@@ -32,22 +36,55 @@ export class AdminDashboard implements OnInit {
   @ViewChild(CrearCurso) crearCursoComponent!: CrearCurso;
 
   constructor(
-    private autorizacionService: ServicioAutorizacion,
     private usuariologueado: ServicioAutorizacion,
     private servicioArchivos: ServicioArchivos,
     private servicioUsuarios: ServicioUsuarios,
     private servicioCursos: ServicioCursos, 
-    private router: Router
+    private servicioEvaluaciones: ServiceEvaluacion
   ) {}
 
-  // Método para manejar cuando se edita un curso
+
+  cargarTotalEvaluaciones(): void {
+    try {
+      const data = localStorage.getItem('evaluaciones');
+      if (data) {
+        const evaluaciones = JSON.parse(data);
+        this.totalEvaluaciones = evaluaciones.length;
+      } else {
+        this.totalEvaluaciones = 0;
+      }
+    } catch (error) {
+      console.error('Error cargando evaluaciones:', error);
+      this.totalEvaluaciones = 0;
+    }
+  }
+
+  /**
+   * Inicialización del componente
+  */
+  ngOnInit(): void {
+    this.usuarioActual = this.usuariologueado.obtenerUsuarioActual();
+    this.cargarArchivos();
+    this.totalUsuarios = this.servicioUsuarios.obtenerTotalUsuarios();
+    this.totalCursos = this.servicioCursos.obtenerCursos().length;
+    this.cargarTotalEvaluaciones();
+  }
+
+
+  /**
+   * Método para manejar cuando se edita un curso
+   * @param curso El curso que se va a editar
+  */
   onCursoEditado(curso: Curso): void {
     // Usar el servicio para preparar el curso para edición
     this.cursoEditando = this.servicioCursos.prepararEdicionCurso(curso);
     this.mostrarModalCurso = true;
   }
 
-  // Método para manejar cuando se guarda un curso (nuevo o editado)
+  /**
+   * Método para manejar cuando se guarda un curso (nuevo o editado)
+   * @param curso El curso que ha sido guardado
+  */
   onCursoGuardado(curso: Curso): void {
     this.cursoEditando = null;
     this.mostrarModalCurso = false;
@@ -58,7 +95,9 @@ export class AdminDashboard implements OnInit {
     this.recargarTablaCursos();
   }
 
-  // Método para guardar la edición del curso
+  /**
+   * Método para guardar la edición del curso
+  */
   guardarEdicionCurso(): void {
     if (!this.cursoEditando) return;
 
@@ -86,7 +125,9 @@ export class AdminDashboard implements OnInit {
     this.recargarTablaCursos();
   }
 
-  // Método para recargar la tabla de cursos
+  /**
+   * Método para recargar la tabla de cursos
+  */
   recargarTablaCursos(): void {
     // Si estamos en la vista de cursos, recargar la tabla
     if (this.vistaActual === 'cursos' && this.crearCursoComponent) {
@@ -94,31 +135,42 @@ export class AdminDashboard implements OnInit {
     }
   }
 
-  // Método para cerrar el modal
+  /**
+   * Método para cerrar el modal
+  */
   cerrarModal(): void {
     this.mostrarModalCurso = false;
     this.cursoEditando = null;
   }
 
+  /**
+   * Método para cambiar la vista del dashboard
+   * @param vista 
+   */
   cambiarVista(vista: string): void {
     if (vista === 'cursos') {
       CrearCurso.modoGlobal = 'tabla';
     } else {
       CrearCurso.modoGlobal = 'formulario';
     }
+
+    if (vista === 'evaluacion') {
+      Evaluation.modoGlobal = 'tabla';
+    }
     
     this.vistaActual = vista;
   }
 
-  ngOnInit(): void {
-    this.usuarioActual = this.usuariologueado.obtenerUsuarioActual();
-    this.cargarArchivos();
 
-    this.totalUsuarios = this.servicioUsuarios.obtenerTotalUsuarios();
-    this.totalCursos = this.servicioCursos.obtenerCursos().length;
-  }
-
+  /**
+   * Método para cargar los archivos desde el servicio
+   */
   cargarArchivos(): void {
     this.archivos = this.servicioArchivos.obtenerArchivos();
   }
+
+  volverInicio() {
+    this.vistaActual = 'inicio';
+  }
+
 }

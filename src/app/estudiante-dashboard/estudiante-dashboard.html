@@ -87,9 +87,8 @@
                 <!-- Checkbox de completado -->
                 <label class="checkbox-completada">
                   <input type="checkbox" 
-[checked]="archivo.estado === 'Disponible'"
-(change)="toggleEstadoArchivo(archivo, curso)"
-                         >
+                    [checked]="archivo.estado === 'Disponible'"
+                    (change)="toggleEstadoArchivo(archivo, curso)">
                   Completada
                 </label>
 

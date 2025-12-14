@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { ServicioArchivos, Archivo } from '../servicios/servicio-archivos';
 import { DialogoArchivoComponent } from '../dialogo-archivo/dialogo-archivo';
 import { ServicioCursos } from '../servicios/servicio-cursos';
+import { MatIcon } from "@angular/material/icon";
 
 @Component({
   selector: 'app-crud-archivos',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogoArchivoComponent],
+  imports: [CommonModule, FormsModule, DialogoArchivoComponent, MatIcon],
   templateUrl: './crud-archivos.html',
   styleUrls: ['./crud-archivos.css']
 })
@@ -30,6 +31,10 @@ export class CrudArchivos implements OnInit {
     this.cargarArchivos();
   }
 
+
+  /**
+   * Método para cargar los archivos desde el servicio
+  */
   cargarArchivos(): void {
     // Obtener todos los cursos para sincronizar archivos
     const cursos = this.servicioCursos.obtenerCursos();
@@ -44,6 +49,10 @@ export class CrudArchivos implements OnInit {
     console.log('Archivos cargados:', this.archivos.length);
   }
 
+
+  /**
+   * Método para filtrar los archivos según el término de búsqueda y el estado seleccionado
+  */
   filtrarArchivos(): void {
     this.archivosFiltrados = this.archivos.filter(archivo => {
       const coincideBusqueda = !this.terminoBusqueda || 
@@ -56,6 +65,10 @@ export class CrudArchivos implements OnInit {
     });
   }
 
+
+  /**
+   * Métodos para abrir y cerrar el diálogo de archivo
+  */
   abrirDialogoNuevo(): void {
     this.archivoSeleccionado = null;
     this.mostrarDialogo = true;
@@ -73,6 +86,11 @@ export class CrudArchivos implements OnInit {
     this.cargarArchivos();
   }
 
+  /**
+   * Método para eliminar un archivo completamente de todos los cursos
+   * @param id 
+  */
+
   eliminarArchivo(id: number): void {
     if (confirm('¿Estás seguro de que deseas eliminar este archivo? Esta acción eliminará el archivo de todos los cursos donde esté asignado.')) {
       // Usar el método completo que elimina tanto del listado como de los cursos
@@ -86,10 +104,18 @@ export class CrudArchivos implements OnInit {
     }
   }
 
+
+  /**
+   * Método para obtener el tamaño legible de un archivo
+  */
   obtenerTamanoLegible(bytes: number): string {
     return this.servicioArchivos.obtenerTamanoLegible(bytes);
   }
 
+
+  /**
+   * Getters para estadísticas de archivos
+  */
   get archivosDisponible(): number {
     return this.archivos.filter(a => a.estado === 'Disponible').length;
   }
@@ -98,4 +124,6 @@ export class CrudArchivos implements OnInit {
     const totalBytes = this.archivos.reduce((sum, archivo) => sum + archivo.tamano, 0);
     return this.obtenerTamanoLegible(totalBytes);
   }
+
+  
 }

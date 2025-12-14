@@ -55,20 +55,15 @@ export class Header implements OnInit {
   }
 
   manejarSesion(): void {
-    //if (this.usuarioLogueado) {
-    //  this.servicioAutorizacion.cerrarSesion();
-    //  this.router.navigate(['/login']);
-    //} else {
-    //  this.router.navigate(['/login']);
-    //}
-    const confirmacion = confirm('¿Estás seguro de que deseas cerrar sesión?');
+    if (this.usuarioLogueado) {
+      const confirmacion = confirm('¿Estás seguro de que deseas cerrar sesión?');
       if (confirmacion) {
         this.servicioAutorizacion.cerrarSesion();
         this.router.navigate(['/login']);
-      } else {
-      // Ir al login
-      this.router.navigate(['/login']);
       }
+    } else {
+      this.router.navigate(['/login']);
+    }
   }
 
   redireccionarInstructorCurso(){
@@ -77,6 +72,14 @@ export class Header implements OnInit {
 
   redireccionarEstudianteCurso(){
     this.router.navigate(['/estudiante']);
+  }
+
+  verificarAcceso(event: Event): void {
+    if (!this.usuarioLogueado) {
+      event.preventDefault();
+      alert('Debes iniciar sesión para acceder a esta sección.');
+      this.router.navigate(['/login']);
+    }
   }
 
 }
