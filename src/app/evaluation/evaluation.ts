@@ -1,13 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-
-
-interface Question {
-  id: number;
-  text: string;
-  options: string[];
-}
+import { FormsModule } from '@angular/forms';
+import { MatIcon } from '@angular/material/icon';
+import { ServiceEvaluacion, Question, Evaluacion } from '../servicios/service-evaluacion';
+import { ServicioAutorizacion } from '../autorizacion.service';
 
 interface VisualizationEvaluation {
   title: string;
@@ -19,21 +16,36 @@ interface VisualizationEvaluation {
 @Component({
   selector: 'app-evaluation',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule, MatIcon],
   templateUrl: './evaluation.html',
   styleUrl: './evaluation.css',
 })
-
-
 export class Evaluation {
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private serviceEvaluacion: ServiceEvaluacion,
+    private servicioAuth: ServicioAutorizacion
+  ) { }
+
+  static modoGlobal: 'formulario' | 'tabla' = 'tabla';
 
   isStarted = false;
   mostrarModalInicio = false;
   currentQuestion = 0;
-  selectedAnswer : number | null = null;
+  selectedAnswer: number | null = null;
   answers: { [key: number]: number } = {};
+  esEstudiante: boolean = false;
+
+  @Input() modo: 'tabla' | 'evaluacion' | 'formulario' = 'tabla';
+  terminoBusqueda: string = '';
+  filtroEstado: string = '';
+  evaluacionesFiltradas: Evaluacion[] = [];
+  evaluacionSeleccionada: Evaluacion | null = null;
+  modoFormulario: 'crear' | 'editar' = 'crear';
+
+  evaluaciones: Evaluacion[] = [];
+  mostrarDialogoFormulario: boolean = false;
 
   evaluationData: VisualizationEvaluation = {
     title: 'Evaluacion del Modulo 1',
@@ -153,44 +165,94 @@ export class Evaluation {
     ]
   };
 
+  ngOnInit(): void {
+    this.modo = Evaluation.modoGlobal;
+
+    const usuario = this.servicioAuth.obtenerUsuarioActual();
+    this.esEstudiante = !!(usuario && usuario.tipo === 'estudiante');
+
+    if (this.modo === 'tabla') {
+      this.cargarEvaluaciones();
+    }
+  }
+
+
+  /**
+   * Abre el modal de inicio de evaluación.
+   */
   abrirModal(): void {
     this.mostrarModalInicio = true;
-    document.body.style.overflow = 'hidden'; 
+    document.body.style.overflow = 'hidden';
   }
 
+
+  /**
+   * Cierra el modal de inicio de evaluación.
+   */
   cerrarModal(): void {
     this.mostrarModalInicio = false;
-    document.body.style.overflow = 'auto'; 
-  }
-
-  startEvaluation() {
-    this.mostrarModalInicio = false;
-    this.isStarted = true;
     document.body.style.overflow = 'auto';
   }
 
+
+  /**
+   * Inicia la evaluación solo si el usuario es estudiante y cierra el modal de inicio.
+   */
+  startEvaluation() {
+    if (this.esEstudiante) {
+      this.mostrarModalInicio = false;
+      this.isStarted = true;
+      document.body.style.overflow = 'auto';
+      this.modo = 'evaluacion';
+    }else{
+      alert('Solo los estudiantes pueden iniciar la evaluación.');
+    }
+  }
+
+
+  /**
+   * Selecciona una respuesta para la pregunta actual.
+   * @param optionIndex  Índice de la opción seleccionada.
+   */
   selectAnswer(optionIndex: number): void {
     this.selectedAnswer = optionIndex;
     this.answers[this.currentQuestion] = optionIndex;
   }
 
+  /**
+   * Navega a una pregunta específica.
+   * @param index  Índice de la pregunta a la que se desea navegar.
+   */
   goToQuestion(index: number): void {
     this.currentQuestion = index;
     this.selectedAnswer = this.answers[index] !== undefined ? this.answers[index] : null;
-  }    
+  }
 
+
+  /**
+   * Navega a la siguiente pregunta.
+   */
   nextQuestion(): void {
     if (this.currentQuestion < this.evaluationData.totalQuestions - 1) {
       this.goToQuestion(this.currentQuestion + 1);
     }
   }
 
+
+  /**
+   * Navega a la pregunta anterior.
+   */
   previousQuestion(): void {
     if (this.currentQuestion > 0) {
       this.goToQuestion(this.currentQuestion - 1);
     }
   }
 
+  /**
+   * Obtiene el estado de una pregunta (respondida, actual o pendiente).
+   * @param index  Índice de la pregunta.
+   * @returns El estado de la pregunta como una cadena.
+   */
   getQuestionStatus(index: number): string {
     if (this.answers[index] !== undefined) {
       return 'answered';
@@ -201,24 +263,204 @@ export class Evaluation {
     }
   }
 
+  /**
+   * Obtiene el número de preguntas respondidas.
+   * @returns El número de preguntas respondidas.
+   */
   getAnsweredCount(): number {
     return Object.keys(this.answers).length;
   }
 
+
+  /**
+   * Finaliza la evaluación con confirmación del usuario.
+   */
   finishEvaluation(): void {
     const confirmed = confirm(
       `Has contestado ${this.getAnsweredCount()} de ${this.evaluationData.totalQuestions} preguntas.\n¿Deseas finalizar la evaluación?`
     );
     if (confirmed) {
       alert('Evaluación finalizada. ¡Gracias por participar!');
-      console.log('Respuestas:', this.answers);
       this.router.navigate(['/estudiante']);
     }
   }
 
+  /**
+   * Crea un rango de números desde 0 hasta length - 1.
+   * @param length 
+   * @returns Un array de números desde 0 hasta length - 1.
+   */
   createRange(length: number): number[] {
     return Array.from({ length }, (_, i) => i);
   }
 
-}
+  /**
+   * Carga las evaluaciones desde el servicio.
+   */
+  cargarEvaluaciones(): void {
+    this.evaluaciones = this.serviceEvaluacion.cargarEvaluaciones();
+    this.evaluacionesFiltradas = [...this.evaluaciones];
+  }
 
+  /**
+   * Filtra las evaluaciones según el término de búsqueda y el estado seleccionado.
+   */
+  filtrarEvaluaciones(): void {
+    this.evaluacionesFiltradas = this.serviceEvaluacion.filtrarEvaluaciones(
+      this.terminoBusqueda,
+      this.filtroEstado
+    );
+  }
+
+  /**
+   * Abre el diálogo para crear una nueva evaluación.
+   */
+  abrirDialogoNuevo(): void {
+    this.modoFormulario = 'crear';
+    this.evaluacionSeleccionada = {
+      id: 0,
+      titulo: '',
+      modulo: '',
+      totalPreguntas: 0,
+      duracion: '',
+      fechaCreacion: new Date(),
+      estado: 'Activa'
+    };
+    this.mostrarDialogoFormulario = true;
+  }
+
+
+  /**
+   * Crea una nueva evaluación.
+   * @param evaluacion  Evaluación a crear.
+   */
+  crearEvaluacion(evaluacion: Evaluacion): void {
+    this.serviceEvaluacion.crearEvaluacion(evaluacion);
+    this.filtrarEvaluaciones();
+    this.modo = 'tabla';
+    alert('Evaluación creada exitosamente');
+  }
+
+
+  /**
+   * Muestra los detalles de una evaluación.
+   * @param evaluacion  Evaluación a visualizar.
+   */
+  verEvaluacion(evaluacion: Evaluacion): void {
+    this.evaluacionSeleccionada = evaluacion;
+
+    this.evaluationData = {
+      title: evaluacion.titulo,
+      duration: evaluacion.duracion,
+      totalQuestions: evaluacion.totalPreguntas,
+      questions: evaluacion.preguntas || this.evaluationData.questions
+    };
+
+    this.isStarted = false;
+    this.modo = 'tabla';
+    this.abrirModal();
+  }
+
+  /**
+   * Permite visualizar el formulario de edición de una evaluación.
+   * @param evaluacion Evaluación a editar.
+   */
+  editarEvaluacion(evaluacion: Evaluacion): void {
+    this.modoFormulario = 'editar';
+    this.evaluacionSeleccionada = { ...evaluacion };
+    this.modo = 'tabla';
+    this.mostrarDialogoFormulario = true;
+  }
+
+
+  /**
+   * Actualiza una evaluación ya seleccionada anteriormente.
+   * @param evaluacion  Evaluación a actualizar.
+   */
+  actualizarEvaluacion(evaluacion: Evaluacion): void {
+    this.serviceEvaluacion.actualizarEvaluacion(evaluacion);
+    this.filtrarEvaluaciones();
+    this.modo = 'tabla';
+    alert('Evaluación actualizada exitosamente');
+  }
+
+
+  /**
+   * Elimina una evaluación pidiendo primero la confirmación del usuario.
+   * @param id  ID de la evaluación a eliminar.
+   */
+  eliminarEvaluacion(id: number): void {
+    const confirmado = confirm('¿Estás seguro de eliminar esta evaluación?\n\nEsta acción no se puede deshacer.');
+
+    if (confirmado) {
+      const exito = this.serviceEvaluacion.eliminarEvaluacion(id);
+      if (exito) {
+        this.filtrarEvaluaciones();
+        alert('Evaluación eliminada exitosamente');
+      }
+    }
+  }
+
+  /**
+   * Guarda el formulario de creación o edición de evaluación.
+   */
+  guardarFormulario(): void {
+    if (!this.evaluacionSeleccionada) {
+      console.error('No hay evaluación seleccionada');
+      return;
+    }
+
+    // Validación
+    if (!this.evaluacionSeleccionada.titulo.trim()) {
+      alert('El título es obligatorio');
+      return;
+    }
+
+    if (!this.evaluacionSeleccionada.modulo) {
+      alert('El módulo es obligatorio');
+      return;
+    }
+
+    if (!this.evaluacionSeleccionada.duracion.trim()) {
+      alert('La duración es obligatoria');
+      return;
+    }
+
+    if (this.evaluacionSeleccionada.totalPreguntas <= 0) {
+      alert('El número de preguntas debe ser mayor a 0');
+      return;
+    }
+
+    if (this.modoFormulario === 'crear') {
+      this.serviceEvaluacion.crearEvaluacion(this.evaluacionSeleccionada);
+      alert('Evaluación creada exitosamente');
+    } else {
+      this.serviceEvaluacion.actualizarEvaluacion(this.evaluacionSeleccionada);
+      alert('Evaluación actualizada exitosamente');
+    }
+
+    this.evaluaciones = this.serviceEvaluacion.evaluaciones;
+    this.filtrarEvaluaciones();
+    this.cerrarDialogoFormulario();
+  }
+
+  /**
+   * Cierra el diálogo del formulario de evaluación.
+   */
+  cerrarDialogoFormulario(): void {
+    this.mostrarDialogoFormulario = false;
+    this.evaluacionSeleccionada = null;
+  }
+
+  /**
+   * Vuelve a la vista de tabla de evaluaciones.
+   */
+  volverATabla(): void {
+    this.modo = 'tabla';
+    this.isStarted = false;
+    this.currentQuestion = 0;
+    this.selectedAnswer = null;
+    this.answers = {};
+    this.evaluacionSeleccionada = null;
+  }
+}

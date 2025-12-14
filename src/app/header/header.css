@@ -114,6 +114,10 @@
   transform: translateY(0);
 }
 
+.text-verde-custom {
+  color: #4a7c2c !important; 
+}
+
 /* Responsive */
 @media (max-width: 991px) {
   .nav {

@@ -1,5 +1,5 @@
 /* 
-   PALETA PRINCIPAL
+  PALETA PRINCIPAL
  */
 :root {
   --verde-oscuro: #1e7145;
@@ -8,24 +8,293 @@
   --verde-claro2: #6b9d3e;
   --gris-texto: #666;
   --gris-claro: #f8f9fa;
-  --gradiente-verde: linear-gradient(135deg, #4a7c2c 0%, #6b9d3e 100%);
+  --gradiente-verde: linear-gradient(135deg, #1e7145 0%, #21854f 100%);
 }
 
 /* 
-   TITULOS Y ENCABEZADO
+  TITULOS Y ENCABEZADO
  */
 h1.display-5 {
   color: var(--verde-claro);
   text-shadow: 1px 1px 4px rgba(62, 182, 102, 0.6);
+  margin-bottom: 0.5rem;
 }
 
 .text-muted {
   color: #777 !important;
+  font-size: 0.95rem;
 }
 
 /* 
-   BOTÓN PRINCIPAL (Agregar archivo)
+  CONTENEDOR DASHBOARD 
  */
+.dashboard-contenido {
+  /*background: white;*/
+  padding: 1.5rem;
+  border-radius: 12px;
+  /*box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);*/
+}
+
+/* 
+  ACCIONES SUPERIORES
+ */
+.acciones-superiores {
+  gap: 1rem;
+  margin-bottom: 0;
+}
+
+/* 
+  CONTROLES SUPERIORES
+ */
+.controles-tabla {
+  flex: 1;
+  max-width: 600px;
+}
+
+.buscador {
+  min-width: 250px;
+  border-radius: 8px;
+  padding: 10px 16px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.buscador:focus {
+  border-color: var(--verde-medio);
+  box-shadow: 0 0 0 3px rgba(33, 133, 79, 0.1);
+  outline: none;
+}
+
+.form-select {
+  min-width: 180px;
+  border-radius: 8px;
+  padding: 10px 16px;
+  border: 2px solid #e5e7eb;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.form-select:focus {
+  border-color: var(--verde-medio);
+  box-shadow: 0 0 0 3px rgba(33, 133, 79, 0.1);
+  outline: none;
+}
+
+/* 
+  CARD Y TABLA
+ */
+.card {
+  border-radius: 12px;
+  overflow: hidden;
+  border: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 50px;
+}
+
+.card-header {
+  background-color: #5a8c47;
+  padding: 1rem 1.5rem;
+  border-bottom: none;
+}
+
+.card-header h5 {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.card-body {
+  padding: 0;
+}
+
+/* 
+  TABLA
+ */
+.table {
+  margin-bottom: 0;
+  font-size: 0.92rem;
+}
+
+.table thead th {
+  background-color: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  padding: 1rem 0.75rem;
+  border-bottom: 2px solid #dee2e6;
+  white-space: nowrap;
+}
+
+.table tbody td {
+  padding: 1rem 0.75rem;
+  vertical-align: middle;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.table-hover tbody tr {
+  transition: all 0.2s ease;
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(76, 175, 80, 0.06);
+}
+
+/* 
+  COLUMNAS ESPECÍFICAS
+ */
+.nombre-archivo {
+  color: var(--verde-oscuro);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.descripcion {
+  max-width: 280px;
+  white-space: normal;
+  line-height: 1.4;
+  color: #555;
+  font-size: 0.88rem;
+}
+
+/* 
+  BADGES (tipo archivo)
+ */
+.badge-tipo {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  min-width: 60px;
+  text-align: center;
+}
+
+.tipo-pdf {
+  background: #dc3545;
+  color: white;
+}
+
+.tipo-docx {
+  background: #2b579a;
+  color: white;
+}
+
+.tipo-xlsx {
+  background: #217346;
+  color: white;
+}
+
+.tipo-pptx {
+  background: #d24726;
+  color: white;
+}
+
+/* 
+  ESTADO DEL ARCHIVO
+ */
+.badge-estado {
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 6px 14px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  display: inline-block;
+  min-width: 100px;
+  text-align: center;
+}
+
+.estado-disponible {
+  background-color: #1e7145 !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(30, 113, 69, 0.3);
+}
+
+.estado-nodisponible {
+  background-color: #dc3545 !important;
+  color: white !important;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+/* 
+  ACCIONES 
+ */
+.acciones {
+  white-space: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.acciones button {
+  margin: 0;
+  cursor: pointer;
+  position: relative;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+}
+
+/* Tooltip en hover */
+.acciones button:hover::before {
+  content: attr(title);
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 1000;
+  font-weight: 500;
+}
+
+/* Botón Modificar en tabla */
+.acciones .btn-modificar {
+  color: #2b7de9 !important;
+}
+
+.acciones .btn-modificar:hover {
+  background: rgba(43, 125, 233, 0.1);
+  transform: scale(1.15);
+}
+
+.acciones .btn-modificar i {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+/* Botón Eliminar en tabla */
+.acciones .btn-eliminar {
+  color: #dc3545;
+}
+
+.acciones .btn-eliminar:hover {
+  background: rgba(220, 53, 69, 0.1);
+  transform: scale(1.15);
+}
+
+.acciones .btn-eliminar i {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+/* Botón Agregar en tabla */
 .btn-agregar {
   background: linear-gradient(135deg, #1e7145 0%, #21854f 100%);
   border: none;
@@ -37,159 +306,87 @@ h1.display-5 {
 }
 
 .btn-agregar:hover {
-   background: #145c35;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(30, 113, 69, 0.4);
-}
-
-/* 
-   CONTROLES SUPERIORES
- */
-.buscador {
-  border-radius: 8px;
-  padding: 10px;
-  border: 2px solid #e5e7eb;
-  transition: border-color 0.2s ease;
-}
-
-.buscador:focus {
-  border-color: var(--verde-medio);
-  box-shadow: 0 0 6px rgba(33, 133, 79, 0.3);
-}
-
-.form-select {
-  border-radius: 8px;
-  border: 2px solid #e5e7eb;
-}
-
-/* 
-   TABLA
- */
-.card {
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.card-header {
-  background: var(--gradiente-verde);
-}
-
-.table-hover tbody tr:hover {
-  background-color: rgba(76, 175, 80, 0.08);
-}
-
-.nombre-archivo {
-  color: var(--verde-oscuro);
-}
-
-.descripcion {
-  max-width: 300px;
-  white-space: normal;
-}
-
-/* 
-   BADGES (tipo archivo)
- */
-.badge-tipo {
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-/* Estilos personalizados para tipos de archivo */
-.tipo-pdf {
-  background: #8b0000;
-  color: white;
-}
-
-.tipo-docx {
-  background: #185abd;
-  color: white;
-}
-
-.tipo-xlsx {
-  background: #1e7145;
-  color: white;
-}
-
-.tipo-pptx {
-  background: #d24726;
-  color: white;
-}
-
-/* 
-   ESTADO DEL ARCHIVO
- */
-.badge-estado {
-  font-weight: 600;
-  font-size: 0.85rem;
-  padding: 6px 12px;
-  border-radius: 12px;
-}
-
-/* Verde brillante para DISPONIBLE */
-.estado-disponible {
-  background-color: #1e7145 !important;
-  color: white !important;
-  box-shadow: 0 0 6px rgba(30, 113, 69, 0.4);
-}
-
-/* Rojo fuerte para NO DISPONIBLE */
-.estado-nodisponible {
-  background-color: #c0392b !important;
-  color: white !important;
-  box-shadow: 0 0 6px rgba(192, 57, 43, 0.4);
-}
-/* 
-   ACCIONES - Botones
- */
-.btn-modificar {
-  background: linear-gradient(135deg, #1e7145 0%, #21854f 100%);
-  border: none;
-  color: white !important;
-  padding: 6px 14px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 0.25s ease;
-}
-
-.btn-modificar:hover {
   background: #145c35;
   transform: translateY(-2px);
   box-shadow: 0 4px 14px rgba(30, 113, 69, 0.4);
 }
 
-.btn-eliminar {
-  background: #b02a37;
-  color: white;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 6px;
-  transition: all 0.3s ease;
-}
-
-.btn-eliminar:hover {
-  background: #922b31;
-  transform: scale(1.05);
+/* 
+  MENSAJE VACÍO
+ */
+.table tbody tr td[colspan] {
+  padding: 3rem 1rem;
+  font-size: 1rem;
+  color: #999;
 }
 
 /* 
-   RESPONSIVE
+  RESPONSIVE
  */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
   .acciones-superiores {
     flex-direction: column;
-    gap: 1rem;
+    align-items: stretch !important;
   }
 
   .controles-tabla {
-    width: 100%;
+    max-width: 100%;
+    flex-direction: column;
   }
 
-  .buscador {
-    width: 100%;
-  }
-
+  .buscador,
   .form-select {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .table {
+    font-size: 0.85rem;
+  }
+
+  .table thead th,
+  .table tbody td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .descripcion {
+    max-width: 200px;
+    font-size: 0.82rem;
+  }
+
+  .acciones button {
+    width: 34px;
+    height: 34px;
+  }
+
+  .acciones button i {
+    font-size: 0.95rem !important;
+  }
+
+  .badge-tipo,
+  .badge-estado {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
+}
+
+@media (max-width: 576px) {
+  .card-header h5 {
+    font-size: 1rem;
+  }
+
+  h1.display-5 {
+    font-size: 1.75rem;
+  }
+
+  .acciones {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .acciones button {
     width: 100%;
   }
 }

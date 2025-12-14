@@ -29,7 +29,7 @@
 
           <!-- Selección de curso -->
           <div class="seleccion-curso" *ngIf="!modoEdicion">
-            <label for="selector-curso">Seleccionar curso:</label>
+            <label for="selector-curso" style="margin-bottom: 10px;">Seleccionar curso:</label>
 
             <select id="selector-curso" 
                     [ngModel]="cursoSeleccionado?.id" 
@@ -50,7 +50,7 @@
             Editando: <strong>{{ archivoEditando.nombre }}</strong>
           </p>
           
-          <p>Formatos soportados: PDF y PPTX (Máximo 5 MB o 5120 KB)</p>
+          <p style="margin-top: 10px;">Formatos soportados: PDF y PPTX (Máximo 5 MB o 5120 KB)</p>
 
           <div class="zona-subida">
             <input type="file" #inputArchivo (change)="onArchivoSeleccionado($event)" 

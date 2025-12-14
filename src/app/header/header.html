@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm">
   <div class="container-fluid">
-    <a class="navbar-brand d-flex align-items-center" routerLink="/" style="cursor: pointer;">
+    <a class="navbar-brand d-flex align-items-center" routerLink="/pagina-principal" style="cursor: pointer;">
       <img 
         src="assets/AgroPe-Tech_LOGO.png" 
         alt="Logo" 
@@ -23,11 +23,11 @@
 
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav mx-auto">
-        <li class="nav-item">
+        <li class="nav-item"*ngIf="usuarioLogueado && usuarioActual?.tipo === 'administrador'">
           <a 
             class="nav-link px-3" 
             routerLink="/admin-dashboard" 
-            routerLinkActive="active fw-bold text-primary">
+            routerLinkActive="active fw-bold text-verde-custom">
             <i class="bi bi-speedometer2 me-1"></i>Administrador
           </a>
         </li>
@@ -35,23 +35,24 @@
           <a 
             class="nav-link px-3" 
             routerLink="/acerca" 
-            routerLinkActive="active fw-bold text-primary">
+            routerLinkActive="active fw-bold text-verde-custom">
             <i class="bi bi-info-circle-fill me-1"></i>
           </a>
         </li>
         <li class="nav-item">
           <a 
             class="nav-link px-3" 
-            routerLink="/evaluacion" 
-            routerLinkActive="active fw-bold text-primary">
-            <i class="bi bi-journal-text me-1"></i>Evaluacion
+            routerLink="/pagina-principal" 
+            routerLinkActive="active fw-bold text-verde-custom">
+            <i class="bi bi-journal-text me-1"></i>Inicio
           </a>
         </li>
         <li class="nav-item">
           <a 
             class="nav-link px-3" 
-            routerLink="/lista-usuarios" 
-            routerLinkActive="active fw-bold text-primary">
+            routerLink="usuarioLogueado ? '/lista-usuarios' : null"
+            (click)="verificarAcceso($event)" 
+            routerLinkActive="active fw-bold text-verde-custom">
             <i class="bi bi-journal-text me-1"></i>Usuarios
           </a>
         </li>
@@ -59,7 +60,7 @@
           <a 
             class="nav-link px-3" 
             routerLink="/crear-curso" 
-            routerLinkActive="active fw-bold text-primary">
+            routerLinkActive="active fw-bold text-verde-custom">
             <i class="bi bi-envelope-fill me-1"></i>Cursos
           </a>
         </li>-->
@@ -67,23 +68,24 @@
           <a 
             class="nav-link px-3" 
             routerLink="/instructor"
-            routerLinkActive="active fw-bold text-primary">
-            <i class="bi bi-envelope-fill me-1"></i>Instructor
+            routerLinkActive="active fw-bold text-verde-custom">
+            <i class="bi bi-envelope-fill me-1"></i>Instructores
           </a>
         </li>
         <li class="nav-item">
           <a 
-            class="nav-link px-3" 
+            class="nav-link px-3"
             routerLink="/estudiante"
-            routerLinkActive="active fw-bold text-primary">
-            <i class="bi bi-envelope-fill me-1"></i>Estudiante-Cursos
+            (click)="verificarAcceso($event)" 
+            routerLinkActive="active fw-bold text-verde-custom">
+            <i class="bi bi-envelope-fill me-1"></i>Cursos
           </a>
         </li>
         <li class="nav-item">
           <a 
             class="nav-link px-3" 
             routerLink="/comunidad"
-            routerLinkActive="active fw-bold text-primary">
+            routerLinkActive="active fw-bold text-verde-custom">
             <i class="bi bi-envelope-fill me-1"></i>Comunidad
           </a>
         </li>

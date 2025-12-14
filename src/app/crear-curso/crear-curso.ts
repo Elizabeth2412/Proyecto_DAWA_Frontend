@@ -43,6 +43,9 @@ export class CrearCurso {
   displayedColumns: string[] = ['numero', 'titulo', 'nivel', 'duracion', 'instructor', 'acciones'];
   dataSource!: MatTableDataSource<Curso>;
   cursos: Curso[] = [];
+  cursosFiltrados: Curso[] = [];
+  filtroNivel: string = '';
+  terminoBusqueda: string = '';
 
   constructor(
     public router: Router,
