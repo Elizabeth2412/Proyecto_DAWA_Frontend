@@ -45,6 +45,10 @@ export class ComunidadVirtual {
     this.forosFiltrados = [...this.forosList];
   }
 
+  /**
+   * Filtra los foros según el término de búsqueda ingresado por el usuario.
+   * Busca coincidencias tanto en el título como en el contenido del foro.
+   */
   buscarForo(): void {
     const term = this.txtBusqueda.toLowerCase();
     this.forosFiltrados = this.forosList.filter(forum =>
@@ -53,11 +57,18 @@ export class ComunidadVirtual {
     );
   }
 
+  /**
+   * Abre el modal para crear un nuevo foro y resetea el formulario
+   */
   view_newForo(): void {
     this.resetForm();
     this.isNewForoOpen = true;
   }
 
+  /**
+   * Abre el modal de edición y carga los datos del foro seleccionado en el formulario
+   * @param forum Foro que se desea editar
+   */
   view_editForo(forum: Foro): void {
     this.foroSelect = forum;
     this.nuevoForo = {
@@ -68,11 +79,18 @@ export class ComunidadVirtual {
     this.isEditForoOpen = true;
   }
 
+  /**
+   * Abre el modal de confirmación para eliminar un foro
+   * @param forum Foro que se desea eliminar
+   */
   view_deleteForo(forum: Foro): void {
     this.foroSelect = forum;
     this.isDeleteForoOpen = true;
   }
 
+  /**
+   * Cierra todos los modales abiertos, limpia el foro seleccionado y resetea el formulario
+   */
   cerrarVentanas(): void {
     this.isNewForoOpen = false;
     this.isEditForoOpen = false;
@@ -81,6 +99,9 @@ export class ComunidadVirtual {
     this.resetForm();
   }
 
+  /**
+   * Limpia todos los campos del formulario de nuevo foro
+   */
   resetForm(): void {
     this.nuevoForo = {
       titulo: '',
@@ -89,6 +110,10 @@ export class ComunidadVirtual {
     };
   }
 
+  /**
+   * Maneja la carga de una imagen seleccionada por el usuario y la convierte a base64
+   * @param event Evento del input file que contiene el archivo seleccionado
+   */
   onFileChange(event: any): void {
     const file = event.target.files[0];
     if (file) {
@@ -100,6 +125,10 @@ export class ComunidadVirtual {
     }
   }
 
+  /**
+   * Crea un nuevo foro con los datos del formulario y lo agrega al inicio de la lista.
+   * Valida que los campos requeridos no estén vacíos antes de crear.
+   */
   createForum(): void {
     if (!this.nuevoForo.titulo || !this.nuevoForo.contenido) {
       return;
@@ -121,7 +150,7 @@ export class ComunidadVirtual {
   }
 
   /**
-   * 
+   * Edita el foro, en sus campos titulo y contenido
    * @returns 
    */
   editForum(): void {
@@ -179,7 +208,9 @@ export class ComunidadVirtual {
     return new Intl.DateTimeFormat('es-ES', options).format(date);
   }
 
-  // Foros de prueba
+  /**
+   * Lista principal de todos los foros disponibles en la plataforma
+   */
   forosList: Foro[] = [
     {
       id: 1,
