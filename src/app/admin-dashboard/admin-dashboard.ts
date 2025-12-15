@@ -1,7 +1,7 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router } from '@angular/router'; 
 import { ServicioAutorizacion } from '../autorizacion.service';
 import { ServicioArchivos, Archivo } from '../servicios/servicio-archivos';
 import { CrudArchivos } from '../crud-archivos/crud-archivos';
@@ -40,9 +40,11 @@ export class AdminDashboard implements OnInit {
     private servicioArchivos: ServicioArchivos,
     private servicioUsuarios: ServicioUsuarios,
     private servicioCursos: ServicioCursos, 
-    private servicioEvaluaciones: ServiceEvaluacion
+    private servicioEvaluaciones: ServiceEvaluacion,
+    private router: Router,
+        private cdr: ChangeDetectorRef
+    
   ) {}
-
 
   cargarTotalEvaluaciones(): void {
     try {
@@ -59,56 +61,48 @@ export class AdminDashboard implements OnInit {
     }
   }
 
-  /**
-   * Inicialización del componente
-  */
   ngOnInit(): void {
     this.usuarioActual = this.usuariologueado.obtenerUsuarioActual();
+    
+    // Verificar permisos
+    if (!this.usuarioActual || this.usuarioActual.tipo !== 'administrador') {
+      this.router.navigate(['/login']);
+      return;
+    }
+    
     this.cargarArchivos();
     this.totalUsuarios = this.servicioUsuarios.obtenerTotalUsuarios();
     this.totalCursos = this.servicioCursos.obtenerCursos().length;
     this.cargarTotalEvaluaciones();
   }
+onCursoEditado(curso: Curso): void {
+  console.log('Curso recibido para editar:', curso);
+  // Usar el servicio para preparar el curso para edición
+  this.cursoEditando = this.servicioCursos.prepararEdicionCurso(curso);
+  this.mostrarModalCurso = true;
+  
+  // Forzar detección de cambios
+  setTimeout(() => {
+    this.cdr?.detectChanges();
+  }, 0);
+}
 
-
-  /**
-   * Método para manejar cuando se edita un curso
-   * @param curso El curso que se va a editar
-  */
-  onCursoEditado(curso: Curso): void {
-    // Usar el servicio para preparar el curso para edición
-    this.cursoEditando = this.servicioCursos.prepararEdicionCurso(curso);
-    this.mostrarModalCurso = true;
-  }
-
-  /**
-   * Método para manejar cuando se guarda un curso (nuevo o editado)
-   * @param curso El curso que ha sido guardado
-  */
   onCursoGuardado(curso: Curso): void {
     this.cursoEditando = null;
     this.mostrarModalCurso = false;
-    // Recargar estadísticas
     this.totalCursos = this.servicioCursos.obtenerCursos().length;
-    
-    // Forzar la recarga de la tabla
     this.recargarTablaCursos();
   }
 
-  /**
-   * Método para guardar la edición del curso
-  */
   guardarEdicionCurso(): void {
     if (!this.cursoEditando) return;
 
-    // Validar el curso
     const validacion = this.servicioCursos.validarCurso(this.cursoEditando);
     if (!validacion.valido) {
       alert(validacion.mensaje);
       return;
     }
 
-    // Actualizar el curso
     const cursoActualizado: Curso = {
       ...this.cursoEditando,
       fechaActualizacion: new Date()
@@ -118,53 +112,35 @@ export class AdminDashboard implements OnInit {
     this.cerrarModal();
     alert('Curso actualizado exitosamente.');
     
-    // Recargar estadísticas
     this.totalCursos = this.servicioCursos.obtenerCursos().length;
-    
-    // Forzar la recarga de la tabla
     this.recargarTablaCursos();
   }
 
-  /**
-   * Método para recargar la tabla de cursos
-  */
   recargarTablaCursos(): void {
-    // Si estamos en la vista de cursos, recargar la tabla
     if (this.vistaActual === 'cursos' && this.crearCursoComponent) {
       this.crearCursoComponent.cargarCursos();
     }
   }
 
-  /**
-   * Método para cerrar el modal
-  */
   cerrarModal(): void {
     this.mostrarModalCurso = false;
     this.cursoEditando = null;
   }
 
-  /**
-   * Método para cambiar la vista del dashboard
-   * @param vista 
-   */
+  // MODIFICAR ESTE MÉTODO COMPLETAMENTE
   cambiarVista(vista: string): void {
     if (vista === 'cursos') {
-      CrearCurso.modoGlobal = 'tabla';
-    } else {
-      CrearCurso.modoGlobal = 'formulario';
-    }
-
-    if (vista === 'evaluacion') {
+      // Navegar a la ruta de tabla de cursos
+      this.router.navigate(['/cursos']);
+      return; // IMPORTANTE: salir del método aquí
+    } else if (vista === 'evaluacion') {
       Evaluation.modoGlobal = 'tabla';
+      this.vistaActual = vista;
+    } else {
+      this.vistaActual = vista;
     }
-    
-    this.vistaActual = vista;
   }
 
-
-  /**
-   * Método para cargar los archivos desde el servicio
-   */
   cargarArchivos(): void {
     this.archivos = this.servicioArchivos.obtenerArchivos();
   }
@@ -172,5 +148,4 @@ export class AdminDashboard implements OnInit {
   volverInicio() {
     this.vistaActual = 'inicio';
   }
-
 }

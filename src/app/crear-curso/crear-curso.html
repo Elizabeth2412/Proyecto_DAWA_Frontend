@@ -1,14 +1,45 @@
-<!-- Buscador -->
-<div class="mb-3">
-  <mat-form-field appearance="outline" class="w-100">
-    <mat-label>🔍 Buscar curso</mat-label>
-    <input matInput (keyup)="applyFilter($event)" 
-           placeholder="Buscar por título, nivel o instructor...">
-  </mat-form-field>
-</div>
-
 <!-- ========== VISTA TABLA (PARA ADMIN) ========== -->
 <div *ngIf="modo === 'tabla'" style="padding: 40px;">
+  
+  <!-- Controles de Búsqueda y Filtros -->
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>🔍 Buscar curso</mat-label>
+        <input matInput 
+               [(ngModel)]="terminoBusqueda"
+               (input)="aplicarFiltros()" 
+               placeholder="Buscar por título o instructor...">
+      </mat-form-field>
+    </div>
+    
+    <div class="col-md-4">
+      <select class="form-select form-select-lg" 
+              [(ngModel)]="filtroNivel" 
+              (change)="filtrarPorNivel()">
+        <option value="">Todos los niveles</option>
+        <option value="Principiante">Principiante</option>
+        <option value="Intermedio">Intermedio</option>
+        <option value="Avanzado">Avanzado</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Botones de acción -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <button class="btn btn-success btn-lg" (click)="nuevoCurso()">
+      <i class="bi bi-plus-circle me-2"></i>
+      Nuevo curso
+    </button>
+
+    <button class="btn btn-outline-secondary" 
+            (click)="limpiarFiltros()"
+            *ngIf="terminoBusqueda || filtroNivel">
+      <i class="bi bi-x-circle me-2"></i>
+      Limpiar filtros
+    </button>
+  </div>
+
   <div class="card shadow-sm">
     <div class="card-header tabla-header">
       <h4 class="mb-0">
@@ -20,9 +51,15 @@
     <div class="card-body">
       <!-- Contador -->
       <div class="mb-3">
-        <span class="badge bg-success">
-          Total: {{ dataSource.filteredData.length || 0 }}
-        </span>
+<span class="badge bg-success">
+  Total: {{ dataSource.data.length }} curso(s)
+</span>
+
+<span class="badge bg-info ms-2" *ngIf="terminoBusqueda || filtroNivel">
+  Filtrados: {{ dataSource.data.length }} de {{ cursos.length }}
+</span>
+
+
       </div>
 
       <!-- Tabla -->
@@ -76,14 +113,19 @@
               <div class="acciones">
                 <button class="btn-modificar" 
                         (click)="editarCurso(curso)"
-                        title="Editar">
+                        title="Editar"
+                        *ngIf="puedeEditarEliminar()">
                   <mat-icon>edit</mat-icon>
                 </button>
                 <button class="btn-eliminar" 
                         (click)="eliminarCurso(curso)"
-                        title="Eliminar">
+                        title="Eliminar"
+                        *ngIf="puedeEditarEliminar()">
                   <mat-icon>delete</mat-icon>
                 </button>
+                <span *ngIf="!puedeEditarEliminar()" class="text-muted">
+                  No disponible
+                </span>
               </div>
             </td>
           </ng-container>
@@ -95,7 +137,9 @@
           <tr class="mat-row" *matNoDataRow>
             <td class="mat-cell text-center py-5" colspan="6">
               <i class="bi bi-inbox display-4 text-muted d-block mb-3"></i>
-              <p class="text-muted mb-0">No se encontraron cursos</p>
+              <p class="text-muted mb-0">
+                {{ (terminoBusqueda || filtroNivel) ? 'No se encontraron cursos con los filtros aplicados' : 'No hay cursos disponibles' }}
+              </p>
             </td>
           </tr>
         </table>
@@ -179,5 +223,219 @@
       </div>
 
     </form>
+  </div>
+</div>
+
+<!-- ========== MODAL CREAR NUEVO CURSO ========== -->
+<div *ngIf="mostrarModalCrear" class="modal-overlay" (click)="cerrarModalCrear()">
+  <div class="modal-dialog-curso" (click)="$event.stopPropagation()">
+    
+    <!-- Header del Modal -->
+    <div class="modal-header-curso">
+      <div>
+        <h2 class="modal-title">
+          <i class="bi bi-plus-circle me-2"></i>
+          Crear Nuevo Curso
+        </h2>
+        <p class="modal-subtitle">
+          Completa la información del nuevo curso
+        </p>
+      </div>
+      <button class="btn-close-modal" (click)="cerrarModalCrear()" type="button" title="Cerrar">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Body del Modal -->
+    <div class="modal-body-curso">
+      <form *ngIf="cursoNuevo" #formModalCrear="ngForm">
+        
+        <!-- TÍTULO -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">
+            <i class="bi bi-pencil me-2"></i>Título del Curso *
+          </label>
+          <input 
+            type="text" 
+            class="form-control form-control-lg"
+            [(ngModel)]="cursoNuevo.titulo"
+            name="titulo"
+            placeholder="Ej: Introducción a Angular"
+            required>
+        </div>
+
+        <!-- DESCRIPCIÓN -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">
+            <i class="bi bi-text-paragraph me-2"></i>Descripción *
+          </label>
+          <textarea 
+            class="form-control form-control-lg"
+            [(ngModel)]="cursoNuevo.descripcion"
+            name="descripcion"
+            rows="4"
+            placeholder="Breve descripción del curso"
+            required></textarea>
+        </div>
+
+        <!-- NIVEL -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">
+            <i class="bi bi-bar-chart-steps me-2"></i>Nivel *
+          </label>
+          <select 
+            class="form-select form-select-lg"
+            [(ngModel)]="cursoNuevo.nivel"
+            name="nivel"
+            required>
+            <option value="">Selecciona un nivel</option>
+            <option value="Principiante">Principiante</option>
+            <option value="Intermedio">Intermedio</option>
+            <option value="Avanzado">Avanzado</option>
+          </select>
+        </div>
+
+        <!-- DURACIÓN -->
+        <div class="mb-4">
+          <label class="form-label fw-bold">
+            <i class="bi bi-clock me-2"></i>Duración (horas) *
+          </label>
+          <input 
+            type="number" 
+            class="form-control form-control-lg"
+            [(ngModel)]="cursoNuevo.duracion"
+            name="duracion"
+            placeholder="Ej: 10"
+            min="1"
+            required>
+        </div>
+
+        <!-- BOTONES -->
+        <div class="d-flex gap-3 justify-content-end">
+          <button 
+            type="button" 
+            class="btn btn-secondary btn-lg"
+            (click)="cerrarModalCrear()">
+            <i class="bi bi-x-circle me-2"></i>
+            Cancelar
+          </button>
+          <button 
+            type="button" 
+            class="btn-guardar"
+            (click)="guardarNuevoCursoModal()"
+            [disabled]="formModalCrear.invalid">
+            <i class="bi bi-check-circle me-2"></i>
+            Crear Curso
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODAL EDITAR CURSO ========== -->
+<div *ngIf="mostrarModalEdicion" class="modal-overlay" (click)="cerrarModalEdicion()">
+  <div class="modal-dialog-curso" (click)="$event.stopPropagation()">
+    
+    <!-- Header del Modal -->
+    <div class="modal-header-curso">
+      <div>
+        <h2 class="modal-title">
+          <i class="bi bi-pencil-square me-2"></i>
+          Editar Curso
+        </h2>
+        <p class="modal-subtitle">
+          Modifica la información del curso
+        </p>
+      </div>
+      <button class="btn-close-modal" (click)="cerrarModalEdicion()" type="button" title="Cerrar">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Body del Modal -->
+    <div class="modal-body-curso">
+      <form *ngIf="cursoParaEditar" #formModal="ngForm">
+        
+        <!-- TÍTULO -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">
+            <i class="bi bi-pencil me-2"></i>Título del Curso *
+          </label>
+          <input 
+            type="text" 
+            class="form-control form-control-lg"
+            [(ngModel)]="cursoParaEditar.titulo"
+            name="titulo"
+            placeholder="Ej: Introducción a Angular"
+            required>
+        </div>
+
+        <!-- DESCRIPCIÓN -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">
+            <i class="bi bi-text-paragraph me-2"></i>Descripción *
+          </label>
+          <textarea 
+            class="form-control form-control-lg"
+            [(ngModel)]="cursoParaEditar.descripcion"
+            name="descripcion"
+            rows="4"
+            placeholder="Breve descripción del curso"
+            required></textarea>
+        </div>
+
+        <!-- NIVEL -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">
+            <i class="bi bi-bar-chart-steps me-2"></i>Nivel *
+          </label>
+          <select 
+            class="form-select form-select-lg"
+            [(ngModel)]="cursoParaEditar.nivel"
+            name="nivel"
+            required>
+            <option value="">Selecciona un nivel</option>
+            <option value="Principiante">Principiante</option>
+            <option value="Intermedio">Intermedio</option>
+            <option value="Avanzado">Avanzado</option>
+          </select>
+        </div>
+
+        <!-- DURACIÓN -->
+        <div class="mb-4">
+          <label class="form-label fw-bold">
+            <i class="bi bi-clock me-2"></i>Duración (horas) *
+          </label>
+          <input 
+            type="number" 
+            class="form-control form-control-lg"
+            [(ngModel)]="cursoParaEditar.duracion"
+            name="duracion"
+            placeholder="Ej: 10"
+            min="1"
+            required>
+        </div>
+
+        <!-- BOTONES -->
+        <div class="d-flex gap-3 justify-content-end">
+          <button 
+            type="button" 
+            class="btn btn-secondary btn-lg"
+            (click)="cerrarModalEdicion()">
+            <i class="bi bi-x-circle me-2"></i>
+            Cancelar
+          </button>
+          <button 
+            type="button" 
+            class="btn-guardar"
+            (click)="guardarEdicionModal()"
+            [disabled]="formModal.invalid">
+            <i class="bi bi-check-circle me-2"></i>
+            Guardar Cambios
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>

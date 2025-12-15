@@ -19,17 +19,35 @@ export const routes: Routes = [
   { path: 'register', component: Register },
   { path: 'lista-usuarios', component: ListaUsuarios },
   { path: 'admin-dashboard', component: AdminDashboard },
-  { path: 'instructor', component: InstructorDashboard },
   { path: 'estudiante', component: EstudianteDashboard },
   { path: 'header', component: Header },
   { path: 'footer', component: Footer },
-  { path: 'crear-curso', component: CrearCurso },
+  { 
+    path: 'instructor', 
+    component: InstructorDashboard 
+  },
   { path: 'evaluacion', component: Evaluation },
   { path: 'comunidad', component: ComunidadVirtual },
   { path: 'pagina-principal', component: PaginalPrincipal },
-  { path: 'cursos', component: ListaCursosComponent },
-  { path: 'cursos/nuevo', component: CrearCurso },
-  { path: 'cursos/editar/:id', component: CrearCurso },
-
+   { 
+    path: 'crear-curso', 
+    component: CrearCurso,
+    data: { modo: 'formulario' }
+  },
+  { 
+    path: 'cursos', 
+    component: CrearCurso,
+    data: { modo: 'tabla' }
+  },
+  { 
+    path: 'cursos/nuevo', 
+    component: CrearCurso,
+    data: { modo: 'formulario' }
+  },
+  { 
+    path: 'cursos/editar/:id', 
+    component: CrearCurso,
+    data: { modo: 'formulario' }
+  },
   { path: '**', redirectTo: '/login' },
 ];

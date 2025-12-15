@@ -1,13 +1,15 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router,ActivatedRoute, NavigationEnd   } from '@angular/router';
 import { ServicioAutorizacion } from '../autorizacion.service';
 import { ServicioCursos, Curso } from '../servicios/servicio-cursos';
 import { ServicioArchivos, Archivo } from '../servicios/servicio-archivos';
 import { ServicioAlmacenamientoSession } from '../servicios/servicio-almacenamiento-session'; // .
 import { Usuario } from '../servicios/servicio-usuarios';
 import { CrearCurso } from '../crear-curso/crear-curso';
+import { filter, Subscription } from 'rxjs';
+
 @Component({
   selector: 'app-instructor-dashboard',
   standalone: true,
@@ -19,7 +21,8 @@ export class InstructorDashboard implements OnInit {
   usuarioActual: Usuario | null = null;
   archivoSeleccionado: File | null = null;
   vistaActual: string = 'inicio';
-
+  private routerSub!: Subscription;
+  private routeSub!: Subscription;
   cursos: Curso[] = [];
   cargando: boolean = false;
   cursoEditando: Curso | null = null;
@@ -27,11 +30,14 @@ export class InstructorDashboard implements OnInit {
   modoEdicion: boolean = false;
   cursoSeleccionado: Curso | null = null;
   mostrarModalCurso: boolean = false;
-  nuevoCurso: any = {
+ nuevoCurso: any = {
     titulo: '',
     descripcion: '',
+    nivel: 'Principiante',
+    duracion: 1
   };
   modalCurso: any = null;
+  modoFormularioCurso: 'crear' | 'editar' = 'crear';
 
   private _handleEsc = (e: KeyboardEvent) => {
     if (e.key === 'Escape' || e.key === 'Esc') {
@@ -47,26 +53,37 @@ export class InstructorDashboard implements OnInit {
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
-
-  ngOnInit(): void {
-    this.usuarioActual = this.servicioAutorizacion.obtenerUsuarioActual();
-    //if (!this.usuarioActual || this.usuarioActual.tipo !== 'instructor') {
-    //  this.router.navigate(['/login']);
-    //  return;
-    //}
-    this.cargarCursos();
+ngOnInit(): void {
+  this.usuarioActual = this.servicioAutorizacion.obtenerUsuarioActual();
+  
+  if (!this.usuarioActual || 
+      (this.usuarioActual.tipo !== 'instructor' && this.usuarioActual.tipo !== 'administrador')) {
+    this.router.navigate(['/login']);
+    return;
   }
-  cargarCursos(): void {
-    // CORRECCIÓN: Manejar cuando el usuario es null
-    if (this.usuarioActual && this.usuarioActual.email) {
-      this.cursos = this.servicioCursos.obtenerCursosPorInstructor(this.usuarioActual.email);
+  
+  this.cargarCursos();
+}
+  ngOnDestroy(): void {
+    if (this.routerSub) this.routerSub.unsubscribe();
+    if (this.routeSub) this.routeSub.unsubscribe();
+  }
+  
+cargarCursos(): void {
+  if (this.usuarioActual && this.usuarioActual.email) {
+    // Si es administrador, mostrar todos los cursos
+    if (this.usuarioActual.tipo === 'administrador') {
+      this.cursos = this.servicioCursos.obtenerCursos();
     } else {
-      // Si no hay usuario autenticado, mostrar todos los cursos o cursos de invitado
-      this.cursos = this.servicioCursos
-        .obtenerCursos()
-        .filter((curso) => curso.instructor === 'invitado@gmail.com' || !curso.instructor);
+      // Si es instructor, mostrar solo sus cursos
+      this.cursos = this.servicioCursos.obtenerCursosPorInstructor(this.usuarioActual.email);
     }
+  } else {
+    this.cursos = this.servicioCursos
+      .obtenerCursos()
+      .filter((curso) => curso.instructor === 'invitado@gmail.com' || !curso.instructor);
   }
+}
   async onArchivoSeleccionado(evento: any): Promise<void> {
     const resultado = await this.servicioArchivos.procesarArchivoSeleccionado(evento);
 
@@ -133,35 +150,34 @@ export class InstructorDashboard implements OnInit {
     this.modoEdicion = false;
     this.limpiarInputArchivo();
   }
-
-  abrirModalCrearCurso(): void {
-    this.nuevoCurso = { titulo: '', descripcion: '', nivel: 'Principiante', duracion: 1 };
+abrirModalCrearCurso(): void {
+    this.modoFormularioCurso = 'crear';
+    this.nuevoCurso = { 
+      titulo: '', 
+      descripcion: '', 
+      nivel: 'Principiante', 
+      duracion: 1 
+    };
     this.modalCurso = this.nuevoCurso;
+    this.cursoEditando = null;
+    
     setTimeout(() => {
       this.mostrarModalCurso = true;
-      console.log(
-        'abrirModalCrearCurso: modalCurso=',
-        this.modalCurso,
-        'mostrarModalCurso=',
-        this.mostrarModalCurso
-      );
+      console.log('Modal crear curso abierto');
       try {
         this.cdr.detectChanges();
       } catch (e) {
-        /* safe */
+        console.error('Error en detectChanges:', e);
       }
       try {
         document.body.classList.add('modal-open');
-      } catch (e) {
-        /* safe in SSR */
-      }
+      } catch (e) {}
       try {
         document.addEventListener('keydown', this._handleEsc);
-      } catch (e) {
-        /* safe */
-      }
+      } catch (e) {}
     }, 0);
   }
+
 
   cerrarModalCrearCurso(): void {
     this.mostrarModalCurso = false;
@@ -226,54 +242,87 @@ export class InstructorDashboard implements OnInit {
       this.cursoSeleccionado = null;
     }
   }
-  gestionarCursos(): void {
+ gestionarCursos(): void {
+    // Navegar a la ruta correcta
     this.router.navigate(['/cursos']);
   }
+
 
   volverInicio(): void {
     this.vistaActual = 'inicio';
     CrearCurso.modoGlobal = 'formulario';
   }
-
   irCrearCurso(): void {
-    this.router.navigate(['/crear-curso']);
+    this.router.navigate(['/cursos/nuevo']);
   }
 
   verCurso(curso: Curso): void {
     alert(`Viendo curso: ${curso.titulo}`);
   }
-
-  editarCurso(curso: Curso): void {
-    // Usar el servicio para preparar el curso para edición
+// En instructor-dashboard.ts, modifica el método editarCurso:
+editarCurso(curso: Curso): void {
+  console.log('Editando curso en instructor dashboard:', curso);
+  
+  // Para administradores e instructores, usar el modal local
+  if (this.usuarioActual?.tipo === 'administrador' || this.usuarioActual?.tipo === 'instructor') {
     this.cursoEditando = this.servicioCursos.prepararEdicionCurso(curso);
     this.modalCurso = this.cursoEditando;
 
     setTimeout(() => {
       this.mostrarModalCurso = true;
-      console.log(
-        'editarCurso: modalCurso=',
-        this.modalCurso,
-        'mostrarModalCurso=',
-        this.mostrarModalCurso
-      );
+      console.log('Modal abierto para editar curso:', this.cursoEditando);
       try {
         this.cdr.detectChanges();
       } catch (e) {
-        /* safe */
+        console.error('Error en detectChanges:', e);
       }
       try {
         document.body.classList.add('modal-open');
-      } catch (e) {
-        /* safe in SSR */
-      }
+      } catch (e) {}
       try {
         document.addEventListener('keydown', this._handleEsc);
-      } catch (e) {
-        /* safe */
-      }
+      } catch (e) {}
     }, 0);
   }
+}
+  eliminarCurso(curso: Curso): void {
+    // Permitir a administradores e instructores eliminar cursos
+    if (this.usuarioActual?.tipo !== 'administrador' && this.usuarioActual?.tipo !== 'instructor') {
+      alert('No tienes permisos para eliminar cursos');
+      return;
+    }
 
+    const confirmar = window.confirm(
+      `¿Está seguro de que desea eliminar el curso "${curso.titulo}"?\n\n` +
+        `Esta acción eliminará ${curso.archivos.length} Archivo(s) y no se puede deshacer.`
+    );
+
+    if (!confirmar) return;
+
+    try {
+      curso.archivos.forEach(async (Archivo) => {
+        if (Archivo.archivoId) {
+          try {
+            await this.almacenamientoSession.borrarArchivo(Archivo.archivoId);
+          } catch (error) {
+            console.warn(`No se pudo eliminar el archivo: ${Archivo.archivoId}`, error);
+          }
+        }
+      });
+
+      this.servicioCursos.eliminarCurso(curso.id);
+
+      if (this.cursoSeleccionado && this.cursoSeleccionado.id === curso.id) {
+        this.cursoSeleccionado = null;
+      }
+
+      this.cargarCursos();
+      alert('Curso eliminado exitosamente.');
+    } catch (error) {
+      console.error('Error al eliminar curso:', error);
+      alert('Error al eliminar el curso. Por favor, intente nuevamente.');
+    }
+  }
   guardarEdicionCurso(): void {
     if (!this.cursoEditando) return;
 
@@ -302,41 +351,6 @@ export class InstructorDashboard implements OnInit {
       /* safe in SSR */
     }
     alert('Curso actualizado exitosamente.');
-  }
-
-  eliminarCurso(curso: Curso): void {
-    const confirmar = window.confirm(
-      `¿Está seguro de que desea eliminar el curso "${curso.titulo}"?\n\n` +
-        `Esta acción eliminará ${curso.archivos.length} Archivo(s) y no se puede deshacer.`
-    );
-
-    if (!confirmar) return;
-
-    try {
-      // Eliminar todos los archivos asociados del curso
-      curso.archivos.forEach(async (Archivo) => {
-        if (Archivo.archivoId) {
-          try {
-            await this.almacenamientoSession.borrarArchivo(Archivo.archivoId);
-          } catch (error) {
-            console.warn(`No se pudo eliminar el archivo: ${Archivo.archivoId}`, error);
-          }
-        }
-      });
-
-      // Usar el servicio para eliminar el curso
-      this.servicioCursos.eliminarCurso(curso.id);
-
-      if (this.cursoSeleccionado && this.cursoSeleccionado.id === curso.id) {
-        this.cursoSeleccionado = null;
-      }
-
-      this.cargarCursos();
-      alert('Curso eliminado exitosamente.');
-    } catch (error) {
-      console.error('Error al eliminar curso:', error);
-      alert('Error al eliminar el curso. Por favor, intente nuevamente.');
-    }
   }
 
   async editarArchivo(curso: Curso, Archivo: Archivo): Promise<void> {
