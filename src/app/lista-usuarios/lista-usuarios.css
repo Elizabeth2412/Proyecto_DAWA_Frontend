@@ -1,5 +1,5 @@
 :root {
-  --primary-gradient: linear-gradient(135deg, #4a7c2c 0%, #6b9d3e 100%);
+  --primary-gradient: linear-gradient(135deg, #1e7145 0%, #21854f 100%);;
 }
 
 .bg-green-gradient {
@@ -71,13 +71,13 @@
   align-items: flex-start;
   padding: 1.5rem;
   border-bottom: 1px solid #e9ecef;
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #1e7145 0%, #21854f 100%);;
   border-radius: 12px 12px 0 0;
 }
 
 .card-header h2 {
   margin: 0;
-  color: #2c3e50;
+  color: white;
   font-size: 1.5rem;
 }
 
