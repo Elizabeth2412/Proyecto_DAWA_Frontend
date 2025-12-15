@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ServicioAutorizacion} from '../autorizacion.service';
+import { ServicioAutorizacion } from '../autorizacion.service';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { RouterModule } from '@angular/router';
 import { Usuario } from '../servicios/servicio-usuarios';
 import { MatIcon } from '@angular/material/icon';
+
 @Component({
   selector: 'app-header',
   standalone: true,
@@ -22,24 +23,6 @@ export class Header implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // usar obtenerUsuarioActual()
-    //this.usuarioLogueado = this.servicioAutorizacion.obtenerUsuarioActual() !== null;
-
-    // . Mantiene sincronización con cambios de sesión
-    //this.servicioAutorizacion.cambioEstado$.subscribe(estado => {
-    //  this.usuarioLogueado = estado;
-    //});
-
-    // Suscribirse a cambios de sesión
-    //this.servicioAutorizacion.cambioEstado$.subscribe(
-    //  (estado) => {
-    //    this.usuarioLogueado = estado;
-    //  }
-    //);
-
-    // Verificar estado inicial
-    //this.usuarioLogueado = this.servicioAutorizacion.estaLogueado();
-
     this.servicioAutorizacion.obtenerObservableLogueado().subscribe(isLogged => {
       this.usuarioLogueado = isLogged;
 
@@ -67,20 +50,70 @@ export class Header implements OnInit {
     }
   }
 
-  redireccionarInstructorCurso(){
-    this.router.navigate(['/instructor']);
+  // MODIFICAR ESTE MÉTODO
+  redireccionarInstructorCurso(): void {
+    const usuario = this.servicioAutorizacion.obtenerUsuarioActual();
+    
+    if (!usuario) {
+      alert('Debes iniciar sesión para acceder a esta sección.');
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    // Permitir tanto instructores como administradores
+    if (usuario.tipo === 'instructor' || usuario.tipo === 'administrador') {
+      this.router.navigate(['/instructor']);
+    } else {
+      alert('No tienes permisos para acceder al panel de instructor.');
+    }
   }
 
-  redireccionarEstudianteCurso(){
-    this.router.navigate(['/estudiante']);
+  redireccionarEstudianteCurso(): void {
+    const usuario = this.servicioAutorizacion.obtenerUsuarioActual();
+    
+    if (!usuario) {
+      alert('Debes iniciar sesión para acceder a esta sección.');
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    if (usuario.tipo === 'estudiante') {
+      this.router.navigate(['/estudiante']);
+    } else {
+      alert('Esta sección es solo para estudiantes.');
+    }
   }
 
-  verificarAcceso(event: Event): void {
+  // ELIMINAR o modificar este método
+  verificarAcceso(event: Event, tipoUsuarioPermitido: string[] = []): void {
     if (!this.usuarioLogueado) {
       event.preventDefault();
       alert('Debes iniciar sesión para acceder a esta sección.');
       this.router.navigate(['/login']);
+      return;
+    }
+
+    const usuario = this.servicioAutorizacion.obtenerUsuarioActual();
+    if (usuario && tipoUsuarioPermitido.length > 0 && !tipoUsuarioPermitido.includes(usuario.tipo)) {
+      event.preventDefault();
+      alert('No tienes permisos para acceder a esta sección.');
     }
   }
 
+  // AGREGAR método para redireccionar al admin dashboard
+  redireccionarAdminDashboard(): void {
+    const usuario = this.servicioAutorizacion.obtenerUsuarioActual();
+    
+    if (!usuario) {
+      alert('Debes iniciar sesión para acceder a esta sección.');
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    if (usuario.tipo === 'administrador') {
+      this.router.navigate(['/admin-dashboard']);
+    } else {
+      alert('Esta sección es solo para administradores.');
+    }
+  }
 }

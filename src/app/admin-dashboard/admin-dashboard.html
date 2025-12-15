@@ -107,9 +107,10 @@
     <!-- VISTA DE GESTIÓN DE CURSOS -->
     <div *ngIf="vistaActual === 'cursos'">
       <app-crear-curso
-        (cursoEditado)="onCursoEditado($event)"
-        (cursoGuardado)="onCursoGuardado($event)"
-      >
+    [modo]="'tabla'"
+    (cursoEditado)="onCursoEditado($event)"
+    (cursoGuardado)="onCursoGuardado($event)">
+      
       </app-crear-curso>
     </div>
 
@@ -120,6 +121,7 @@
   </div>
 </div>
 
+<!-- MODAL PARA EDITAR CURSO -->
 <!-- MODAL PARA EDITAR CURSO -->
 <div *ngIf="mostrarModalCurso && cursoEditando" class="modal-overlay" (click)="cerrarModal()">
   <div class="modal-contenido" (click)="$event.stopPropagation()">
