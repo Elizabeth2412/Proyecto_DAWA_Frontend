@@ -189,7 +189,9 @@
   </main>
 
 </div>
-<!-- Modal para editar curso -->
+
+
+<!-- Modal para editar curso - DEBE ESTAR FUERA DEL MAIN -->
 <div *ngIf="mostrarModalCurso" class="modal-overlay" (click)="cerrarModalCrearCurso()" role="presentation">
   <div class="modal-contenido" role="dialog" aria-modal="true" aria-labelledby="modalTitulo" (click)="$event.stopPropagation()">
     <div class="card">
@@ -205,18 +207,33 @@
       <form class="card-body" (ngSubmit)="$event.preventDefault()">
         <div class="form-row">
           <label for="titulo-curso">Título</label>
-          <input id="titulo-curso" type="text" name="titulo" [(ngModel)]="modalCurso.titulo" placeholder="Ej. Introducción a Angular" />
+          <input 
+            id="titulo-curso" 
+            type="text" 
+            name="titulo" 
+            [(ngModel)]="modalCurso.titulo" 
+            placeholder="Ej. Introducción a Angular" 
+            required
+          />
+          <div *ngIf="!modalCurso.titulo?.trim()" class="error">El título es obligatorio</div>
         </div>
 
         <div class="form-row">
           <label for="descripcion-curso">Descripción</label>
-          <textarea id="descripcion-curso" name="descripcion" [(ngModel)]="modalCurso.descripcion" placeholder="Breve descripción del curso"></textarea>
+          <textarea 
+            id="descripcion-curso" 
+            name="descripcion" 
+            [(ngModel)]="modalCurso.descripcion" 
+            placeholder="Breve descripción del curso"
+            required
+          ></textarea>
+          <div *ngIf="!modalCurso.descripcion?.trim()" class="error">La descripción es obligatoria</div>
         </div>
 
         <div class="form-row">
           <label for="nivel-curso">Nivel</label>
           <div class="select-wrap">
-            <select id="nivel-curso" name="nivel" [(ngModel)]="modalCurso.nivel">
+            <select id="nivel-curso" name="nivel" [(ngModel)]="modalCurso.nivel" required>
               <option value="" disabled selected>Selecciona un nivel</option>
               <option value="Principiante">Principiante</option>
               <option value="Intermedio">Intermedio</option>
@@ -229,7 +246,15 @@
         <div class="form-row">
           <label for="duracion-curso">Duración</label>
           <div class="input-with-unit">
-            <input id="duracion-curso" type="number" name="duracion" min="1" [(ngModel)]="modalCurso.duracion" placeholder="0" />
+            <input 
+              id="duracion-curso" 
+              type="number" 
+              name="duracion" 
+              min="1" 
+              [(ngModel)]="modalCurso.duracion" 
+              placeholder="0" 
+              required
+            />
             <span class="unit">horas</span>
           </div>
           <div class="muted-help">Introduce la duración estimada en horas (mín. 1).</div>
@@ -237,7 +262,12 @@
 
         <div class="actions">
           <button type="button" class="btn btn-secondary" (click)="cerrarModalCrearCurso()">Cancelar</button>
-          <button type="button" class="btn btn-guardar" (click)="cursoEditando ? guardarEdicionCurso() : crearCurso()">
+          <button 
+            type="button" 
+            class="btn btn-guardar" 
+            (click)="guardarEdicionCurso()"
+            [disabled]="!modalCurso?.titulo?.trim() || !modalCurso?.descripcion?.trim()"
+          >
             {{ cursoEditando ? 'Actualizar curso' : 'Guardar curso' }}
           </button>
         </div>

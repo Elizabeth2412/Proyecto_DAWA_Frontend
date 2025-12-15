@@ -18,8 +18,9 @@ export class Login implements OnInit {
   vacioEmail: boolean = false;
   vacioPassword: boolean = false;
   credencialesInvalidas: boolean = false;
-  cargando: boolean = false; // Nuevo flag para pantalla de carga
+  cargando: boolean = false;
   mensajeCarga: string = ""; 
+  
   constructor(
     private servicioAutorizacion: ServicioAutorizacion,
     private router: Router
@@ -38,36 +39,43 @@ export class Login implements OnInit {
       return;
     }
 
-    // Mostrar pantalla de carga antes de validar
-      this.mensajeCarga = "Se procederá a validar las credenciales de acceso...";
-
+    this.mensajeCarga = "Se procederá a validar las credenciales de acceso...";
     this.cargando = true;
 
-    // Simula un pequeño retardo para mostrar el mensaje de carga
     setTimeout(() => {
       this.procesarLogin();
     }, 1500);
   }
-
-  private procesarLogin(): void {
-  // Cambia el mensaje mientras valida
+private procesarLogin(): void {
   this.mensajeCarga = "Validando credenciales...";
   
-  // Validación real con el servicio
   const usuario = this.servicioAutorizacion.validarCredenciales(this.email, this.password);
 
   if (usuario) {
-    // Si son correctas
     this.mensajeCarga = " Acceso concedido. Redirigiendo...";
     
     setTimeout(() => {
       this.servicioAutorizacion.iniciarSesion(usuario);
-      this.router.navigate(['/pagina-principal']);
+      
+      // Redireccionar según el tipo de usuario
+      switch (usuario.tipo) {
+        case 'administrador':
+          this.router.navigate(['/admin-dashboard']);
+          break;
+        case 'instructor':
+          this.router.navigate(['/instructor']);
+          break;
+        case 'estudiante':
+          this.router.navigate(['/estudiante']);
+          break;
+        default:
+          this.router.navigate(['/pagina-principal']);
+      }
+      
       this.cargando = false;
     }, 1500);
 
   } else {
-    // Si son incorrectas
     this.mensajeCarga = " Error: credenciales incorrectas.";
 
     setTimeout(() => {
@@ -76,7 +84,6 @@ export class Login implements OnInit {
     }, 1500);
   }
 }
-
 
   private reiniciarValidaciones(): void {
     this.vacioEmail = false;
@@ -111,10 +118,11 @@ export class Login implements OnInit {
     }, 3000);
   }
 
+  // CORREGIDO: Este método ya existía pero no se estaba usando correctamente
   private redireccionarSegunTipo(tipo: string): void {
     switch (tipo) {
       case 'administrador':
-        this.router.navigate(['/admin']);
+        this.router.navigate(['/admin-dashboard']);
         break;
       case 'instructor':
         this.router.navigate(['/instructor']);
@@ -123,13 +131,12 @@ export class Login implements OnInit {
         this.router.navigate(['/estudiante']);
         break;
       default:
-        this.router.navigate(['/']);
+        this.router.navigate(['/pagina-principal']);
     }
   }
 
-
-  registrar() {
+  // CORREGIDO: Este método debe estar alineado con la clase
+  registrar(): void {
     this.router.navigate(['/register']);
   }
-
 }
