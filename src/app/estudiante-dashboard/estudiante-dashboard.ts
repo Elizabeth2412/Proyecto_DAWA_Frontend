@@ -34,7 +34,9 @@ export class EstudianteDashboard implements OnInit {
   }
 
   iniciarEvaluacion(): void {
-    this.router.navigate(['/evaluacion']);
+    this.router.navigate(['/evaluacion'], { 
+      state: { abrirModalInicio: true } 
+    });
   }
 
   cargarCursos(): void {

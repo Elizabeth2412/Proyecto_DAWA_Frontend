@@ -171,7 +171,12 @@ export class Evaluation {
     const usuario = this.servicioAuth.obtenerUsuarioActual();
     this.esEstudiante = !!(usuario && usuario.tipo === 'estudiante');
 
-    if (this.modo === 'tabla') {
+    const state = history.state;
+    if (state?.abrirModalInicio) {
+      this.modo = 'evaluacion';
+      this.abrirModal();
+      history.replaceState({}, '');
+    } else if (this.modo === 'tabla') {
       this.cargarEvaluaciones();
     }
   }
@@ -192,6 +197,10 @@ export class Evaluation {
   cerrarModal(): void {
     this.mostrarModalInicio = false;
     document.body.style.overflow = 'auto';
+
+    if (this.modo === 'evaluacion') {
+      this.router.navigate(['/estudiante']);
+    }
   }
 
 
