@@ -442,3 +442,103 @@ div[style*="padding: 40px"] .card-body {
 .btn-cerrar:hover {
   color: #000;
 }
+
+
+/* Contenedor de acciones */
+.acciones {
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.acciones button {
+  margin: 0;
+  cursor: pointer;
+  position: relative;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+}
+
+/* Tooltip en hover */
+.acciones button:hover::before {
+  content: attr(title);
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 1000;
+  font-weight: 500;
+}
+
+/* Botón Modificar */
+.acciones .btn-modificar {
+  color: #2b7de9 !important;
+}
+
+.acciones .btn-modificar:hover {
+  background: rgba(43, 125, 233, 0.1);
+  transform: scale(1.15);
+}
+
+.acciones .btn-modificar mat-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+/* Botón Eliminar */
+.acciones .btn-eliminar {
+  color: #dc3545;
+}
+
+.acciones .btn-eliminar:hover {
+  background: rgba(220, 53, 69, 0.1);
+  transform: scale(1.15);
+}
+
+.acciones .btn-eliminar mat-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .acciones button {
+    width: 34px;
+    height: 34px;
+  }
+
+  .acciones button mat-icon {
+    font-size: 1rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .acciones {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .acciones button {
+    width: 100%;
+    border-radius: 8px;
+  }
+}
+
+

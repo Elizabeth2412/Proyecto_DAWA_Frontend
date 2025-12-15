@@ -13,10 +13,9 @@
   <!-- Controles -->
   <section class="dashboard-contenido mb-4">
     <div class="acciones-superiores d-flex flex-wrap justify-content-between align-items-center">
-
-<button class="btn-agregar" (click)="abrirDialogoNuevo()">
-  <i class="bi bi-pencil me-1"></i> Agregar nuevo archivo
-</button>  
+      <button class="btn-agregar" (click)="abrirDialogoNuevo()">
+          <i class="bi bi-pencil me-1"></i> Agregar nuevo archivo
+      </button>  
       <div class="controles-tabla d-flex gap-3 mb-2">
         <input 
           type="text"
@@ -39,8 +38,7 @@
 
   <!-- Tabla -->
   <div class="card shadow-sm">
-    <div class="card-header text-white" 
-         style="background: linear-gradient(135deg, #4a7c2c 0%, #6b9d3e 100%);">
+    <div class="card-header text-white">
       <h5 class="mb-0">Listado de archivos</h5>
     </div>
 
@@ -82,12 +80,12 @@
                 </span>
               </td>
               <td class="text-center acciones">
-<button class="btn-modificar" (click)="abrirDialogoModificar(archivo)">
-  <i class="bi bi-pencil me-1"></i> Modificar
-</button>
+                <button class="btn-modificar" (click)="abrirDialogoModificar(archivo)" title="Modificar">
+                  <mat-icon>edit</mat-icon>
+                </button>
 
-                <button class="btn-eliminar" (click)="eliminarArchivo(archivo.id)">
-                  <i class="bi bi-trash">Eliminar</i>
+                <button class="btn-eliminar" (click)="eliminarArchivo(archivo.id)" title="Eliminar">
+                  <mat-icon>delete</mat-icon>
                 </button>
               </td>
             </tr>
@@ -103,10 +101,13 @@
     </div>
   </div>
 
+  
+
   <!-- Diálogo -->
   <app-dialogo-archivo 
     *ngIf="mostrarDialogo"
     [archivo]="archivoSeleccionado"
     (cerrar)="cerrarDialogo()">
   </app-dialogo-archivo>
+
 </div>

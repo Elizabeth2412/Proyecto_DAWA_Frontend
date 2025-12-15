@@ -114,6 +114,28 @@
   transform: translateY(0);
 }
 
+.text-verde-custom {
+  color: #4a7c2c !important; 
+}
+
+.avatar-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4a7c2c, #6ab04c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.avatar-circle mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+}
+
 /* Responsive */
 @media (max-width: 991px) {
   .nav {

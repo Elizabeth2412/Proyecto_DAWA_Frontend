@@ -1,12 +1,14 @@
 <div class="container-fluid py-4 bg-light min-vh-100">
   <div class="container">
-
     <!-- ENCABEZADO PRINCIPAL -->
     <div class="row mb-4">
       <div class="col">
         <div class="d-flex justify-content-between align-items-center">
           <div>
-            <h1 class="display-5 fw-bold" style="color: #4a7c2c; text-shadow: 1px 1px 4px rgba(62, 182, 102, 0.6);">
+            <h1
+              class="display-5 fw-bold"
+              style="color: #4a7c2c; text-shadow: 1px 1px 4px rgba(62, 182, 102, 0.6)"
+            >
               <i class="bi bi-speedometer2 me-3"></i>
               Panel de administración
             </h1>
@@ -24,9 +26,7 @@
               <i class="bi bi-files"></i>
             </div>
             <h4 class="card-title fw-bold">Gestión de archivos</h4>
-            <p class="card-text text-muted">
-              Administra los archivos y documentos del sistema.
-            </p>
+            <p class="card-text text-muted">Administra los archivos y documentos del sistema.</p>
             <div class="dashboard-stats">
               <span class="badge bg-primary">{{ archivos.length }} archivos</span>
             </div>
@@ -41,9 +41,7 @@
               <i class="bi bi-people-fill"></i>
             </div>
             <h4 class="card-title fw-bold">Gestión de usuarios</h4>
-            <p class="card-text text-muted">
-              Gestiona usuarios, roles y permisos del sistema.
-            </p>
+            <p class="card-text text-muted">Gestiona usuarios, roles y permisos del sistema.</p>
             <div class="dashboard-stats">
               <span class="badge bg-success">{{ totalUsuarios }} usuarios</span>
             </div>
@@ -67,7 +65,34 @@
           </div>
         </div>
       </div>
+
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card dashboard-card h-100" (click)="cambiarVista('evaluacion')">
+          <div class="card-body text-center p-4">
+            <div class="dashboard-icon mb-3">
+              <i class="bi bi-journal-text"></i>
+            </div>
+            <h4 class="card-title fw-bold">Gestión de evaluaciones</h4>
+            <p class="card-text text-muted">
+              Crea y administra las evaluaciones para los diferentes cursos.
+            </p>
+            <div class="dashboard-stats">
+              <span class="badge bg-warning">{{ totalEvaluaciones }} evaluaciones</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <button 
+      *ngIf="vistaActual !== 'inicio'"
+      mat-fab 
+      (click)="volverInicio()"
+      class="btn-fab-volver"
+      matTooltip="Volver al dashboard"
+      matTooltipPosition="right">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
 
     <!-- VISTA DE GESTIÓN DE ARCHIVOS -->
     <div *ngIf="vistaActual === 'archivos'">
@@ -81,13 +106,17 @@
 
     <!-- VISTA DE GESTIÓN DE CURSOS -->
     <div *ngIf="vistaActual === 'cursos'">
-<app-crear-curso
-    (cursoEditado)="onCursoEditado($event)"
-    (cursoGuardado)="onCursoGuardado($event)">
-</app-crear-curso>
-
+      <app-crear-curso
+        (cursoEditado)="onCursoEditado($event)"
+        (cursoGuardado)="onCursoGuardado($event)"
+      >
+      </app-crear-curso>
     </div>
 
+    <!-- VISTA DE GESTIÓN DE EVALUACIONES -->
+    <div *ngIf="vistaActual === 'evaluacion'">
+      <app-evaluation></app-evaluation>
+    </div>
   </div>
 </div>
 
@@ -106,47 +135,52 @@
       <form class="card-body" (ngSubmit)="guardarEdicionCurso()">
         <div class="form-row">
           <label for="titulo-curso">Título</label>
-          <input id="titulo-curso" type="text" 
-                 [(ngModel)]="cursoEditando.titulo" 
-                 name="titulo" 
-                 placeholder="Ej. Introducción a Angular" 
-                 required />
+          <input
+            id="titulo-curso"
+            type="text"
+            [(ngModel)]="cursoEditando.titulo"
+            name="titulo"
+            placeholder="Ej. Introducción a Angular"
+            required
+          />
         </div>
 
         <div class="form-row">
           <label for="descripcion-curso">Descripción</label>
-          <textarea id="descripcion-curso" 
-                    [(ngModel)]="cursoEditando.descripcion" 
-                    name="descripcion" 
-                    placeholder="Breve descripción del curso" 
-                    required></textarea>
+          <textarea
+            id="descripcion-curso"
+            [(ngModel)]="cursoEditando.descripcion"
+            name="descripcion"
+            placeholder="Breve descripción del curso"
+            required
+          ></textarea>
         </div>
 
         <div class="form-row">
           <label for="nivel-curso">Nivel</label>
           <div class="select-wrap">
-            <select id="nivel-curso" 
-                    [(ngModel)]="cursoEditando.nivel" 
-                    name="nivel" 
-                    required>
+            <select id="nivel-curso" [(ngModel)]="cursoEditando.nivel" name="nivel" required>
               <option value="" disabled>Selecciona un nivel</option>
               <option value="Principiante">Principiante</option>
               <option value="Intermedio">Intermedio</option>
               <option value="Avanzado">Avanzado</option>
             </select>
-            <span class="select-badge" *ngIf="cursoEditando.nivel">{{cursoEditando.nivel}}</span>
+            <span class="select-badge" *ngIf="cursoEditando.nivel">{{ cursoEditando.nivel }}</span>
           </div>
         </div>
 
         <div class="form-row">
           <label for="duracion-curso">Duración</label>
           <div class="input-with-unit">
-            <input id="duracion-curso" type="number" 
-                   [(ngModel)]="cursoEditando.duracion" 
-                   name="duracion" 
-                   min="1" 
-                   placeholder="0" 
-                   required />
+            <input
+              id="duracion-curso"
+              type="number"
+              [(ngModel)]="cursoEditando.duracion"
+              name="duracion"
+              min="1"
+              placeholder="0"
+              required
+            />
             <span class="unit">horas</span>
           </div>
           <div class="muted-help">Introduce la duración estimada en horas (mín. 1).</div>
@@ -154,8 +188,11 @@
 
         <div class="actions">
           <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
-          <button type="submit" class="btn btn-guardar" 
-[disabled]="!cursoEditando.titulo.trim() || !cursoEditando.descripcion.trim()">
+          <button
+            type="submit"
+            class="btn btn-guardar"
+            [disabled]="!cursoEditando.titulo.trim() || !cursoEditando.descripcion.trim()"
+          >
             Actualizar curso
           </button>
         </div>

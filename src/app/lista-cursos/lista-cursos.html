@@ -1,0 +1,100 @@
+<div class="container-fluid py-4 bg-light min-vh-100">
+  <div class="container">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h1 class="fw-bold text-success">
+          <i class="bi bi-journal-text me-2"></i>
+          Gestión de Cursos
+        </h1>
+        <p class="text-muted">Administra los cursos del sistema</p>
+      </div>
+
+      <button class="btn btn-success" (click)="nuevoCurso()">
+        <i class="bi bi-plus-circle me-2"></i>
+        Nuevo curso
+      </button>
+    </div>
+
+    <!-- Filtros -->
+    <div class="d-flex gap-3 mb-4">
+      <input
+        class="form-control"
+        placeholder="Buscar cursos..."
+        [(ngModel)]="terminoBusqueda"
+        (input)="filtrarCursos()">
+
+      <select
+        class="form-select w-auto"
+        [(ngModel)]="filtroNivel"
+        (change)="filtrarCursos()">
+        <option value="">Todos los niveles</option>
+        <option value="Principiante">Principiante</option>
+        <option value="Intermedio">Intermedio</option>
+        <option value="Avanzado">Avanzado</option>
+      </select>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card shadow-sm">
+      <div class="card-header bg-success text-white">
+        Lista de Cursos ({{ cursosFiltrados.length }})
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>#</th>
+              <th>Título</th>
+              <th>Nivel</th>
+              <th>Duración</th>
+              <th>Instructor</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let curso of cursosFiltrados; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td><strong>{{ curso.titulo }}</strong></td>
+
+              <td>
+                <span class="badge"
+                  [ngClass]="{
+                    'bg-success': curso.nivel === 'Principiante',
+                    'bg-warning text-dark': curso.nivel === 'Intermedio',
+                    'bg-danger': curso.nivel === 'Avanzado'
+                  }">
+                  {{ curso.nivel }}
+                </span>
+              </td>
+
+              <td>{{ curso.duracion }} h</td>
+              <td>{{ curso.instructor }}</td>
+
+              <td class="text-center">
+                <button class="btn btn-sm btn-outline-primary me-2"
+                        (click)="editarCurso(curso)">
+                  Editar
+                </button>
+                <button class="btn btn-sm btn-outline-danger"
+                        (click)="eliminarCurso(curso.id)">
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+
+            <tr *ngIf="cursosFiltrados.length === 0">
+              <td colspan="6" class="text-center py-4 text-muted">
+                No se encontraron cursos
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -64,3 +64,36 @@
 .modal-contenido .card-body {
   padding: 20px 24px 32px 24px;
 }
+
+
+.btn-fab-volver {
+  position: fixed;
+  bottom: 30px;
+  left: 30px;
+  padding-top: 5px;
+
+  background: rgba(74, 124, 44, 0.95) !important;
+  backdrop-filter: blur(10px);
+  color: white !important;
+  z-index: 1000;
+  transition: all 0.2s ease;
+  box-shadow: 
+    0 10px 30px rgba(74, 124, 44, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  
+  
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 15px;
+  align-items: center;
+  
+  /* Animación de flotación */
+  animation: float 3s ease-in-out infinite;
+}
+
+.btn-fab-volver:hover {
+  background: rgba(90, 145, 53, 0.98) !important;
+  transform: scale(1.15);
+  box-shadow: 
+    0 15px 40px rgba(74, 124, 44, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}

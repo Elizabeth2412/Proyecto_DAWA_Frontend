@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; 
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ServicioAutorizacion } from '../autorizacion.service';
 import { ServicioCursos, Curso } from '../servicios/servicio-cursos';
@@ -11,9 +11,9 @@ import { CrearCurso } from '../crear-curso/crear-curso';
 @Component({
   selector: 'app-instructor-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, CrearCurso], 
+  imports: [CommonModule, FormsModule, CrearCurso],
   templateUrl: './instructor-dashboard.html',
-  styleUrls: ['./instructor-dashboard.css']
+  styleUrls: ['./instructor-dashboard.css'],
 })
 export class InstructorDashboard implements OnInit {
   usuarioActual: Usuario | null = null;
@@ -29,10 +29,10 @@ export class InstructorDashboard implements OnInit {
   mostrarModalCurso: boolean = false;
   nuevoCurso: any = {
     titulo: '',
-    descripcion: ''
+    descripcion: '',
   };
   modalCurso: any = null;
-  
+
   private _handleEsc = (e: KeyboardEvent) => {
     if (e.key === 'Escape' || e.key === 'Esc') {
       if (this.mostrarModalCurso) this.cerrarModalCrearCurso();
@@ -56,83 +56,75 @@ export class InstructorDashboard implements OnInit {
     //}
     this.cargarCursos();
   }
- cargarCursos(): void {
+  cargarCursos(): void {
     // CORRECCIÓN: Manejar cuando el usuario es null
     if (this.usuarioActual && this.usuarioActual.email) {
       this.cursos = this.servicioCursos.obtenerCursosPorInstructor(this.usuarioActual.email);
     } else {
       // Si no hay usuario autenticado, mostrar todos los cursos o cursos de invitado
-      this.cursos = this.servicioCursos.obtenerCursos().filter(curso => 
-        curso.instructor === 'invitado@gmail.com' || !curso.instructor
-      );
+      this.cursos = this.servicioCursos
+        .obtenerCursos()
+        .filter((curso) => curso.instructor === 'invitado@gmail.com' || !curso.instructor);
     }
   }
   async onArchivoSeleccionado(evento: any): Promise<void> {
     const resultado = await this.servicioArchivos.procesarArchivoSeleccionado(evento);
-    
+
     if (resultado.error) {
       alert(resultado.error);
       return;
     }
-    
+
     this.archivoSeleccionado = resultado.archivo;
   }
- async subirArchivo(): Promise<void> {
-  if (!this.archivoSeleccionado || !this.usuarioActual) return;
+  async subirArchivo(): Promise<void> {
+    if (!this.archivoSeleccionado || !this.usuarioActual) return;
 
-  this.cargando = true;
-  
-  const resultado = await this.servicioArchivos.subirArchivo(
-    this.archivoSeleccionado,
-    this.cursoSeleccionado,
-    this.modoEdicion,
-    this.cursoEditando,
-    this.archivoEditando,
-    this.usuarioActual.email
-  );
+    this.cargando = true;
 
-  if (resultado.exito) {
-    if (resultado.necesitaActualizar && this.cursoEditando && this.archivoEditando) {
-      // Actualizar Archivo existente en el curso
-      const archivoActualizada: Archivo = {
-        ...this.archivoEditando,
-        nombre: this.servicioArchivos.eliminarExtension(this.archivoSeleccionado.name),
-        tipo: this.archivoSeleccionado.name.toLowerCase().endsWith('.pdf') ? 'PDF' : 'PPTX',
-        archivoId: `archivo_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-        fechaSubida: new Date(),
-        tamano: this.archivoSeleccionado.size
-      };
+    const resultado = await this.servicioArchivos.subirArchivo(
+      this.archivoSeleccionado,
+      this.cursoSeleccionado,
+      this.modoEdicion,
+      this.cursoEditando,
+      this.archivoEditando,
+      this.usuarioActual.email
+    );
 
-      this.servicioCursos.actualizarArchivoEnCurso(
-        this.cursoEditando.id, 
-        archivoActualizada
-      );
-      
-    } else if (resultado.Archivo && this.cursoSeleccionado) {
-      // Agregar nueva Archivo al curso
-      this.servicioCursos.agregarArchivoACurso(
-        this.cursoSeleccionado.id, 
-        resultado.Archivo
-      );
+    if (resultado.exito) {
+      if (resultado.necesitaActualizar && this.cursoEditando && this.archivoEditando) {
+        // Actualizar Archivo existente en el curso
+        const archivoActualizada: Archivo = {
+          ...this.archivoEditando,
+          nombre: this.servicioArchivos.eliminarExtension(this.archivoSeleccionado.name),
+          tipo: this.archivoSeleccionado.name.toLowerCase().endsWith('.pdf') ? 'PDF' : 'PPTX',
+          archivoId: `archivo_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+          fechaSubida: new Date(),
+          tamano: this.archivoSeleccionado.size,
+        };
+
+        this.servicioCursos.actualizarArchivoEnCurso(this.cursoEditando.id, archivoActualizada);
+      } else if (resultado.Archivo && this.cursoSeleccionado) {
+        // Agregar nueva Archivo al curso
+        this.servicioCursos.agregarArchivoACurso(this.cursoSeleccionado.id, resultado.Archivo);
+      }
+
+      // Sincronizar UNA SOLA VEZ después de todas las operaciones
+      this.servicioArchivos.sincronizarArchivosDesdeCursos(this.cursos);
+
+      this.cargarCursos();
+      this.limpiarEstado();
+      alert(resultado.mensaje);
+    } else {
+      alert(resultado.mensaje);
     }
 
-    // Sincronizar UNA SOLA VEZ después de todas las operaciones
-    this.servicioArchivos.sincronizarArchivosDesdeCursos(this.cursos);
-    
-    this.cargarCursos();
-    this.limpiarEstado();
-    alert(resultado.mensaje);
-  } else {
-    alert(resultado.mensaje);
+    this.cargando = false;
   }
-  
-  this.cargando = false;
-}
   private limpiarInputArchivo(): void {
     const inputArchivo = document.querySelector('input[type="file"]') as HTMLInputElement;
     if (inputArchivo) inputArchivo.value = '';
   }
-
 
   limpiarEstado(): void {
     this.archivoSeleccionado = null;
@@ -147,10 +139,27 @@ export class InstructorDashboard implements OnInit {
     this.modalCurso = this.nuevoCurso;
     setTimeout(() => {
       this.mostrarModalCurso = true;
-      console.log('abrirModalCrearCurso: modalCurso=', this.modalCurso, 'mostrarModalCurso=', this.mostrarModalCurso);
-      try { this.cdr.detectChanges(); } catch (e) { /* safe */ }
-      try { document.body.classList.add('modal-open'); } catch (e) { /* safe in SSR */ }
-      try { document.addEventListener('keydown', this._handleEsc); } catch (e) { /* safe */ }
+      console.log(
+        'abrirModalCrearCurso: modalCurso=',
+        this.modalCurso,
+        'mostrarModalCurso=',
+        this.mostrarModalCurso
+      );
+      try {
+        this.cdr.detectChanges();
+      } catch (e) {
+        /* safe */
+      }
+      try {
+        document.body.classList.add('modal-open');
+      } catch (e) {
+        /* safe in SSR */
+      }
+      try {
+        document.addEventListener('keydown', this._handleEsc);
+      } catch (e) {
+        /* safe */
+      }
     }, 0);
   }
 
@@ -159,8 +168,16 @@ export class InstructorDashboard implements OnInit {
     this.nuevoCurso = { titulo: '', descripcion: '' };
     this.cursoEditando = null;
     this.modalCurso = null;
-    try { document.body.classList.remove('modal-open'); } catch (e) { /* safe in SSR */ }
-    try { document.removeEventListener('keydown', this._handleEsc); } catch (e) { /* safe */ }
+    try {
+      document.body.classList.remove('modal-open');
+    } catch (e) {
+      /* safe in SSR */
+    }
+    try {
+      document.removeEventListener('keydown', this._handleEsc);
+    } catch (e) {
+      /* safe */
+    }
   }
 
   crearCurso(): void {
@@ -178,13 +195,13 @@ export class InstructorDashboard implements OnInit {
       id: 0,
       titulo: this.nuevoCurso.titulo,
       descripcion: this.nuevoCurso.descripcion,
-      nivel: this.nuevoCurso.nivel || 'Principiante',   
-      duracion: this.nuevoCurso.duracion || 1,          
+      nivel: this.nuevoCurso.nivel || 'Principiante',
+      duracion: this.nuevoCurso.duracion || 1,
       archivos: [],
       progreso: 0,
       instructor: this.usuarioActual!.email,
       fechaCreacion: new Date(),
-      fechaActualizacion: new Date()
+      fechaActualizacion: new Date(),
     };
 
     this.servicioCursos.agregarCurso(nuevoCurso);
@@ -200,18 +217,17 @@ export class InstructorDashboard implements OnInit {
 
   onCursoSeleccionado(cursoId: string): void {
     console.log('Curso ID seleccionado:', cursoId);
-    
+
     if (cursoId && cursoId !== 'null') {
-      const curso = this.cursos.find(c => c.id.toString() === cursoId);
+      const curso = this.cursos.find((c) => c.id.toString() === cursoId);
       this.cursoSeleccionado = curso || null;
       console.log('Curso seleccionado:', this.cursoSeleccionado);
     } else {
       this.cursoSeleccionado = null;
     }
   }
- gestionarCursos(): void {
-    this.vistaActual = 'cursos';
-    CrearCurso.modoGlobal = 'tabla';
+  gestionarCursos(): void {
+    this.router.navigate(['/cursos']);
   }
 
   volverInicio(): void {
@@ -231,13 +247,30 @@ export class InstructorDashboard implements OnInit {
     // Usar el servicio para preparar el curso para edición
     this.cursoEditando = this.servicioCursos.prepararEdicionCurso(curso);
     this.modalCurso = this.cursoEditando;
-    
+
     setTimeout(() => {
       this.mostrarModalCurso = true;
-      console.log('editarCurso: modalCurso=', this.modalCurso, 'mostrarModalCurso=', this.mostrarModalCurso);
-      try { this.cdr.detectChanges(); } catch (e) { /* safe */ }
-      try { document.body.classList.add('modal-open'); } catch (e) { /* safe in SSR */ }
-      try { document.addEventListener('keydown', this._handleEsc); } catch (e) { /* safe */ }
+      console.log(
+        'editarCurso: modalCurso=',
+        this.modalCurso,
+        'mostrarModalCurso=',
+        this.mostrarModalCurso
+      );
+      try {
+        this.cdr.detectChanges();
+      } catch (e) {
+        /* safe */
+      }
+      try {
+        document.body.classList.add('modal-open');
+      } catch (e) {
+        /* safe in SSR */
+      }
+      try {
+        document.addEventListener('keydown', this._handleEsc);
+      } catch (e) {
+        /* safe */
+      }
     }, 0);
   }
 
@@ -256,28 +289,32 @@ export class InstructorDashboard implements OnInit {
     const actualizado: Curso = {
       ...(original || this.cursoEditando),
       ...this.cursoEditando,
-      fechaActualizacion: new Date()
+      fechaActualizacion: new Date(),
     };
 
     this.servicioCursos.actualizarCurso(actualizado);
     this.cargarCursos();
     this.mostrarModalCurso = false;
     this.cursoEditando = null;
-    try { document.body.classList.remove('modal-open'); } catch (e) { /* safe in SSR */ }
+    try {
+      document.body.classList.remove('modal-open');
+    } catch (e) {
+      /* safe in SSR */
+    }
     alert('Curso actualizado exitosamente.');
   }
-  
+
   eliminarCurso(curso: Curso): void {
     const confirmar = window.confirm(
       `¿Está seguro de que desea eliminar el curso "${curso.titulo}"?\n\n` +
-      `Esta acción eliminará ${curso.archivos.length} Archivo(s) y no se puede deshacer.`
+        `Esta acción eliminará ${curso.archivos.length} Archivo(s) y no se puede deshacer.`
     );
 
     if (!confirmar) return;
 
     try {
       // Eliminar todos los archivos asociados del curso
-      curso.archivos.forEach(async Archivo => {
+      curso.archivos.forEach(async (Archivo) => {
         if (Archivo.archivoId) {
           try {
             await this.almacenamientoSession.borrarArchivo(Archivo.archivoId);
@@ -289,11 +326,11 @@ export class InstructorDashboard implements OnInit {
 
       // Usar el servicio para eliminar el curso
       this.servicioCursos.eliminarCurso(curso.id);
-      
+
       if (this.cursoSeleccionado && this.cursoSeleccionado.id === curso.id) {
         this.cursoSeleccionado = null;
       }
-      
+
       this.cargarCursos();
       alert('Curso eliminado exitosamente.');
     } catch (error) {
@@ -306,36 +343,36 @@ export class InstructorDashboard implements OnInit {
     this.modoEdicion = true;
     this.cursoEditando = curso;
     this.archivoEditando = Archivo;
-    
+
     const inputArchivo = document.querySelector('input[type="file"]') as HTMLInputElement;
     if (inputArchivo) {
       inputArchivo.click();
     }
   }
 
-async eliminarArchivo(curso: Curso, archivo: Archivo): Promise<void> {
-  const confirmar = window.confirm(
-    `¿Está seguro de que desea eliminar el archivo "${archivo.nombre}"?\n\nEsta acción no se puede deshacer.`
-  );
+  async eliminarArchivo(curso: Curso, archivo: Archivo): Promise<void> {
+    const confirmar = window.confirm(
+      `¿Está seguro de que desea eliminar el archivo "${archivo.nombre}"?\n\nEsta acción no se puede deshacer.`
+    );
 
-  if (!confirmar) return;
+    if (!confirmar) return;
 
-  // Eliminar archivo asociado
-  const resultadoArchivo = await this.servicioArchivos.eliminarArchivoDeArchivo(archivo);
-  
-  if (resultadoArchivo.exito) {
-    // Eliminar Archivo del curso
-    this.servicioCursos.eliminarArchivoDeCurso(curso.id, archivo.id);
-    
-    // Eliminar también del listado general de archivos
-    this.servicioArchivos.eliminarArchivo(archivo.id);
-    
-    this.cargarCursos();
-    alert('Archivo eliminado exitosamente.');
-  } else {
-    alert(resultadoArchivo.mensaje);
+    // Eliminar archivo asociado
+    const resultadoArchivo = await this.servicioArchivos.eliminarArchivoDeArchivo(archivo);
+
+    if (resultadoArchivo.exito) {
+      // Eliminar Archivo del curso
+      this.servicioCursos.eliminarArchivoDeCurso(curso.id, archivo.id);
+
+      // Eliminar también del listado general de archivos
+      this.servicioArchivos.eliminarArchivo(archivo.id);
+
+      this.cargarCursos();
+      alert('Archivo eliminado exitosamente.');
+    } else {
+      alert(resultadoArchivo.mensaje);
+    }
   }
-}
 
   async visualizarArchivo(Archivo: Archivo): Promise<void> {
     const resultado = await this.servicioArchivos.visualizarArchivo(Archivo);
@@ -363,6 +400,4 @@ async eliminarArchivo(curso: Curso, archivo: Archivo): Promise<void> {
   formatearFecha(fecha: Date): string {
     return this.servicioArchivos.formatearFecha(fecha);
   }
-
-
 }
