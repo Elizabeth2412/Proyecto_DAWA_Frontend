@@ -1,21 +1,6 @@
 import { Injectable } from '@angular/core';
-
-export interface Question {
-  id: number;
-  text: string;
-  options: string[];
-}
-
-export interface Evaluacion {
-  id: number;
-  titulo: string;
-  modulo: string;
-  totalPreguntas: number;
-  duracion: string;
-  fechaCreacion: Date;
-  estado: 'Activa' | 'Inactiva';
-  preguntas?: Question[];
-}
+import { Evaluacion } from '../interfaces/evaluacion-interface';
+import { Question } from '../interfaces/question-interface';
 
 @Injectable({
   providedIn: 'root',

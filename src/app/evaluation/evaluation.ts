@@ -3,9 +3,10 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
-import { ServiceEvaluacion, Question, Evaluacion } from '../servicios/service-evaluacion';
+import { ServiceEvaluacion} from '../servicios/service-evaluacion';
 import { ServicioAutorizacion } from '../autorizacion.service';
-
+import { Question } from '../interfaces/question-interface';
+import { Evaluacion } from '../interfaces/evaluacion-interface';
 interface VisualizationEvaluation {
   title: string;
   duration: string;

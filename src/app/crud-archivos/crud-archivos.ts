@@ -1,10 +1,12 @@
+// src/app/crud-archivos/crud-archivos.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ServicioArchivos, Archivo } from '../servicios/servicio-archivos';
+import { ServicioArchivos } from '../servicios/servicio-archivos';
 import { DialogoArchivoComponent } from '../dialogo-archivo/dialogo-archivo';
-import { ServicioCursos } from '../servicios/servicio-cursos';
+import { ServicioAutorizacion } from '../autorizacion.service';
 import { MatIcon } from "@angular/material/icon";
+import { Archivo } from '../interfaces/archivo-interface';
 
 @Component({
   selector: 'app-crud-archivos',
@@ -14,45 +16,49 @@ import { MatIcon } from "@angular/material/icon";
   styleUrls: ['./crud-archivos.css']
 })
 export class CrudArchivos implements OnInit {
+  // Propiedades del COMPONENTE (no del servicio)
   archivoSeleccionado: Archivo | null = null;
   mostrarDialogo: boolean = false;
-
   archivos: Archivo[] = [];
   archivosFiltrados: Archivo[] = [];
   terminoBusqueda: string = '';
   filtroEstado: string = '';
+  cargando: boolean = false;
 
   constructor(
     private servicioArchivos: ServicioArchivos,
-    private servicioCursos: ServicioCursos
+    private servicioAutorizacion: ServicioAutorizacion
   ) {}
 
   ngOnInit(): void {
     this.cargarArchivos();
   }
 
-
-  /**
-   * Método para cargar los archivos desde el servicio
-  */
-  cargarArchivos(): void {
-    // Obtener todos los cursos para sincronizar archivos
-    const cursos = this.servicioCursos.obtenerCursos();
+  // ESTOS MÉTODOS PERTENECEN AL COMPONENTE, NO AL SERVICIO
+  async cargarArchivos(): Promise<void> {
+    this.cargando = true;
     
-    // Sincronizar archivos desde cursos (solo una vez)
-    this.servicioArchivos.sincronizarArchivosDesdeCursos(cursos);
-    
-    // Obtener todos los archivos (sin duplicados)
-    this.archivos = this.servicioArchivos.obtenerTodosLosArchivos();
-    this.archivosFiltrados = [...this.archivos];
-    
-    console.log('Archivos cargados:', this.archivos.length);
+    try {
+      const archivos = await this.servicioArchivos.obtenerTodosLosArchivos();
+      
+      this.archivos = archivos.map(archivo => ({
+        ...archivo,
+        fechaSubida: new Date(archivo.fechaSubida)
+      }));
+      
+      this.archivosFiltrados = [...this.archivos];
+      console.log(`Archivos cargados: ${this.archivos.length}`);
+      
+    } catch (error: any) {
+      console.error('Error al cargar archivos:', error);
+      alert('Error al cargar los archivos: ' + error.message);
+      this.archivos = [];
+      this.archivosFiltrados = [];
+    } finally {
+      this.cargando = false;
+    }
   }
 
-
-  /**
-   * Método para filtrar los archivos según el término de búsqueda y el estado seleccionado
-  */
   filtrarArchivos(): void {
     this.archivosFiltrados = this.archivos.filter(archivo => {
       const coincideBusqueda = !this.terminoBusqueda || 
@@ -65,11 +71,13 @@ export class CrudArchivos implements OnInit {
     });
   }
 
-
-  /**
-   * Métodos para abrir y cerrar el diálogo de archivo
-  */
   abrirDialogoNuevo(): void {
+    const usuario = this.servicioAutorizacion.obtenerUsuarioActual();
+    if (!usuario || (usuario.tipo !== 'instructor' && usuario.tipo !== 'administrador')) {
+      alert('Solo los instructores o administradores pueden subir archivos');
+      return;
+    }
+    
     this.archivoSeleccionado = null;
     this.mostrarDialogo = true;
   }
@@ -82,40 +90,28 @@ export class CrudArchivos implements OnInit {
   cerrarDialogo(): void {
     this.mostrarDialogo = false;
     this.archivoSeleccionado = null;
-    // Recargar para reflejar cambios
     this.cargarArchivos();
   }
 
-  /**
-   * Método para eliminar un archivo completamente de todos los cursos
-   * @param id 
-  */
+  async eliminarArchivo(id: number): Promise<void> {
+    if (!confirm('¿Estás seguro de que deseas eliminar este archivo?')) {
+      return;
+    }
 
-  eliminarArchivo(id: number): void {
-    if (confirm('¿Estás seguro de que deseas eliminar este archivo? Esta acción eliminará el archivo de todos los cursos donde esté asignado.')) {
-      // Usar el método completo que elimina tanto del listado como de los cursos
-      this.servicioArchivos.eliminarArchivoCompleto(id);
-      
-      // Recargar la lista actualizada
-      this.archivos = this.servicioArchivos.obtenerTodosLosArchivos();
-      this.filtrarArchivos();
-      
-      alert('Archivo eliminado exitosamente de todos los cursos.');
+    try {
+      await this.servicioArchivos.eliminarArchivoCompleto(id);
+      alert('Archivo eliminado exitosamente');
+      await this.cargarArchivos();
+    } catch (error: any) {
+      console.error('Error al eliminar archivo:', error);
+      alert('Error al eliminar el archivo: ' + error.message);
     }
   }
 
-
-  /**
-   * Método para obtener el tamaño legible de un archivo
-  */
   obtenerTamanoLegible(bytes: number): string {
     return this.servicioArchivos.obtenerTamanoLegible(bytes);
   }
 
-
-  /**
-   * Getters para estadísticas de archivos
-  */
   get archivosDisponible(): number {
     return this.archivos.filter(a => a.estado === 'Disponible').length;
   }
@@ -124,6 +120,4 @@ export class CrudArchivos implements OnInit {
     const totalBytes = this.archivos.reduce((sum, archivo) => sum + archivo.tamano, 0);
     return this.obtenerTamanoLegible(totalBytes);
   }
-
-  
 }

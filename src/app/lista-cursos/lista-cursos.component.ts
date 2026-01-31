@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ServicioCursos, Curso } from '../servicios/servicio-cursos';
-
+import { ServicioCursos } from '../servicios/servicio-cursos';
+import { Curso } from '../interfaces/curso-interface';
 @Component({
   selector: 'app-lista-cursos',
   standalone: true,
