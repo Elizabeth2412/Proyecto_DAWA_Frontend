@@ -2,7 +2,8 @@ import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angu
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { ServicioCursos, Curso } from '../servicios/servicio-cursos';
+import { ServicioCursos } from '../servicios/servicio-cursos';
+import { Curso } from '../interfaces/curso-interface';
 import { ServicioAutorizacion } from '../autorizacion.service';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';

@@ -1,3 +1,4 @@
+/*src/app/register/register.spec.ts*/
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { Register } from './register';

@@ -4,7 +4,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ServicioAutorizacion } from '../autorizacion.service';
-import { ServicioUsuarios, Usuario } from '../servicios/servicio-usuarios';
+import { ServicioUsuarios } from '../servicios/servicio-usuarios';
+import { Usuario } from '../interfaces/usuario-interface';
 @Component({
   selector: 'app-lista-usuarios',
   standalone: true,

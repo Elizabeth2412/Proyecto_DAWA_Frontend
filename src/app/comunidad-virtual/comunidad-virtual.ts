@@ -2,18 +2,10 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { Foro } from '../interfaces/foro-interface';
 /**
  * Interface que contiene los datos de Foro
  */
-export interface Foro {
-  id: number;
-  titulo: string;
-  contenido: string;
-  autor: string;
-  fechaHora: string;
-  replicas: number;
-  image?: string | null;
-}
 
 @Component({
   selector: 'app-comunidad-virtual',

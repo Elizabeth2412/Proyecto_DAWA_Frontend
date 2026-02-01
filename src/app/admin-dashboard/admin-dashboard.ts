@@ -3,14 +3,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router'; 
 import { ServicioAutorizacion } from '../autorizacion.service';
-import { ServicioArchivos, Archivo } from '../servicios/servicio-archivos';
+import { ServicioArchivos } from '../servicios/servicio-archivos';
+import { Archivo } from '../interfaces/archivo-interface';
 import { CrudArchivos } from '../crud-archivos/crud-archivos';
 import { ListaUsuarios } from '../lista-usuarios/lista-usuarios';
 import { CrearCurso } from '../crear-curso/crear-curso';
-import { Usuario } from '../servicios/servicio-usuarios';
+import { Usuario } from '../interfaces/usuario-interface';
 import { ServicioUsuarios } from '../servicios/servicio-usuarios';
 import { ServicioCursos } from '../servicios/servicio-cursos';
-import { Curso } from '../servicios/servicio-cursos';
+import { Curso } from '../interfaces/curso-interface';
 import { MatIcon } from "@angular/material/icon";
 import { ServiceEvaluacion } from '../servicios/service-evaluacion';
 import { Evaluation } from '../evaluation/evaluation';
@@ -141,9 +142,15 @@ onCursoEditado(curso: Curso): void {
     }
   }
 
-  cargarArchivos(): void {
-    this.archivos = this.servicioArchivos.obtenerArchivos();
+async cargarArchivos(): Promise<void> {
+  try {
+    this.archivos = await this.servicioArchivos.obtenerTodosLosArchivos();
+  } catch (error) {
+    console.error('Error cargando archivos:', error);
+    this.archivos = [];
   }
+}
+
 
   volverInicio() {
     this.vistaActual = 'inicio';

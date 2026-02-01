@@ -1,19 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Archivo } from './servicio-archivos';
-
-export interface Curso {
-  id: number;
-  titulo: string;
-  descripcion: string;
-  archivos: Archivo[];
-  progreso: number;
-  instructor: string;
-  fechaCreacion: Date;
-  fechaActualizacion: Date;
-  nivel: string;    
-  duracion: number;  
-}
-
+import { Archivo } from '../interfaces/archivo-interface';
+import { Curso } from '../interfaces/curso-interface';
 @Injectable({
   providedIn: 'root'
 })
