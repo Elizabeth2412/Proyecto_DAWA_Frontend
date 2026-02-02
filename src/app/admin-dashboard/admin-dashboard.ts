@@ -15,6 +15,7 @@ import { Curso } from '../interfaces/curso-interface';
 import { MatIcon } from "@angular/material/icon";
 import { ServiceEvaluacion } from '../servicios/service-evaluacion';
 import { Evaluation } from '../evaluation/evaluation';
+import { Evaluacion } from '../interfaces/evaluacion-interface';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -26,6 +27,7 @@ import { Evaluation } from '../evaluation/evaluation';
 export class AdminDashboard implements OnInit {
   usuarioActual: Usuario | null = null;
   archivos: Archivo[] = [];
+  evaluaciones: Evaluacion[] = [];
   vistaActual: string = 'inicio';
   totalUsuarios: number = 0;
   totalCursos: number = 0;
@@ -47,21 +49,6 @@ export class AdminDashboard implements OnInit {
     
   ) {}
 
-  cargarTotalEvaluaciones(): void {
-    try {
-      const data = localStorage.getItem('evaluaciones');
-      if (data) {
-        const evaluaciones = JSON.parse(data);
-        this.totalEvaluaciones = evaluaciones.length;
-      } else {
-        this.totalEvaluaciones = 0;
-      }
-    } catch (error) {
-      console.error('Error cargando evaluaciones:', error);
-      this.totalEvaluaciones = 0;
-    }
-  }
-
   ngOnInit(): void {
     this.usuarioActual = this.usuariologueado.obtenerUsuarioActual();
     
@@ -76,17 +63,34 @@ export class AdminDashboard implements OnInit {
     this.totalCursos = this.servicioCursos.obtenerCursos().length;
     this.cargarTotalEvaluaciones();
   }
-onCursoEditado(curso: Curso): void {
-  console.log('Curso recibido para editar:', curso);
-  // Usar el servicio para preparar el curso para edición
-  this.cursoEditando = this.servicioCursos.prepararEdicionCurso(curso);
-  this.mostrarModalCurso = true;
-  
-  // Forzar detección de cambios
-  setTimeout(() => {
-    this.cdr?.detectChanges();
-  }, 0);
-}
+
+
+  cargarTotalEvaluaciones(): void {
+    this.servicioEvaluaciones.obtenerEvaluaciones().subscribe({
+      next: (evaluaciones) => {
+        this.evaluaciones = evaluaciones;
+        this.totalEvaluaciones = this.evaluaciones.length;
+      },
+      error: (error) => {
+        console.error('Error cargando evaluaciones:', error);
+        this.evaluaciones = [];
+        this.totalEvaluaciones = 0;
+      }
+    });
+  }
+
+
+  onCursoEditado(curso: Curso): void {
+    console.log('Curso recibido para editar:', curso);
+    // Usar el servicio para preparar el curso para edición
+    this.cursoEditando = this.servicioCursos.prepararEdicionCurso(curso);
+    this.mostrarModalCurso = true;
+    
+    // Forzar detección de cambios
+    setTimeout(() => {
+      this.cdr?.detectChanges();
+    }, 0);
+  }
 
   onCursoGuardado(curso: Curso): void {
     this.cursoEditando = null;
@@ -142,14 +146,14 @@ onCursoEditado(curso: Curso): void {
     }
   }
 
-async cargarArchivos(): Promise<void> {
-  try {
-    this.archivos = await this.servicioArchivos.obtenerTodosLosArchivos();
-  } catch (error) {
-    console.error('Error cargando archivos:', error);
-    this.archivos = [];
+  async cargarArchivos(): Promise<void> {
+    try {
+      this.archivos = await this.servicioArchivos.obtenerTodosLosArchivos();
+    } catch (error) {
+      console.error('Error cargando archivos:', error);
+      this.archivos = [];
+    }
   }
-}
 
 
   volverInicio() {
