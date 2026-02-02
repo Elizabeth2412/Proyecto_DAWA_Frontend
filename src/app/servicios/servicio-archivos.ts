@@ -6,6 +6,7 @@ import { ServicioCursos } from './servicio-cursos';
 import { Archivo } from '../interfaces/archivo-interface';
 import { Curso } from '../interfaces/curso-interface';
 import { environment } from '../environments/environment.development';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -236,36 +237,38 @@ export class ServicioArchivos {
   }
 
   // Métodos de utilidad para cursos
-  actualizarArchivoEnCursos(archivoActualizado: Archivo): void {
-    const cursos = this.servicioCursos.obtenerCursos();
-
-    cursos.forEach(curso => {
-      const indice = curso.archivos.findIndex(a => a.id === archivoActualizado.id);
+actualizarArchivoEnCursos(archivoActualizado: Archivo): void {
+  this.servicioCursos.obtenerCursos().subscribe((cursos: Curso[]) => {
+    cursos.forEach((curso: Curso) => {
+      const indice = curso.archivos.findIndex((a: Archivo) => a.id === archivoActualizado.id);
       if (indice !== -1) {
         curso.archivos[indice] = { ...curso.archivos[indice], ...archivoActualizado };
-        this.servicioCursos.actualizarCurso(curso);
+        this.servicioCursos.actualizarCurso(curso).subscribe();
       }
     });
-  }
+  });
+}
+
 
   eliminarArchivoDeCursos(idArchivo: number): void {
-    const cursos = this.servicioCursos.obtenerCursos();
-
-    cursos.forEach(curso => {
-      const archivoExiste = curso.archivos.some(a => a.id === idArchivo);
-      if (archivoExiste) {
-        curso.archivos = curso.archivos.filter(a => a.id !== idArchivo);
-        this.servicioCursos.actualizarCurso(curso);
-      }
+  this.servicioCursos.obtenerCursos().subscribe((cursos: Curso[]) => {
+    cursos.forEach((curso: Curso) => {
+      curso.archivos = curso.archivos.filter((a: Archivo) => a.id !== idArchivo);
+      this.servicioCursos.actualizarCurso(curso).subscribe();
     });
-  }
+  });
+}
 
-  obtenerCursosConArchivo(idArchivo: number): Curso[] {
-    const cursos = this.servicioCursos.obtenerCursos();
-    return cursos.filter(curso =>
-      curso.archivos.some(archivo => archivo.id === idArchivo)
-    );
-  }
+  obtenerCursosConArchivo(idArchivo: number): Observable<Curso[]> {
+  return this.servicioCursos.obtenerCursos().pipe(
+    map((cursos: Curso[]) =>
+      cursos.filter((curso: Curso) =>
+        curso.archivos.some((archivo: Archivo) => archivo.id === idArchivo)
+      )
+    )
+  );
+}
+
 
   // Métodos para procesar archivos
   async procesarArchivoSeleccionado(evento: any): Promise<{ archivo: File | null; error: string | null }> {

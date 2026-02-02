@@ -25,10 +25,18 @@ export class ListaCursosComponent implements OnInit {
     this.cargarCursos();
   }
 
-  cargarCursos(): void {
-    this.cursos = this.servicioCursos.obtenerCursos();
-    this.cursosFiltrados = [...this.cursos];
-  }
+cargarCursos(): void {
+  this.servicioCursos.obtenerCursos().subscribe({
+    next: (cursos: Curso[]) => {
+      this.cursos = cursos;
+      this.cursosFiltrados = [...this.cursos];
+    },
+    error: (error) => {
+      console.error('Error al cargar cursos:', error);
+    }
+  });
+}
+
 
   filtrarCursos(): void {
     this.cursosFiltrados = this.cursos.filter((curso) => {

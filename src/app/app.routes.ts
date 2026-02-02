@@ -1,3 +1,4 @@
+//src/app/app.routes.ts
 import { Routes } from '@angular/router';
 import { Login } from './login/login';
 import { AdminDashboard } from './admin-dashboard/admin-dashboard';

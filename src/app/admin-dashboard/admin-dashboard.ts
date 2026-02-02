@@ -49,20 +49,35 @@ export class AdminDashboard implements OnInit {
     
   ) {}
 
-  ngOnInit(): void {
-    this.usuarioActual = this.usuariologueado.obtenerUsuarioActual();
-    
-    // Verificar permisos
-    if (!this.usuarioActual || this.usuarioActual.tipo !== 'administrador') {
-      this.router.navigate(['/login']);
-      return;
-    }
-    
-    this.cargarArchivos();
-    this.totalUsuarios = this.servicioUsuarios.obtenerTotalUsuarios();
-    this.totalCursos = this.servicioCursos.obtenerCursos().length;
-    this.cargarTotalEvaluaciones();
+ngOnInit(): void {
+  this.usuarioActual = this.usuariologueado.obtenerUsuarioActual();
+
+  // Verificar permisos
+  if (!this.usuarioActual || this.usuarioActual.tipo !== 'administrador') {
+    this.router.navigate(['/login']);
+    return;
   }
+
+  this.cargarArchivos();
+
+  // TOTAL USUARIOS (Observable)
+  this.servicioUsuarios.obtenerTotalUsuarios().subscribe({
+    next: (total) => this.totalUsuarios = total,
+    error: () => this.totalUsuarios = 0
+  });
+
+  this.servicioCursos.obtenerCursos().subscribe({
+  next: (cursos: Curso[]) => {
+    this.totalCursos = cursos.length;
+  },
+  error: () => {
+    this.totalCursos = 0;
+  }
+});
+
+  // TOTAL EVALUACIONES
+  this.cargarTotalEvaluaciones();
+}
 
 
   cargarTotalEvaluaciones(): void {
@@ -95,7 +110,14 @@ export class AdminDashboard implements OnInit {
   onCursoGuardado(curso: Curso): void {
     this.cursoEditando = null;
     this.mostrarModalCurso = false;
-    this.totalCursos = this.servicioCursos.obtenerCursos().length;
+this.servicioCursos.obtenerCursos().subscribe({
+  next: (cursos: Curso[]) => {
+    this.totalCursos = cursos.length;
+    this.recargarTablaCursos();
+  },
+  error: () => this.totalCursos = 0
+});
+
     this.recargarTablaCursos();
   }
 
@@ -117,7 +139,14 @@ export class AdminDashboard implements OnInit {
     this.cerrarModal();
     alert('Curso actualizado exitosamente.');
     
-    this.totalCursos = this.servicioCursos.obtenerCursos().length;
+this.servicioCursos.obtenerCursos().subscribe({
+  next: (cursos: Curso[]) => {
+    this.totalCursos = cursos.length;
+    this.recargarTablaCursos();
+  },
+  error: () => this.totalCursos = 0
+});
+    
     this.recargarTablaCursos();
   }
 

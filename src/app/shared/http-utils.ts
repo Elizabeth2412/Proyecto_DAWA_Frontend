@@ -1,3 +1,4 @@
+//src/app/shared/http-utils.ts
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Resultado } from '../interfaces/Respuesta-interface';
