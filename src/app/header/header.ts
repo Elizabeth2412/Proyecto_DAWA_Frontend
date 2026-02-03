@@ -67,7 +67,8 @@ export class Header implements OnInit {
         this.cerrarSesion();
       }
     } else {
-      this.openDialogLogin();
+          this.router.navigate(['/login']);
+
     }
   }
 
@@ -108,7 +109,7 @@ export class Header implements OnInit {
     
     if (!usuario) {
       alert('Debes iniciar sesión para acceder a esta sección.');
-      this.openDialogLogin();
+      this.router.navigate(['/login']);
       return;
     }
 
@@ -124,7 +125,7 @@ export class Header implements OnInit {
     
     if (!usuario) {
       alert('Debes iniciar sesión para acceder a esta sección.');
-      this.openDialogLogin();
+      this.router.navigate(['/login']);
       return;
     }
 
@@ -140,7 +141,7 @@ export class Header implements OnInit {
     
     if (!usuario) {
       alert('Debes iniciar sesión para acceder a esta sección.');
-      this.openDialogLogin();
+      this.router.navigate(['/login']);
       return;
     }
 
@@ -156,7 +157,7 @@ export class Header implements OnInit {
     if (!this.usuarioLogueado) {
       event.preventDefault();
       alert('Debes iniciar sesión para acceder a esta sección.');
-      this.openDialogLogin();
+      this.router.navigate(['/login']);
       return;
     }
 

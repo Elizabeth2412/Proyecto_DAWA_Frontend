@@ -38,9 +38,20 @@ export class EstudianteDashboard implements OnInit {
     });
   }
 
-  cargarCursos(): void {
-    this.cursos = this.servicioCursos.obtenerCursos();
-  }
+cargarCursos(): void {
+  this.cargando = true;
+
+  this.servicioCursos.obtenerCursos().subscribe({
+    next: (cursos: Curso[]) => {
+      this.cursos = cursos;
+      this.cargando = false;
+    },
+    error: (error) => {
+      console.error('Error al cargar cursos:', error);
+      this.cargando = false;
+    }
+  });
+}
 
   seleccionarCurso(curso: Curso): void {
     this.cursoSeleccionado = this.cursoSeleccionado?.id === curso.id ? null : curso;

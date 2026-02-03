@@ -25,9 +25,10 @@ export class ServicioAutorizacion {
   /**
    * Valida las credenciales del usuario
    */
-  validarCredenciales(email: string, password: string): Usuario | null {
-    return this.servicioUsuarios.validarCredenciales(email, password);
-  }
+validarCredenciales(email: string, password: string): Observable<Usuario | null> {
+  return this.servicioUsuarios.validarCredenciales(email, password);
+}
+
     /**
    * Inicia sesión con un usuario válido
    */
@@ -86,74 +87,49 @@ export class ServicioAutorizacion {
   /**
    * Obtiene todos los usuarios (delegado a ServicioUsuarios)
    */
-  obtenerTodosUsuarios(): Usuario[] {
-    return this.servicioUsuarios.obtenerTodosUsuarios();
-  }
-  // Método de login con backend
- login(email: string, password: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      // Primero intentar con backend
-      this.servicioUsuarios.loginBackend({ email, password }).subscribe({
-        next: (response: any) => {
-          if (response && response.Respuesta === 'Ok') {
-            // Obtener datos del usuario desde backend
-            this.servicioUsuarios.getUsuarioInfoBackend(email).subscribe({
-              next: (userResponse: any) => {
-                if (userResponse && userResponse.Data && userResponse.Data.length > 0) {
-                  const usuarioBackend = userResponse.Data[0];
-                  
-                  // Convertir a interfaz Usuario local
-                  const usuario: Usuario = {
-                    email: usuarioBackend.Email || email,
-                    password: password, // Guardar temporalmente
-                    tipo: this.determinarTipoUsuario(usuarioBackend.Rol),
-                    nombre: usuarioBackend.Nombre || '',
-                    apellido: usuarioBackend.Apellido || '',
-                    edad: usuarioBackend.Edad
-                  };
-                  
-                  this.iniciarSesion(usuario);
-                  resolve(true);
-                } else {
-                  // Si backend no retorna datos, usar validación local
-                  this.loginLocal(email, password, resolve, reject);
-                }
-              },
-              error: (error) => {
-                // Fallback a validación local
-                console.warn('Error al obtener info de backend, usando local:', error);
-                this.loginLocal(email, password, resolve, reject);
-              }
-            });
-          } else {
-            // Fallback a validación local
-            this.loginLocal(email, password, resolve, reject);
-          }
-        },
-        error: (error) => {
-          // Fallback a validación local si hay error de conexión
-          console.warn('Error de conexión al backend, usando local:', error);
-          this.loginLocal(email, password, resolve, reject);
-        }
-      });
-    });
-  }
+obtenerTodosUsuarios(): Observable<Usuario[]> {
+  return this.servicioUsuarios.obtenerTodosUsuarios();
+}
+login(email: string, password: string): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    this.servicioUsuarios.loginBackend({ email, password }).subscribe({
+      next: (response: any) => {
+        console.log('Respuesta del login:', response);
 
-  // Método de login local (fallback)
-  private loginLocal(
-    email: string, 
-    password: string, 
-    resolve: (value: boolean) => void, 
-    reject: (reason?: any) => void
-  ): void {
-    const usuario = this.servicioUsuarios.validarCredenciales(email, password);
-    if (usuario) {
-      this.iniciarSesion(usuario);
-      resolve(true);
-    } else {
-      reject('Credenciales incorrectas');
-    }
-  }
+        // ✅ USAR nombres correctos (minúsculas)
+        if (response?.respuesta === 'Ok' && response.data?.usuario) {
+
+          const usuarioData = response.data.usuario;
+
+          const usuario: Usuario = {
+            email: usuarioData.email || usuarioData.Email || email,
+            password: password,
+            tipo: usuarioData.tipo || usuarioData.Tipo || 'estudiante',
+            nombre: usuarioData.nombre || usuarioData.Nombre || '',
+            apellido: usuarioData.apellido || usuarioData.Apellido || '',
+            edad: usuarioData.edad || usuarioData.Edad || 0,
+            id: usuarioData.id || usuarioData.Id || 0
+          };
+
+          // ✅ Guardar token correctamente
+          if (response.data.token) {
+            localStorage.setItem(this.claveToken, response.data.token);
+          }
+
+          this.iniciarSesion(usuario);
+          resolve(true);
+
+        } else {
+          reject('Credenciales inválidas');
+        }
+      },
+      error: (error) => {
+        console.error('Error login backend:', error);
+        reject('Error de conexión con el servidor');
+      }
+    });
+  });
+}
 
   // Determinar tipo de usuario desde el rol del backend
   private determinarTipoUsuario(rolBackend: string): 'administrador' | 'instructor' | 'estudiante' {
@@ -194,23 +170,14 @@ export class ServicioAutorizacion {
 
   // Método de registro unificado
   registrarUsuario(usuarioData: any, usarBackend: boolean = true): Promise<any> {
-    if (usarBackend) {
+    
       return new Promise((resolve, reject) => {
         this.registrarUsuarioBackend(usuarioData).subscribe({
           next: (response) => resolve(response),
           error: (error) => reject(error)
         });
       });
-    } else {
-      // Registro local
-      return new Promise((resolve, reject) => {
-        const result = this.servicioUsuarios.registrarUsuario(usuarioData);
-        if (result.exito) {
-          resolve(result);
-        } else {
-          reject(result.mensaje);
-        }
-      });
-    }
+    
+    
   }
 }

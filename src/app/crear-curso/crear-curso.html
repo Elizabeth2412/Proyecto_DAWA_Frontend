@@ -1,4 +1,4 @@
-<!-- ========== VISTA TABLA (PARA ADMIN) ========== -->
+<!-- ========== VISTA TABLA (PARA ADMIN/INSTRUCTOR) ========== -->
 <div *ngIf="modo === 'tabla'" style="padding: 40px;">
   
   <!-- Controles de Búsqueda y Filtros -->
@@ -45,26 +45,27 @@
       <h4 class="mb-0">
         <i class="bi bi-journal-text me-2"></i>
         Gestión de Cursos
+        <span class="badge bg-secondary ms-2">
+          {{cursos.length}} curso(s)
+        </span>
       </h4>
     </div>
     
     <div class="card-body">
       <!-- Contador -->
       <div class="mb-3">
-<span class="badge bg-success">
-  Total: {{ dataSource.data.length }} curso(s)
-</span>
+        <span class="badge bg-success" *ngIf="dataSource">
+          Total: {{ dataSource.data.length }} curso(s)
+        </span>
 
-<span class="badge bg-info ms-2" *ngIf="terminoBusqueda || filtroNivel">
-  Filtrados: {{ dataSource.data.length }} de {{ cursos.length }}
-</span>
-
-
+        <span class="badge bg-info ms-2" *ngIf="terminoBusqueda || filtroNivel">
+          Filtrados: {{ dataSource.data.length }} de {{ cursos.length }}
+        </span>
       </div>
 
       <!-- Tabla -->
       <div class="table-responsive">
-        <table mat-table [dataSource]="dataSource" class="w-100 tabla-cursos">
+        <table mat-table *ngIf="dataSource" [dataSource]="dataSource">
           
           <!-- Columna # -->
           <ng-container matColumnDef="numero">
@@ -111,20 +112,22 @@
             <th mat-header-cell *matHeaderCellDef class="columna-header">Acciones</th>
             <td mat-cell *matCellDef="let curso" class="columna-celda">
               <div class="acciones">
+                <!-- CORREGIDO: Pasar el curso al método puedeEditarEliminar -->
                 <button class="btn-modificar" 
                         (click)="editarCurso(curso)"
                         title="Editar"
-                        *ngIf="puedeEditarEliminar()">
+                        *ngIf="puedeEditarEliminar(curso)">
                   <mat-icon>edit</mat-icon>
                 </button>
                 <button class="btn-eliminar" 
                         (click)="eliminarCurso(curso)"
                         title="Eliminar"
-                        *ngIf="puedeEditarEliminar()">
+                        *ngIf="puedeEditarEliminar(curso)">
                   <mat-icon>delete</mat-icon>
                 </button>
-                <span *ngIf="!puedeEditarEliminar()" class="text-muted">
-                  No disponible
+                <!-- Mostrar mensaje solo si no tiene permisos -->
+                <span *ngIf="!puedeEditarEliminar(curso)" class="text-muted small">
+                  Sin permisos
                 </span>
               </div>
             </td>
@@ -147,6 +150,7 @@
     </div>
   </div>
 </div>
+
 
 <!-- ========== VISTA FORMULARIO (PARA ADMIN/INSTRUCTOR) ========== -->
 <div *ngIf="modo === 'formulario'" class="crear-curso-container">
