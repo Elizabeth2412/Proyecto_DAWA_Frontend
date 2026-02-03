@@ -287,39 +287,41 @@ obtenerTodosLosCursos(): Observable<Curso[]> {
   return new Observable(observer => {
     // Primero subir el archivo
     const formData = new FormData();
-    formData.append('archivo', archivo);
-    formData.append('descripcion', descripcion);
-    formData.append('usuario', usuario);
-    formData.append('Transaccion', 'INSERTAR_ARCHIVO'); 
-
-    this.http.post(`${this.baseUrl}/Archivo/SetArchivo`, formData).subscribe({
+    formData.append('Archivo', archivo); // Nota: Mayúscula 'Archivo' como espera el backend
+    formData.append('Descripcion', descripcion);
+    formData.append('Usuario', usuario);
+    formData.append('Transaccion', 'INSERTAR_ARCHIVO');
+ this.http.post(`${this.baseUrl}/Archivo/SetArchivo`, formData).subscribe({
       next: (response: any) => {
-        console.log('Respuesta de subida de archivo:', response);
+        console.log('Respuesta completa de subida:', response);
         const respuesta = response.respuesta || response.Respuesta;
         const leyenda = response.leyenda || response.Leyenda;
         
         if (respuesta === 'Ok') {
-          // Obtener el ID del archivo subido
-          const archivoId = response.Data?.id || response.data?.id;
+          // Intentar extraer el ID del archivo del mensaje
+          const idMatch = leyenda.match(/ID:\s*(\d+)/);
+          let archivoId: number | null = null;
+          
+          if (idMatch && idMatch[1]) {
+            archivoId = parseInt(idMatch[1]);
+          } else if (response.data?.id) {
+            archivoId = response.data.id;
+          } else if (response.Data?.id) {
+            archivoId = response.Data.id;
+          }
           
           if (archivoId) {
-            console.log('Archivo subido con ID:', archivoId);
+            console.log('ID del archivo encontrado:', archivoId);
             
-            // Ahora asociar el archivo al curso usando el SP SetCursoArchivo
+            // Ahora asociar el archivo al curso
             const cursoArchivoData = {
               CursoId: cursoId,
               ArchivoId: archivoId,
               Transaccion: 'AGREGAR_ARCHIVO_CURSO'
             };
 
-            // Crear XML para el SP
-            const xml = this.crearXMLParaSP(cursoArchivoData);
-            const body = {
-              iTransaccion: 'AGREGAR_ARCHIVO_CURSO',
-              iXML: xml
-            };
-
-            this.http.post(`${this.baseUrl}/CursoArchivo/SetCursoArchivo`, body).subscribe({
+            // Enviar directamente el objeto JSON
+            this.http.post(`${this.baseUrl}/CursoArchivo/AgregarArchivoACurso`, cursoArchivoData).subscribe({
               next: (relacionResponse: any) => {
                 console.log('Respuesta de asociación:', relacionResponse);
                 const relacionRespuesta = relacionResponse.respuesta || relacionResponse.Respuesta;
@@ -329,7 +331,7 @@ obtenerTodosLosCursos(): Observable<Curso[]> {
                   observer.next({
                     respuesta: 'Ok',
                     leyenda: 'Archivo subido y asociado al curso correctamente',
-                    data: response.data
+                    data: { archivoId: archivoId }
                   });
                   observer.complete();
                 } else {
@@ -342,8 +344,8 @@ obtenerTodosLosCursos(): Observable<Curso[]> {
               }
             });
           } else {
-            console.error('No se pudo obtener el ID del archivo subido');
-            observer.error(new Error('Archivo subido pero no se pudo obtener su ID'));
+            console.error('No se pudo extraer el ID del archivo. Respuesta:', response);
+            observer.error(new Error('Archivo subido pero no se pudo obtener su ID. Mensaje: ' + leyenda));
           }
         } else {
           observer.error(new Error(leyenda || 'Error al subir archivo'));
@@ -357,13 +359,6 @@ obtenerTodosLosCursos(): Observable<Curso[]> {
   });
 }
 
-// Método auxiliar para crear XML
-private crearXMLParaSP(data: any): string {
-  return `<CursoArchivo>
-    <CursoId>${data.CursoId}</CursoId>
-    <ArchivoId>${data.ArchivoId}</ArchivoId>
-  </CursoArchivo>`;
-}
   /**
    * Obtiene cursos filtrados por nivel
    */

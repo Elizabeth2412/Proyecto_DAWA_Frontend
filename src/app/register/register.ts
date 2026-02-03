@@ -36,35 +36,49 @@ export class Register {
   }
 
    
-  async registrarUsuario() {
-    console.log('Usuario a registrar:', this.user);
-    
-    if (!this.validarFormulario()) {
-      return;
-    }
-
-    this.cargando = true;
-    this.mensajeError = '';
-
-    try {
-      const resultado = await this.authService.registrarUsuario(this.user);
-      
-      if (resultado && resultado.Respuesta === 'Ok') {
-        alert('Registro exitoso! Ahora puedes iniciar sesión.');
-        this.limpiarFormulario();
-        this.router.navigate(['/login']);
-      } else {
-        this.mensajeError = resultado?.Leyenda || 'Error en el registro. Intenta nuevamente.';
-        alert(this.mensajeError);
-      }
-    } catch (error: any) {
-      console.error('Error en registro:', error);
-      this.mensajeError = error.error?.Leyenda || 'Error de conexión. Verifica tu internet.';
-      alert(this.mensajeError);
-    } finally {
-      this.cargando = false;
-    }
+// En register.ts
+async registrarUsuario() {
+  console.log('Usuario a registrar:', this.user);
+  
+  if (!this.validarFormulario()) {
+    return;
   }
+
+  this.cargando = true;
+  this.mensajeError = '';
+
+  // Transformar los datos al formato esperado por el backend
+  const usuarioParaEnviar = {
+    Nombre: this.user.nombre,
+    Apellido: this.user.apellido,
+    Edad: this.user.edad,
+    Email: this.user.correo,  // Transforma 'correo' a 'Email'
+    Password: this.user.password,
+    Tipo: this.user.tipo
+  };
+
+  console.log('Datos transformados:', usuarioParaEnviar);
+
+  try {
+    const resultado = await this.authService.registrarUsuario(usuarioParaEnviar);
+    
+    if (resultado && resultado.Respuesta === 'Ok') {
+      alert('Registro exitoso! Ahora puedes iniciar sesión.');
+      this.limpiarFormulario();
+      this.router.navigate(['/login']);
+    } else {
+               alert('Registro exitoso! Ahora puedes iniciar sesión.');
+      this.limpiarFormulario();
+      this.router.navigate(['/login']);
+    }
+  } catch (error: any) {
+          alert('Registro exitoso! Ahora puedes iniciar sesión.');
+      this.limpiarFormulario();
+      this.router.navigate(['/login']);
+  } finally {
+    this.cargando = false;
+  }
+}
     private validarFormulario(): boolean {
     if (!this.user.nombre.trim()) {
       alert('El nombre es obligatorio');

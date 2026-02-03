@@ -313,41 +313,75 @@ editarCurso(curso: Curso): void {
   }
 }
     eliminarCurso(curso: Curso): void {
-    if (this.usuarioActual?.tipo !== 'administrador' && this.usuarioActual?.tipo !== 'instructor') {
-      alert('No tienes permisos para eliminar cursos');
-      return;
-    }
-
-    const confirmar = window.confirm(
-      `¿Está seguro de que desea eliminar el curso "${curso.titulo}"?\n\n` +
-        `Esta acción eliminará ${curso.archivos.length} archivo(s) y no se puede deshacer.`
-    );
-
-    if (!confirmar) return;
-
-    try {
-      // Eliminar archivos físicos
-      curso.archivos.forEach(archivo => {
-        if (archivo.id) {
-          this.servicioArchivos.eliminarArchivoCompleto(archivo.id);
-        }
-      });
-
-      // Eliminar curso
-      this.servicioCursos.eliminarCurso(curso.id);
-
-      if (this.cursoSeleccionado && this.cursoSeleccionado.id === curso.id) {
-        this.cursoSeleccionado = null;
-      }
-
-      this.cargarCursos();
-      alert('Curso eliminado exitosamente.');
-    } catch (error) {
-      console.error('Error al eliminar curso:', error);
-      alert('Error al eliminar el curso. Por favor, intente nuevamente.');
-    }
+  if (this.usuarioActual?.tipo !== 'administrador' && this.usuarioActual?.tipo !== 'instructor') {
+    alert('No tienes permisos para eliminar cursos');
+    return;
   }
 
+  const confirmar = window.confirm(
+    `¿Está seguro de que desea eliminar el curso "${curso.titulo}"?\n\n` +
+    `Esta acción eliminará ${curso.archivos.length} archivo(s) y no se puede deshacer.`
+  );
+
+  if (!confirmar) return;
+
+  this.cargando = true;
+
+  try {
+    // 1. Primero eliminar todos los archivos asociados al curso
+    const promesasEliminarArchivos = curso.archivos.map(archivo => {
+      if (archivo.id) {
+        // Eliminar del sistema de archivos
+        return this.servicioArchivos.eliminarArchivoCompleto(archivo.id).catch(error => {
+          console.warn(`No se pudo eliminar archivo ${archivo.nombre}:`, error);
+          return Promise.resolve();
+        });
+      }
+      return Promise.resolve();
+    });
+
+    // 2. Esperar a que se eliminen todos los archivos
+    Promise.all(promesasEliminarArchivos)
+      .then(() => {
+        // 3. Ahora eliminar el curso del backend
+        this.servicioCursos.eliminarCurso(curso.id).subscribe({
+          next: (response: any) => {
+            const respuesta = response.respuesta || response.Respuesta;
+            const leyenda = response.leyenda || response.Leyenda;
+
+            if (respuesta === 'Ok') {
+              // Actualizar la vista local
+              if (this.cursoSeleccionado && this.cursoSeleccionado.id === curso.id) {
+                this.cursoSeleccionado = null;
+              }
+
+              // Recargar la lista de cursos
+              this.cargarCursos();
+              
+              alert(leyenda || 'Curso eliminado exitosamente.');
+            } else {
+              alert(leyenda || 'Error al eliminar el curso en el servidor.');
+            }
+            this.cargando = false;
+          },
+          error: (error) => {
+            console.error('Error al eliminar curso del backend:', error);
+            alert('Error al eliminar el curso del servidor. Por favor, intente nuevamente.');
+            this.cargando = false;
+          }
+        });
+      })
+      .catch(error => {
+        console.error('Error al eliminar archivos:', error);
+        alert('Error al eliminar archivos del curso. Por favor, intente nuevamente.');
+        this.cargando = false;
+      });
+  } catch (error) {
+    console.error('Error en el proceso de eliminación:', error);
+    alert('Error en el proceso de eliminación. Por favor, intente nuevamente.');
+    this.cargando = false;
+  }
+}
 
   async editarArchivo(curso: Curso, Archivo: Archivo): Promise<void> {
     this.modoEdicion = true;
