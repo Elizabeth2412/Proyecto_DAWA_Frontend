@@ -3,12 +3,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router,ActivatedRoute, NavigationEnd   } from '@angular/router';
 import { ServicioAutorizacion } from '../autorizacion.service';
-import { ServicioCursos, Curso } from '../servicios/servicio-cursos';
-import { ServicioArchivos, Archivo } from '../servicios/servicio-archivos';
-import { ServicioAlmacenamientoSession } from '../servicios/servicio-almacenamiento-session'; // .
-import { Usuario } from '../servicios/servicio-usuarios';
+import { ServicioCursos } from '../servicios/servicio-cursos';
+import { Curso } from '../interfaces/curso-interface';
+import { Archivo } from '../interfaces/archivo-interface';
+import { ServicioArchivos } from '../servicios/servicio-archivos';
+import { Usuario } from '../interfaces/usuario-interface';
 import { CrearCurso } from '../crear-curso/crear-curso';
 import { filter, Subscription } from 'rxjs';
+import { forkJoin } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-instructor-dashboard',
@@ -49,7 +52,6 @@ export class InstructorDashboard implements OnInit {
     private servicioAutorizacion: ServicioAutorizacion,
     private servicioCursos: ServicioCursos,
     private servicioArchivos: ServicioArchivos,
-    private almacenamientoSession: ServicioAlmacenamientoSession, // .
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
@@ -68,22 +70,45 @@ ngOnInit(): void {
     if (this.routerSub) this.routerSub.unsubscribe();
     if (this.routeSub) this.routeSub.unsubscribe();
   }
-  
 cargarCursos(): void {
-  if (this.usuarioActual && this.usuarioActual.email) {
-    // Si es administrador, mostrar todos los cursos
-    if (this.usuarioActual.tipo === 'administrador') {
-      this.cursos = this.servicioCursos.obtenerCursos();
-    } else {
-      // Si es instructor, mostrar solo sus cursos
-      this.cursos = this.servicioCursos.obtenerCursosPorInstructor(this.usuarioActual.email);
-    }
+  if (!this.usuarioActual?.email) return;
+
+  this.cargando = true;
+
+  let cursos$;
+
+  if (this.usuarioActual.tipo === 'administrador') {
+cursos$ = this.servicioCursos.obtenerTodosLosCursos();
   } else {
-    this.cursos = this.servicioCursos
-      .obtenerCursos()
-      .filter((curso) => curso.instructor === 'invitado@gmail.com' || !curso.instructor);
+    cursos$ = this.servicioCursos.obtenerCursosPorInstructor(this.usuarioActual.email).pipe(
+      switchMap(cursos => {
+        // Para cada curso, obtener sus archivos
+        const cursosConArchivos$ = cursos.map(curso => 
+          this.servicioCursos.obtenerArchivosDeCurso(curso.id).pipe(
+            map(archivos => ({
+              ...curso,
+              archivos: archivos
+            }))
+          )
+        );
+        return forkJoin(cursosConArchivos$);
+      })
+    );
   }
+
+  cursos$.subscribe({
+    next: (cursos: Curso[]) => {
+      this.cursos = cursos;
+      this.cargando = false;
+      console.log('Cursos cargados con archivos:', cursos);
+    },
+    error: (err) => {
+      console.error('Error al cargar cursos:', err);
+      this.cargando = false;
+    }
+  });
 }
+
   async onArchivoSeleccionado(evento: any): Promise<void> {
     const resultado = await this.servicioArchivos.procesarArchivoSeleccionado(evento);
 
@@ -94,50 +119,52 @@ cargarCursos(): void {
 
     this.archivoSeleccionado = resultado.archivo;
   }
-  async subirArchivo(): Promise<void> {
-    if (!this.archivoSeleccionado || !this.usuarioActual) return;
-
-    this.cargando = true;
-
-    const resultado = await this.servicioArchivos.subirArchivo(
-      this.archivoSeleccionado,
-      this.cursoSeleccionado,
-      this.modoEdicion,
-      this.cursoEditando,
-      this.archivoEditando,
-      this.usuarioActual.email
-    );
-
-    if (resultado.exito) {
-      if (resultado.necesitaActualizar && this.cursoEditando && this.archivoEditando) {
-        // Actualizar Archivo existente en el curso
-        const archivoActualizada: Archivo = {
-          ...this.archivoEditando,
-          nombre: this.servicioArchivos.eliminarExtension(this.archivoSeleccionado.name),
-          tipo: this.archivoSeleccionado.name.toLowerCase().endsWith('.pdf') ? 'PDF' : 'PPTX',
-          archivoId: `archivo_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-          fechaSubida: new Date(),
-          tamano: this.archivoSeleccionado.size,
-        };
-
-        this.servicioCursos.actualizarArchivoEnCurso(this.cursoEditando.id, archivoActualizada);
-      } else if (resultado.Archivo && this.cursoSeleccionado) {
-        // Agregar nueva Archivo al curso
-        this.servicioCursos.agregarArchivoACurso(this.cursoSeleccionado.id, resultado.Archivo);
-      }
-
-      // Sincronizar UNA SOLA VEZ después de todas las operaciones
-      this.servicioArchivos.sincronizarArchivosDesdeCursos(this.cursos);
-
-      this.cargarCursos();
-      this.limpiarEstado();
-      alert(resultado.mensaje);
-    } else {
-      alert(resultado.mensaje);
-    }
-
-    this.cargando = false;
+async subirArchivo(): Promise<void> {
+  if (!this.archivoSeleccionado || !this.usuarioActual) {
+    alert('Por favor, selecciona un archivo primero');
+    return;
   }
+
+  if (!this.cursoSeleccionado) {
+    alert('Por favor, selecciona un curso para subir el archivo');
+    return;
+  }
+
+  this.cargando = true;
+
+  const descripcion = `Archivo para curso: ${this.cursoSeleccionado.titulo}`;
+
+  this.servicioCursos.subirArchivoACurso(
+    this.cursoSeleccionado.id,
+    this.archivoSeleccionado,
+    descripcion,
+    this.usuarioActual.email
+  ).subscribe({
+    next: (response: any) => {
+      const respuesta = response.respuesta || response.Respuesta;
+      const leyenda = response.leyenda || response.Leyenda;
+
+      if (respuesta === 'Ok') {
+        alert(leyenda || 'Archivo subido exitosamente');
+        
+        // Recargar los cursos para mostrar el nuevo archivo
+        this.cargarCursos();
+        
+        // Limpiar estado
+        this.limpiarEstado();
+      } else {
+        alert(leyenda || 'Error al subir el archivo');
+      }
+      this.cargando = false;
+    },
+    error: (error) => {
+      console.error('Error al subir archivo:', error);
+      alert('Error al subir el archivo. Por favor, intente nuevamente.');
+      this.cargando = false;
+    }
+  });
+}
+
   private limpiarInputArchivo(): void {
     const inputArchivo = document.querySelector('input[type="file"]') as HTMLInputElement;
     if (inputArchivo) inputArchivo.value = '';
@@ -285,73 +312,76 @@ editarCurso(curso: Curso): void {
     }, 0);
   }
 }
-  eliminarCurso(curso: Curso): void {
-    // Permitir a administradores e instructores eliminar cursos
-    if (this.usuarioActual?.tipo !== 'administrador' && this.usuarioActual?.tipo !== 'instructor') {
-      alert('No tienes permisos para eliminar cursos');
-      return;
-    }
+    eliminarCurso(curso: Curso): void {
+  if (this.usuarioActual?.tipo !== 'administrador' && this.usuarioActual?.tipo !== 'instructor') {
+    alert('No tienes permisos para eliminar cursos');
+    return;
+  }
 
-    const confirmar = window.confirm(
-      `¿Está seguro de que desea eliminar el curso "${curso.titulo}"?\n\n` +
-        `Esta acción eliminará ${curso.archivos.length} Archivo(s) y no se puede deshacer.`
-    );
+  const confirmar = window.confirm(
+    `¿Está seguro de que desea eliminar el curso "${curso.titulo}"?\n\n` +
+    `Esta acción eliminará ${curso.archivos.length} archivo(s) y no se puede deshacer.`
+  );
 
-    if (!confirmar) return;
+  if (!confirmar) return;
 
-    try {
-      curso.archivos.forEach(async (Archivo) => {
-        if (Archivo.archivoId) {
-          try {
-            await this.almacenamientoSession.borrarArchivo(Archivo.archivoId);
-          } catch (error) {
-            console.warn(`No se pudo eliminar el archivo: ${Archivo.archivoId}`, error);
-          }
-        }
-      });
+  this.cargando = true;
 
-      this.servicioCursos.eliminarCurso(curso.id);
-
-      if (this.cursoSeleccionado && this.cursoSeleccionado.id === curso.id) {
-        this.cursoSeleccionado = null;
+  try {
+    // 1. Primero eliminar todos los archivos asociados al curso
+    const promesasEliminarArchivos = curso.archivos.map(archivo => {
+      if (archivo.id) {
+        // Eliminar del sistema de archivos
+        return this.servicioArchivos.eliminarArchivoCompleto(archivo.id).catch(error => {
+          console.warn(`No se pudo eliminar archivo ${archivo.nombre}:`, error);
+          return Promise.resolve();
+        });
       }
+      return Promise.resolve();
+    });
 
-      this.cargarCursos();
-      alert('Curso eliminado exitosamente.');
-    } catch (error) {
-      console.error('Error al eliminar curso:', error);
-      alert('Error al eliminar el curso. Por favor, intente nuevamente.');
-    }
+    // 2. Esperar a que se eliminen todos los archivos
+    Promise.all(promesasEliminarArchivos)
+      .then(() => {
+        // 3. Ahora eliminar el curso del backend
+        this.servicioCursos.eliminarCurso(curso.id).subscribe({
+          next: (response: any) => {
+            const respuesta = response.respuesta || response.Respuesta;
+            const leyenda = response.leyenda || response.Leyenda;
+
+            if (respuesta === 'Ok') {
+              // Actualizar la vista local
+              if (this.cursoSeleccionado && this.cursoSeleccionado.id === curso.id) {
+                this.cursoSeleccionado = null;
+              }
+
+              // Recargar la lista de cursos
+              this.cargarCursos();
+              
+              alert(leyenda || 'Curso eliminado exitosamente.');
+            } else {
+              alert(leyenda || 'Error al eliminar el curso en el servidor.');
+            }
+            this.cargando = false;
+          },
+          error: (error) => {
+            console.error('Error al eliminar curso del backend:', error);
+            alert('Error al eliminar el curso del servidor. Por favor, intente nuevamente.');
+            this.cargando = false;
+          }
+        });
+      })
+      .catch(error => {
+        console.error('Error al eliminar archivos:', error);
+        alert('Error al eliminar archivos del curso. Por favor, intente nuevamente.');
+        this.cargando = false;
+      });
+  } catch (error) {
+    console.error('Error en el proceso de eliminación:', error);
+    alert('Error en el proceso de eliminación. Por favor, intente nuevamente.');
+    this.cargando = false;
   }
-  guardarEdicionCurso(): void {
-    if (!this.cursoEditando) return;
-
-    // Usar validación del servicio
-    const validacion = this.servicioCursos.validarCurso(this.cursoEditando);
-    if (!validacion.valido) {
-      alert(validacion.mensaje);
-      return;
-    }
-
-    // Usar el servicio para actualizar el curso
-    const original = this.servicioCursos.obtenerCursoPorId(this.cursoEditando.id);
-    const actualizado: Curso = {
-      ...(original || this.cursoEditando),
-      ...this.cursoEditando,
-      fechaActualizacion: new Date(),
-    };
-
-    this.servicioCursos.actualizarCurso(actualizado);
-    this.cargarCursos();
-    this.mostrarModalCurso = false;
-    this.cursoEditando = null;
-    try {
-      document.body.classList.remove('modal-open');
-    } catch (e) {
-      /* safe in SSR */
-    }
-    alert('Curso actualizado exitosamente.');
-  }
+}
 
   async editarArchivo(curso: Curso, Archivo: Archivo): Promise<void> {
     this.modoEdicion = true;
@@ -371,34 +401,54 @@ editarCurso(curso: Curso): void {
 
     if (!confirmar) return;
 
-    // Eliminar archivo asociado
-    const resultadoArchivo = await this.servicioArchivos.eliminarArchivoDeArchivo(archivo);
-
-    if (resultadoArchivo.exito) {
+    try {
+      await this.servicioArchivos.eliminarArchivoCompleto(archivo.id);
+      
       // Eliminar Archivo del curso
       this.servicioCursos.eliminarArchivoDeCurso(curso.id, archivo.id);
 
-      // Eliminar también del listado general de archivos
-      this.servicioArchivos.eliminarArchivo(archivo.id);
-
       this.cargarCursos();
       alert('Archivo eliminado exitosamente.');
-    } else {
-      alert(resultadoArchivo.mensaje);
+    } catch (error) {
+      console.error('Error al eliminar archivo:', error);
+      alert('Error al eliminar el archivo. Por favor, intente nuevamente.');
     }
   }
+  guardarEdicionCurso(): void {
+    if (!this.cursoEditando) return;
 
-  async visualizarArchivo(Archivo: Archivo): Promise<void> {
-    const resultado = await this.servicioArchivos.visualizarArchivo(Archivo);
-    if (!resultado.exito) {
-      alert(resultado.mensaje);
+    if (!this.cursoEditando.titulo?.trim()) {
+      alert('El título del curso es obligatorio.');
+      return;
     }
+
+    if (!this.cursoEditando.descripcion?.trim()) {
+      alert('La descripción del curso es obligatoria.');
+      return;
+    }
+
+    if (!this.cursoEditando.id) {
+      alert('Error: Curso sin ID.');
+      return;
+    }
+
+    this.servicioCursos.actualizarCurso({
+      ...this.cursoEditando,
+      fechaActualizacion: new Date()
+    });
+
+    this.cargarCursos();
+    this.mostrarModalCurso = false;
+    this.cursoEditando = null;
+    alert('Curso actualizado exitosamente.');
   }
 
-  async descargarArchivo(Archivo: Archivo): Promise<void> {
-    const resultado = await this.servicioArchivos.descargarArchivoDeArchivo(Archivo);
-    if (!resultado.exito) {
-      alert(resultado.mensaje);
+  async descargarArchivo(archivo: Archivo): Promise<void> {
+    try {
+      await this.servicioArchivos.descargarArchivo(archivo.id, archivo.nombre);
+    } catch (error) {
+      console.error('Error al descargar archivo:', error);
+      alert('Error al descargar el archivo. Por favor, intente nuevamente.');
     }
   }
 

@@ -1,3 +1,4 @@
+//src/app/dialogo-archivos/dialogo-archivos.spec.ts
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DialogoArchivoComponent } from './dialogo-archivo';
 

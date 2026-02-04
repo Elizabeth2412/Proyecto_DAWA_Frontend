@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ServicioCursos, Curso } from '../servicios/servicio-cursos';
-
+import { ServicioCursos } from '../servicios/servicio-cursos';
+import { Curso } from '../interfaces/curso-interface';
 @Component({
   selector: 'app-lista-cursos',
   standalone: true,
@@ -25,10 +25,18 @@ export class ListaCursosComponent implements OnInit {
     this.cargarCursos();
   }
 
-  cargarCursos(): void {
-    this.cursos = this.servicioCursos.obtenerCursos();
-    this.cursosFiltrados = [...this.cursos];
-  }
+cargarCursos(): void {
+  this.servicioCursos.obtenerCursos().subscribe({
+    next: (cursos: Curso[]) => {
+      this.cursos = cursos;
+      this.cursosFiltrados = [...this.cursos];
+    },
+    error: (error) => {
+      console.error('Error al cargar cursos:', error);
+    }
+  });
+}
+
 
   filtrarCursos(): void {
     this.cursosFiltrados = this.cursos.filter((curso) => {

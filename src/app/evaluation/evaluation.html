@@ -51,6 +51,7 @@
           <thead class="table-light">
             <tr>
               <th class="text-center">ID</th>
+              <th class="text-center">Curso</th>
               <th>Título</th>
               <th class="text-center">Módulo</th>
               <th class="text-center">N° Preguntas</th>
@@ -64,6 +65,7 @@
           <tbody>
             <tr *ngFor="let evaluacion of evaluacionesFiltradas">
               <td class="text-center">{{ evaluacion.id }}</td>
+              <td class="text-center">{{ evaluacion.cursoId }}</td>
               <td class="nombre-evaluacion fw-semibold">{{ evaluacion.titulo }}</td>
               <td class="text-center">
                 <span class="badge-modulo px-2 py-1 rounded-3">
@@ -84,6 +86,11 @@
                 </span>
               </td>
               <td class="text-center acciones">
+                <button class="btn-preguntas" 
+                        (click)="irAPreguntas(evaluacion)" 
+                        title="Gestionar preguntas">
+                  <mat-icon>help_outline</mat-icon>
+                </button>
                 <button class="btn-ver" 
                         (click)="verEvaluacion(evaluacion)" 
                         title="Ver detalles">
@@ -101,11 +108,12 @@
                         title="Eliminar">
                   <mat-icon>delete</mat-icon>
                 </button>
+
               </td>
             </tr>
 
             <tr *ngIf="evaluacionesFiltradas.length === 0">
-              <td colspan="8" class="text-center py-5 text-muted">
+              <td colspan="9" class="text-center py-5 text-muted">
                 <i class="bi bi-inbox display-4 d-block mb-3"></i>
                 <p class="mb-0">No se encontraron evaluaciones que coincidan con la búsqueda.</p>
               </td>
@@ -116,6 +124,7 @@
     </div>
   </div>
 </div>
+
 
 
 <!-- Modal de inicio de evaluación -->
@@ -438,4 +447,14 @@
       </form>
     </div>
   </div>
+</div>
+
+
+<!-- VISTA DE GESTIÓN DE PREGUNTAS              -->
+<div *ngIf="modo === 'preguntas' && evaluacionSeleccionada">
+  <app-preguntas 
+    [evaluacionId]="evaluacionSeleccionada.id"
+    [evaluacion]="evaluacionSeleccionada"
+    (volverClick)="volverDePreguntas()">
+  </app-preguntas>
 </div>

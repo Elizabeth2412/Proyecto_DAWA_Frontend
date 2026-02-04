@@ -50,7 +50,7 @@
             Editando: <strong>{{ archivoEditando.nombre }}</strong>
           </p>
           
-          <p style="margin-top: 10px;">Formatos soportados: PDF y PPTX (Máximo 5 MB o 5120 KB)</p>
+          <p style="margin-top: 10px;">Formatos soportados: PDF y PPTX (Máximo 50 MB)</p>
 
           <div class="zona-subida">
             <input type="file" #inputArchivo (change)="onArchivoSeleccionado($event)" 
@@ -154,11 +154,6 @@
                   Descargar
                 </button>
 
-                <button class="btn-pequeno btn-editar"
-                        (click)="editarArchivo(curso, archivo)"
-                        title="Reemplazar archivo">
-                  Editar
-                </button>
 
                 <button class="btn-pequeno btn-eliminar"
                         (click)="eliminarArchivo(curso, archivo)"

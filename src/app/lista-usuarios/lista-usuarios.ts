@@ -4,7 +4,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ServicioAutorizacion } from '../autorizacion.service';
-import { ServicioUsuarios, Usuario } from '../servicios/servicio-usuarios';
+import { ServicioUsuarios } from '../servicios/servicio-usuarios';
+import { Usuario } from '../interfaces/usuario-interface';
+
 @Component({
   selector: 'app-lista-usuarios',
   standalone: true,
@@ -19,6 +21,7 @@ export class ListaUsuarios implements OnInit {
   usuarioEditando: Usuario | null = null;
   mostrarModalEdicion: boolean = false;
   mostrarModalNuevo: boolean = false;
+  cargando: boolean = false;
   
   // Filtros
   terminoBusqueda: string = '';
@@ -49,13 +52,26 @@ export class ListaUsuarios implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.cargarUsuarios();
     this.usuarioActual = this.servicioAutorizacion.obtenerUsuarioActual();
+    this.cargarUsuarios();
   }
 
   cargarUsuarios(): void {
-    this.usuarios = this.servicioAutorizacion.obtenerTodosUsuarios();
-    this.usuariosFiltrados = [...this.usuarios];
+    this.cargando = true;
+    this.servicioUsuario.obtenerTodosUsuarios().subscribe({
+      next: (usuarios) => {
+        this.usuarios = usuarios;
+        this.usuariosFiltrados = [...usuarios];
+        this.cargando = false;
+      },
+      error: (error) => {
+        console.error('Error al cargar usuarios:', error);
+        alert('Error al cargar usuarios: ' + error.message);
+        this.usuarios = [];
+        this.usuariosFiltrados = [];
+        this.cargando = false;
+      }
+    });
   }
 
   filtrarUsuarios(): void {
@@ -89,41 +105,45 @@ export class ListaUsuarios implements OnInit {
   }
 
   guardarEdicion(): void {
-    if (this.usuarioEditando) {
+    if (!this.usuarioEditando) return;
 
-      // Validaciones
-          if (this.usuarioActual && this.usuarioEditando.email === this.usuarioActual.email) {
+    // Validaciones
+    if (this.usuarioActual && this.usuarioEditando.email === this.usuarioActual.email) {
       if (this.usuarioForm.tipo !== this.usuarioActual.tipo) {
         alert('No puedes cambiar tu propio rol de administrador.');
         return;
       }
     }
-      if (!this.usuarioForm.nombre.trim()) {
-        alert('Por favor, ingresa un nombre válido.');
-        return;
-      }
 
-      const usuarioActualizado: Usuario = {
-        ...this.usuarioEditando,
-        nombre: this.usuarioForm.nombre,
-        apellido: this.usuarioForm.apellido,
-        edad: this.usuarioForm.edad,
-        tipo: this.usuarioForm.tipo
-      };
-
-      const resultado = this.servicioUsuario.actualizarUsuario(
-        this.usuarioEditando.email,
-        usuarioActualizado
-      );
-
-      if (resultado.exito) {
-        alert(resultado.mensaje);
-        this.cerrarModalEdicion();
-        this.cargarUsuarios();
-      } else {
-        alert(resultado.mensaje);
-      }
+    if (!this.usuarioForm.nombre.trim()) {
+      alert('Por favor, ingresa un nombre válido.');
+      return;
     }
+
+    const usuarioActualizado = {
+      Email: this.usuarioEditando.email,
+      Nombre: this.usuarioForm.nombre,
+      Apellido: this.usuarioForm.apellido,
+      Edad: this.usuarioForm.edad,
+      Tipo: this.usuarioForm.tipo,
+      Transaccion: 'ACTUALIZAR_USUARIO'
+    };
+
+    this.servicioUsuario.actualizarUsuarioBackend(usuarioActualizado).subscribe({
+      next: (response: any) => {
+        if (response && response.Respuesta === 'Ok') {
+          alert(response.Leyenda || 'Usuario actualizado correctamente');
+          this.cerrarModalEdicion();
+          this.cargarUsuarios();
+        } else {
+          alert(response?.Leyenda || 'Error al actualizar usuario');
+        }
+      },
+      error: (error) => {
+        console.error('Error al actualizar usuario:', error);
+        alert('Error al actualizar usuario: ' + (error.error?.Leyenda || error.message));
+      }
+    });
   }
 
   cerrarModalEdicion(): void {
@@ -168,21 +188,31 @@ export class ListaUsuarios implements OnInit {
       return;
     }
 
-    const resultado = this.servicioUsuario.registrarUsuario({
-      nombre: this.nuevoUsuario.nombre,
-      apellido: this.nuevoUsuario.apellido,
-      correo: this.nuevoUsuario.email,
-      password: this.nuevoUsuario.password,
-      edad: this.nuevoUsuario.edad
-    });
+    const usuarioData = {
+      Email: this.nuevoUsuario.email,
+      Password: this.nuevoUsuario.password,
+      Tipo: this.nuevoUsuario.tipo,
+      Nombre: this.nuevoUsuario.nombre,
+      Apellido: this.nuevoUsuario.apellido,
+      Edad: this.nuevoUsuario.edad,
+      Transaccion: 'INSERTAR_USUARIO'
+    };
 
-    if (resultado.exito) {
-      alert(resultado.mensaje);
-      this.cerrarModalNuevo();
-      this.cargarUsuarios();
-    } else {
-      alert(resultado.mensaje);
-    }
+    this.servicioUsuario.registrarUsuarioBackend(usuarioData).subscribe({
+      next: (response: any) => {
+        if (response && response.Respuesta === 'Ok') {
+          alert(response.Leyenda || 'Usuario registrado correctamente');
+          this.cerrarModalNuevo();
+          this.cargarUsuarios();
+        } else {
+          alert(response?.Leyenda || 'Error al registrar usuario');
+        }
+      },
+      error: (error) => {
+        console.error('Error al registrar usuario:', error);
+        alert('Error al registrar usuario: ' + (error.error?.Leyenda || error.message));
+      }
+    });
   }
 
   cerrarModalNuevo(): void {
@@ -207,14 +237,20 @@ export class ListaUsuarios implements OnInit {
     const confirmacion = confirm('¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.');
     
     if (confirmacion) {
-      const resultado = this.servicioUsuario.eliminarUsuario(email);
-      
-      if (resultado.exito) {
-        alert(resultado.mensaje);
-        this.cargarUsuarios();
-      } else {
-        alert(resultado.mensaje);
-      }
+      this.servicioUsuario.eliminarUsuarioBackend(email).subscribe({
+        next: (response: any) => {
+          if (response && response.Respuesta === 'Ok') {
+            alert(response.Leyenda || 'Usuario eliminado correctamente');
+            this.cargarUsuarios();
+          } else {
+            alert(response?.Leyenda || 'Error al eliminar usuario');
+          }
+        },
+        error: (error) => {
+          console.error('Error al eliminar usuario:', error);
+          alert('Error al eliminar usuario: ' + (error.error?.Leyenda || error.message));
+        }
+      });
     }
   }
 

@@ -1,57 +1,110 @@
-import { Component, OnInit } from '@angular/core';
+/*src/app/header/header.ts*/
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ServicioAutorizacion } from '../autorizacion.service';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { RouterModule } from '@angular/router';
-import { Usuario } from '../servicios/servicio-usuarios';
-import { MatIcon } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
+import { PublicVarService } from '../publicVarService';
+import { ServicioAutorizacion } from '../autorizacion.service';
+import { Login } from '../login/login';
+import { Register } from '../register/register';
+import { Usuario } from '../interfaces/usuario-interface';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, RouterModule, MatIcon],
   templateUrl: './header.html',
-  styleUrls: ['./header.css']
+  styleUrls: ['./header.css'],
+  imports: [
+    CommonModule,
+    RouterLink,
+    RouterLinkActive,
+    MatToolbarModule,
+    MatIconModule,
+    MatButtonModule,
+    MatMenuModule
+  ]
 })
 export class Header implements OnInit {
-  usuarioLogueado: boolean = false;
+  usuarioLogueado = false;
   usuarioActual: Usuario | null = null;
 
   constructor(
-    private servicioAutorizacion: ServicioAutorizacion,
-    private router: Router
+    private router: Router,
+    private publicVarService: PublicVarService,
+    private servicioAutorizacion: ServicioAutorizacion
   ) {}
 
-  ngOnInit(): void {
-    this.servicioAutorizacion.obtenerObservableLogueado().subscribe(isLogged => {
-      this.usuarioLogueado = isLogged;
-
-      if (isLogged) {
-        this.usuarioActual = this.servicioAutorizacion.obtenerUsuarioActual();
-      } else {
-        this.usuarioActual = null;
-      }
+  ngOnInit() {
+    // Suscribirse al estado de login de PublicVarService
+    this.publicVarService.logeado$.subscribe(estado => {
+      this.usuarioLogueado = estado;
     });
 
-    // Cargar estado inicial por si ya estaba logueado
+    // Suscribirse al usuario actual del ServicioAutorizacion
+    this.servicioAutorizacion.obtenerObservableUsuarioActual().subscribe(usuario => {
+      this.usuarioActual = usuario;
+      this.usuarioLogueado = usuario !== null;
+      
+      // Sincronizar con PublicVarService
+      this.publicVarService.actualizarEstadoLogin(usuario !== null);
+    });
+
+    // Estado inicial
     this.usuarioActual = this.servicioAutorizacion.obtenerUsuarioActual();
-    this.usuarioLogueado = this.usuarioActual != null;
+    this.usuarioLogueado = this.usuarioActual !== null;
+    this.publicVarService.actualizarEstadoLogin(this.usuarioLogueado);
   }
 
+  // Método unificado para manejar sesión
   manejarSesion(): void {
     if (this.usuarioLogueado) {
       const confirmacion = confirm('¿Estás seguro de que deseas cerrar sesión?');
       if (confirmacion) {
-        this.servicioAutorizacion.cerrarSesion();
-        this.router.navigate(['/login']);
+        this.cerrarSesion();
       }
     } else {
-      this.router.navigate(['/login']);
+          this.router.navigate(['/login']);
+
     }
   }
 
-  // MODIFICAR ESTE MÉTODO
-  redireccionarInstructorCurso(): void {
+  cerrarSesion() {
+    this.servicioAutorizacion.cerrarSesion();
+    this.publicVarService.actualizarEstadoLogin(false);
+    this.router.navigate(['/pagina-principal']);
+  }
+
+  // Métodos de diálogo
+  readonly dialog = inject(MatDialog);
+
+
+  openDialogLogin() {
+    const dialogRef = this.dialog.open(Login, { 
+      width: '400px',
+      disableClose: true 
+    });
+    
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.usuarioActual = this.servicioAutorizacion.obtenerUsuarioActual();
+        this.usuarioLogueado = this.usuarioActual !== null;
+      }
+    });
+  }
+
+  openDialogRegistrarUsuario() {
+    this.dialog.open(Register, { 
+      width: '500px',
+      disableClose: true 
+    });
+  }
+
+  // Métodos de navegación con verificación de permisos
+  redireccionarInstructor(): void {
     const usuario = this.servicioAutorizacion.obtenerUsuarioActual();
     
     if (!usuario) {
@@ -60,7 +113,6 @@ export class Header implements OnInit {
       return;
     }
 
-    // Permitir tanto instructores como administradores
     if (usuario.tipo === 'instructor' || usuario.tipo === 'administrador') {
       this.router.navigate(['/instructor']);
     } else {
@@ -68,7 +120,7 @@ export class Header implements OnInit {
     }
   }
 
-  redireccionarEstudianteCurso(): void {
+  redireccionarEstudiante(): void {
     const usuario = this.servicioAutorizacion.obtenerUsuarioActual();
     
     if (!usuario) {
@@ -84,7 +136,23 @@ export class Header implements OnInit {
     }
   }
 
-  // ELIMINAR o modificar este método
+  redireccionarAdminDashboard(): void {
+    const usuario = this.servicioAutorizacion.obtenerUsuarioActual();
+    
+    if (!usuario) {
+      alert('Debes iniciar sesión para acceder a esta sección.');
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    if (usuario.tipo === 'administrador') {
+      this.router.navigate(['/admin-dashboard']);
+    } else {
+      alert('Esta sección es solo para administradores.');
+    }
+  }
+
+  // Método para verificar acceso en enlaces
   verificarAcceso(event: Event, tipoUsuarioPermitido: string[] = []): void {
     if (!this.usuarioLogueado) {
       event.preventDefault();
@@ -100,20 +168,9 @@ export class Header implements OnInit {
     }
   }
 
-  // AGREGAR método para redireccionar al admin dashboard
-  redireccionarAdminDashboard(): void {
-    const usuario = this.servicioAutorizacion.obtenerUsuarioActual();
-    
-    if (!usuario) {
-      alert('Debes iniciar sesión para acceder a esta sección.');
-      this.router.navigate(['/login']);
-      return;
-    }
-
-    if (usuario.tipo === 'administrador') {
-      this.router.navigate(['/admin-dashboard']);
-    } else {
-      alert('Esta sección es solo para administradores.');
-    }
+  // Método para obtener el nombre completo del usuario
+  obtenerNombreCompleto(): string {
+    if (!this.usuarioActual) return '';
+    return `${this.usuarioActual.nombre} ${this.usuarioActual.apellido || ''}`.trim();
   }
 }

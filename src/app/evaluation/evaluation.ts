@@ -3,20 +3,23 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
-import { ServiceEvaluacion, Question, Evaluacion } from '../servicios/service-evaluacion';
+import { ServiceEvaluacion} from '../servicios/service-evaluacion';
 import { ServicioAutorizacion } from '../autorizacion.service';
-
+import { Questions } from '../interfaces/question-interface';
+import { Evaluacion } from '../interfaces/evaluacion-interface';
+import { A } from '@angular/cdk/keycodes';
+import { Question } from '../question/question';
 interface VisualizationEvaluation {
   title: string;
   duration: string;
   totalQuestions: number;
-  questions: Question[];
+  questions: Questions[];
 }
 
 @Component({
   selector: 'app-evaluation',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, MatIcon],
+  imports: [CommonModule, RouterModule, FormsModule, MatIcon, Question],
   templateUrl: './evaluation.html',
   styleUrl: './evaluation.css',
 })
@@ -28,7 +31,7 @@ export class Evaluation {
     private servicioAuth: ServicioAutorizacion
   ) { }
 
-  static modoGlobal: 'formulario' | 'tabla' = 'tabla';
+  static modoGlobal: 'formulario' | 'tabla' | 'preguntas' = 'tabla';
 
   isStarted = false;
   mostrarModalInicio = false;
@@ -37,7 +40,7 @@ export class Evaluation {
   answers: { [key: number]: number } = {};
   esEstudiante: boolean = false;
 
-  @Input() modo: 'tabla' | 'evaluacion' | 'formulario' = 'tabla';
+  @Input() modo: 'tabla' | 'evaluacion' | 'formulario'| 'preguntas' = 'tabla';
   terminoBusqueda: string = '';
   filtroEstado: string = '';
   evaluacionesFiltradas: Evaluacion[] = [];
@@ -307,18 +310,30 @@ export class Evaluation {
    * Carga las evaluaciones desde el servicio.
    */
   cargarEvaluaciones(): void {
-    this.evaluaciones = this.serviceEvaluacion.cargarEvaluaciones();
-    this.evaluacionesFiltradas = [...this.evaluaciones];
+    this.serviceEvaluacion.obtenerEvaluaciones().subscribe({
+      next: (evaluaciones) => {
+        this.evaluacionesFiltradas = evaluaciones;  
+      },
+      error: (error) => {
+        console.error('Error al cargar evaluaciones:', error);
+      }
+    });
   }
 
   /**
    * Filtra las evaluaciones según el término de búsqueda y el estado seleccionado.
    */
   filtrarEvaluaciones(): void {
-    this.evaluacionesFiltradas = this.serviceEvaluacion.filtrarEvaluaciones(
-      this.terminoBusqueda,
-      this.filtroEstado
-    );
+    this.serviceEvaluacion.filtrarEvaluaciones(this.terminoBusqueda, this.filtroEstado)
+    .subscribe({
+      next: (evaluaciones) => {
+        this.evaluacionesFiltradas = evaluaciones;
+      },
+      error: (err) => {
+        console.error('Error cargando evaluaciones filtradas:', err);
+        this.evaluacionesFiltradas = [];
+      }
+    });
   }
 
   /**
@@ -328,6 +343,7 @@ export class Evaluation {
     this.modoFormulario = 'crear';
     this.evaluacionSeleccionada = {
       id: 0,
+      cursoId: 0,
       titulo: '',
       modulo: '',
       totalPreguntas: 0,
@@ -344,11 +360,20 @@ export class Evaluation {
    * @param evaluacion  Evaluación a crear.
    */
   crearEvaluacion(evaluacion: Evaluacion): void {
-    this.serviceEvaluacion.crearEvaluacion(evaluacion);
-    this.filtrarEvaluaciones();
-    this.modo = 'tabla';
-    alert('Evaluación creada exitosamente');
+    this.serviceEvaluacion.crearEvaluacion(evaluacion).subscribe({
+      next: () => {
+        alert('Evaluación creada exitosamente');
+       
+        this.filtrarEvaluaciones();
+        this.modo = 'tabla';
+      },
+      error: (err) => {
+        console.error('Error al crear evaluación:', err);
+        alert('No se pudo crear la evaluación');
+      }
+    });
   }
+
 
 
   /**
@@ -387,28 +412,45 @@ export class Evaluation {
    * @param evaluacion  Evaluación a actualizar.
    */
   actualizarEvaluacion(evaluacion: Evaluacion): void {
-    this.serviceEvaluacion.actualizarEvaluacion(evaluacion);
-    this.filtrarEvaluaciones();
-    this.modo = 'tabla';
-    alert('Evaluación actualizada exitosamente');
+    this.serviceEvaluacion.actualizarEvaluacion(evaluacion).subscribe({
+      next: () => {
+        alert('Evaluación actualizada exitosamente');
+        this.filtrarEvaluaciones();
+        this.cerrarDialogoFormulario();
+        this.modo = 'tabla';
+      },
+      error: (err) => {
+        console.error('Error al actualizar evaluación:', err);
+        alert('No se pudo actualizar la evaluación');
+      }
+    });
   }
-
 
   /**
    * Elimina una evaluación pidiendo primero la confirmación del usuario.
    * @param id  ID de la evaluación a eliminar.
    */
   eliminarEvaluacion(id: number): void {
-    const confirmado = confirm('¿Estás seguro de eliminar esta evaluación?\n\nEsta acción no se puede deshacer.');
+    const confirmado = confirm(
+      '¿Estás seguro de eliminar esta evaluación?\n\nEsta acción no se puede deshacer.'
+    );
 
-    if (confirmado) {
-      const exito = this.serviceEvaluacion.eliminarEvaluacion(id);
-      if (exito) {
-        this.filtrarEvaluaciones();
+    if (!confirmado) return;
+
+    console.log('Eliminando evaluación con id:', id);
+
+    this.serviceEvaluacion.eliminarEvaluacion(id).subscribe({
+      next: () => {
         alert('Evaluación eliminada exitosamente');
+        this.filtrarEvaluaciones();
+      },
+      error: (err) => {
+        console.error('Error al eliminar evaluación:', err);
+        alert('No se pudo eliminar la evaluación');
       }
-    }
+    });
   }
+
 
   /**
    * Guarda el formulario de creación o edición de evaluación.
@@ -441,11 +483,9 @@ export class Evaluation {
     }
 
     if (this.modoFormulario === 'crear') {
-      this.serviceEvaluacion.crearEvaluacion(this.evaluacionSeleccionada);
-      alert('Evaluación creada exitosamente');
+      this.crearEvaluacion(this.evaluacionSeleccionada);
     } else {
-      this.serviceEvaluacion.actualizarEvaluacion(this.evaluacionSeleccionada);
-      alert('Evaluación actualizada exitosamente');
+      this.actualizarEvaluacion(this.evaluacionSeleccionada);
     }
 
     this.evaluaciones = this.serviceEvaluacion.evaluaciones;
@@ -470,6 +510,26 @@ export class Evaluation {
     this.currentQuestion = 0;
     this.selectedAnswer = null;
     this.answers = {};
+    this.evaluacionSeleccionada = null;
+  }
+
+
+  /**
+ * NUEVA FUNCIÓN: Redirige a la vista de preguntas de una evaluación específica.
+ * @param evaluacion Evaluación cuyas preguntas se desean gestionar.
+ */
+  irAPreguntas(evaluacion: Evaluacion): void {
+    this.evaluacionSeleccionada = evaluacion;
+    this.modo = 'preguntas';
+    Evaluation.modoGlobal = 'preguntas';
+  }
+
+  /**
+   * NUEVA FUNCIÓN: Vuelve de la vista de preguntas a la tabla de evaluaciones.
+   */
+  volverDePreguntas(): void {
+    this.modo = 'tabla';
+    Evaluation.modoGlobal = 'tabla';
     this.evaluacionSeleccionada = null;
   }
 }

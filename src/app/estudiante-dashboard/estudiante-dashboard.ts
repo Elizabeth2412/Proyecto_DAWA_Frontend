@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ServicioAutorizacion } from '../autorizacion.service';
-import { ServicioCursos, Curso } from '../servicios/servicio-cursos';
-import { ServicioArchivos, Archivo } from '../servicios/servicio-archivos';
-import { ServicioAlmacenamientoSession } from '../servicios/servicio-almacenamiento-session';
-import { Usuario } from '../servicios/servicio-usuarios';
-
+import { ServicioCursos } from '../servicios/servicio-cursos';
+import { Curso } from '../interfaces/curso-interface';
+import { ServicioArchivos } from '../servicios/servicio-archivos';
+import { Archivo } from '../interfaces/archivo-interface';
+import { Usuario } from '../interfaces/usuario-interface';
 @Component({
   selector: 'app-estudiante-dashboard',
   standalone: true,
@@ -24,7 +24,6 @@ export class EstudianteDashboard implements OnInit {
     private servicioAutorizacion: ServicioAutorizacion,
     private servicioCursos: ServicioCursos,
     private servicioArchivos: ServicioArchivos,
-    private almacenamientoSession: ServicioAlmacenamientoSession,
     private router: Router
   ) {}
 
@@ -39,52 +38,52 @@ export class EstudianteDashboard implements OnInit {
     });
   }
 
-  cargarCursos(): void {
-    this.cursos = this.servicioCursos.obtenerCursos();
-  }
+cargarCursos(): void {
+  this.cargando = true;
+
+  this.servicioCursos.obtenerCursos().subscribe({
+    next: (cursos: Curso[]) => {
+      this.cursos = cursos;
+      this.cargando = false;
+    },
+    error: (error) => {
+      console.error('Error al cargar cursos:', error);
+      this.cargando = false;
+    }
+  });
+}
 
   seleccionarCurso(curso: Curso): void {
     this.cursoSeleccionado = this.cursoSeleccionado?.id === curso.id ? null : curso;
   }
 
-  async visualizarArchivo(archivo: Archivo): Promise<void> {
-    if (!archivo.archivoId) {
-      alert('No hay archivo asociado para visualizar.');
+   async visualizarArchivo(archivo: Archivo): Promise<void> {
+    if (!archivo.id) {
+      alert('Archivo no válido.');
       return;
     }
-    
+
     try {
-      const blob = await this.almacenamientoSession.obtenerArchivoBlob(archivo.archivoId);
-      if (!blob) {
-        alert('Archivo no encontrado.');
-        return;
-      }
-      this.servicioArchivos.visualizarArchivoDesdeBlob(blob, archivo.nombre);
-    } catch (error) {
-      console.error('Error al visualizar archivo:', error);
-      alert('Error al cargar el archivo para visualización.');
+      await this.servicioArchivos.descargarArchivo(archivo.id, archivo.nombre);
+    } catch (error: any) {
+      alert(`Error al visualizar archivo: ${error.message}`);
     }
   }
+
+
 
   async descargarArchivo(archivo: Archivo): Promise<void> {
-    if (!archivo.archivoId) {
-      alert('No hay archivo para descargar.');
+    if (!archivo.id) {
+      alert('Archivo no válido.');
       return;
     }
-    
+
     try {
-      const blob = await this.almacenamientoSession.obtenerArchivoBlob(archivo.archivoId);
-      if (!blob) {
-        alert('Archivo no encontrado.');
-        return;
-      }
-      this.servicioArchivos.descargarArchivoDesdeBlob(blob, archivo.nombre);
-    } catch (error) {
-      console.error('Error al descargar archivo:', error);
-      alert('Error al cargar el archivo para descarga.');
+      await this.servicioArchivos.descargarArchivo(archivo.id, archivo.nombre);
+    } catch (error: any) {
+      alert(`Error al descargar archivo: ${error.message}`);
     }
   }
-
   obtenerTamanoLegible(tamanoBytes?: number): string {
     if (!tamanoBytes) return 'N/A';
     return this.servicioArchivos.obtenerTamanoArchivoLegible(tamanoBytes);

@@ -1,8 +1,9 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { ServicioCursos, Curso } from '../servicios/servicio-cursos';
+import { ServicioCursos } from '../servicios/servicio-cursos';
+import { Curso } from '../interfaces/curso-interface';
 import { ServicioAutorizacion } from '../autorizacion.service';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -17,7 +18,7 @@ import { MatIconModule } from '@angular/material/icon';
   templateUrl: './crear-curso.html',
   styleUrls: ['./crear-curso.css']
 })
-export class CrearCurso implements OnInit, OnDestroy {
+export class CrearCurso implements OnInit {
   static modoGlobal: 'formulario' | 'tabla' = 'formulario';
   cursos: Curso[] = [];
   cursosFiltrados: Curso[] = [];
@@ -44,12 +45,9 @@ export class CrearCurso implements OnInit, OnDestroy {
   displayedColumns: string[] = ['numero', 'titulo', 'nivel', 'duracion', 'instructor', 'acciones'];
   dataSource!: MatTableDataSource<Curso>;
 
-  private _handleEsc = (e: KeyboardEvent) => {
-    if (e.key === 'Escape' || e.key === 'Esc') {
-      if (this.mostrarModalEdicion) this.cerrarModalEdicion();
-      if (this.mostrarModalCrear) this.cerrarModalCrear();
-    }
-  };
+  // Estado de carga
+  cargando: boolean = false;
+  errorCarga: string = '';
 
   constructor(
     public router: Router,
@@ -75,10 +73,6 @@ export class CrearCurso implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void {
-    document.removeEventListener('keydown', this._handleEsc);
-  }
-
   private inicializarCursoVacio(): Curso {
     return {
       id: 0,
@@ -98,23 +92,11 @@ export class CrearCurso implements OnInit, OnDestroy {
   abrirModalCrear(): void {
     this.cursoNuevo = this.inicializarCursoVacio();
     this.mostrarModalCrear = true;
-    
-    try {
-      document.body.classList.add('modal-open');
-      document.addEventListener('keydown', this._handleEsc);
-    } catch (e) {
-      console.error('Error al abrir modal crear:', e);
-    }
   }
 
   cerrarModalCrear(): void {
     this.mostrarModalCrear = false;
     this.cursoNuevo = this.inicializarCursoVacio();
-    
-    try {
-      document.body.classList.remove('modal-open');
-      document.removeEventListener('keydown', this._handleEsc);
-    } catch (e) {}
   }
 
   guardarNuevoCursoModal(): void {
@@ -124,51 +106,41 @@ export class CrearCurso implements OnInit, OnDestroy {
       return;
     }
 
-    if (!this.cursoNuevo.nivel) {
-      alert('Por favor, selecciona un nivel para el curso.');
-      return;
-    }
-
-    if (!this.cursoNuevo.duracion || this.cursoNuevo.duracion < 1) {
-      alert('Por favor, ingresa una duración válida (mínimo 1 hora).');
-      return;
-    }
-
     const usuario = this.servicioAuth.obtenerUsuarioActual();
     this.cursoNuevo.instructor = usuario ? usuario.email : 'invitado@gmail.com';
     this.cursoNuevo.fechaCreacion = new Date();
     this.cursoNuevo.fechaActualizacion = new Date();
 
-    this.servicioCursos.agregarCurso(this.cursoNuevo);
-    alert(`Curso "${this.cursoNuevo.titulo}" creado correctamente.`);
-    
-    this.cursoGuardado.emit(this.cursoNuevo);
-    this.cerrarModalCrear();
-    this.cargarCursos();
-    this.aplicarFiltros();
+    this.servicioCursos.agregarCurso(this.cursoNuevo).subscribe({
+      next: (response: any) => {
+        const respuesta = response.respuesta || response.Respuesta;
+        const leyenda = response.leyenda || response.Leyenda;
+
+        if (respuesta === 'Ok') {
+          alert(leyenda || `Curso "${this.cursoNuevo.titulo}" creado correctamente.`);
+          this.cursoGuardado.emit(this.cursoNuevo);
+          this.cerrarModalCrear();
+          this.cargarCursos();
+        } else {
+          alert(leyenda || 'Error al crear el curso');
+        }
+      },
+      error: (error) => {
+        console.error('Error al crear curso:', error);
+        alert('Error al crear el curso: ' + (error.error?.leyenda || error.message));
+      }
+    });
   }
 
   // ========== MODAL EDITAR CURSO ==========
   abrirModalEdicion(curso: Curso): void {
     this.cursoParaEditar = { ...curso };
     this.mostrarModalEdicion = true;
-    
-    try {
-      document.body.classList.add('modal-open');
-      document.addEventListener('keydown', this._handleEsc);
-    } catch (e) {
-      console.error('Error al abrir modal editar:', e);
-    }
   }
 
   cerrarModalEdicion(): void {
     this.mostrarModalEdicion = false;
     this.cursoParaEditar = null;
-    
-    try {
-      document.body.classList.remove('modal-open');
-      document.removeEventListener('keydown', this._handleEsc);
-    } catch (e) {}
   }
 
   guardarEdicionModal(): void {
@@ -185,13 +157,25 @@ export class CrearCurso implements OnInit, OnDestroy {
       fechaActualizacion: new Date()
     };
 
-    this.servicioCursos.actualizarCurso(cursoActualizado);
-    alert(`Curso "${cursoActualizado.titulo}" actualizado correctamente.`);
-    
-    this.cursoGuardado.emit(cursoActualizado);
-    this.cerrarModalEdicion();
-    this.cargarCursos();
-    this.aplicarFiltros();
+    this.servicioCursos.actualizarCurso(cursoActualizado).subscribe({
+      next: (response: any) => {
+        const respuesta = response.respuesta || response.Respuesta;
+        const leyenda = response.leyenda || response.Leyenda;
+
+        if (respuesta === 'Ok') {
+          alert(leyenda || `Curso "${cursoActualizado.titulo}" actualizado correctamente.`);
+          this.cursoGuardado.emit(cursoActualizado);
+          this.cerrarModalEdicion();
+          this.cargarCursos();
+        } else {
+          alert(leyenda || 'Error al actualizar el curso');
+        }
+      },
+      error: (error) => {
+        console.error('Error al actualizar curso:', error);
+        alert('Error al actualizar el curso: ' + (error.error?.leyenda || error.message));
+      }
+    });
   }
 
   // ========== MÉTODOS DE LA VISTA FORMULARIO ==========
@@ -235,20 +219,33 @@ export class CrearCurso implements OnInit, OnDestroy {
     this.curso.fechaCreacion = new Date();
     this.curso.fechaActualizacion = new Date();
 
-    this.servicioCursos.agregarCurso(this.curso);
-    alert(`Curso "${this.curso.titulo}" creado correctamente.`);
+    this.servicioCursos.agregarCurso(this.curso).subscribe({
+      next: (response: any) => {
+        const respuesta = response.respuesta || response.Respuesta;
+        const leyenda = response.leyenda || response.Leyenda;
 
-    this.cursoGuardado.emit(this.curso);
+        if (respuesta === 'Ok') {
+          alert(leyenda || `Curso "${this.curso.titulo}" creado correctamente.`);
+          this.cursoGuardado.emit(this.curso);
 
-    if (usuario) {
-      if (usuario.tipo === 'administrador') {
-        this.router.navigate(['/admin-dashboard']);
-      } else {
-        this.router.navigate(['/instructor']);
+          if (usuario) {
+            if (usuario.tipo === 'administrador') {
+              this.router.navigate(['/admin-dashboard']);
+            } else {
+              this.router.navigate(['/instructor']);
+            }
+          } else {
+            this.router.navigate(['/']);
+          }
+        } else {
+          alert(leyenda || 'Error al crear el curso');
+        }
+      },
+      error: (error) => {
+        console.error('Error al crear curso:', error);
+        alert('Error al crear el curso: ' + (error.error?.leyenda || error.message));
       }
-    } else {
-      this.router.navigate(['/']);
-    }
+    });
   }
 
   private actualizarCurso(): void {
@@ -260,22 +257,35 @@ export class CrearCurso implements OnInit, OnDestroy {
       fechaActualizacion: new Date()
     };
 
-    this.servicioCursos.actualizarCurso(cursoActualizado);
-    alert(`Curso "${cursoActualizado.titulo}" actualizado correctamente.`);
-    
-    this.cursoGuardado.emit(cursoActualizado);
-    this.cursoEditando = null;
-    
-    if (this.modo === 'tabla') {
-      this.cargarCursos();
-    } else {
-      const usuario = this.servicioAuth.obtenerUsuarioActual();
-      if (usuario && usuario.tipo === 'administrador') {
-        this.router.navigate(['/admin-dashboard']);
-      } else {
-        this.router.navigate(['/instructor']);
+    this.servicioCursos.actualizarCurso(cursoActualizado).subscribe({
+      next: (response: any) => {
+        const respuesta = response.respuesta || response.Respuesta;
+        const leyenda = response.leyenda || response.Leyenda;
+
+        if (respuesta === 'Ok') {
+          alert(leyenda || `Curso "${cursoActualizado.titulo}" actualizado correctamente.`);
+          this.cursoGuardado.emit(cursoActualizado);
+          this.cursoEditando = null;
+          
+          if (this.modo === 'tabla') {
+            this.cargarCursos();
+          } else {
+            const usuario = this.servicioAuth.obtenerUsuarioActual();
+            if (usuario && usuario.tipo === 'administrador') {
+              this.router.navigate(['/admin-dashboard']);
+            } else {
+              this.router.navigate(['/instructor']);
+            }
+          }
+        } else {
+          alert(leyenda || 'Error al actualizar el curso');
+        }
+      },
+      error: (error) => {
+        console.error('Error al actualizar curso:', error);
+        alert('Error al actualizar el curso: ' + (error.error?.leyenda || error.message));
       }
-    }
+    });
   }
 
   // ========== MÉTODOS DE TABLA Y FILTROS ==========
@@ -284,16 +294,32 @@ export class CrearCurso implements OnInit, OnDestroy {
   }
 
   cargarCursos(): void {
-    const usuario = this.servicioAuth.obtenerUsuarioActual();
-    
-    if (usuario && usuario.tipo === 'instructor') {
-      this.cursos = this.servicioCursos.obtenerCursosPorInstructor(usuario.email);
-    } else {
-      this.cursos = this.servicioCursos.obtenerCursos();
-    }
-    
-    this.dataSource = new MatTableDataSource(this.cursos);
-    this.aplicarFiltros();
+    this.cargando = true;
+    this.errorCarga = '';
+
+    this.servicioCursos.obtenerCursos().subscribe({
+      next: (cursos) => {
+        console.log('Cursos recibidos:', cursos);
+        
+        this.cursos = cursos || [];
+        this.dataSource = new MatTableDataSource(this.cursos);
+        this.aplicarFiltros();
+        this.cargando = false;
+      },
+      error: (error) => {
+        console.error('Error al cargar cursos:', error);
+        this.errorCarga = 'Error al cargar los cursos: ' + error.message;
+        this.cursos = [];
+        this.dataSource = new MatTableDataSource<Curso>([]);
+        this.cargando = false;
+        
+        if (error.message.includes('Error interno del servidor')) {
+          this.errorCarga = 'Error del servidor al cargar cursos. Por favor, intente más tarde.';
+        } else if (error.message.includes('No se pudo conectar')) {
+          this.errorCarga = 'No se puede conectar con el servidor. Verifique su conexión.';
+        }
+      }
+    });
   }
 
   aplicarFiltros(): void {
@@ -343,34 +369,59 @@ export class CrearCurso implements OnInit, OnDestroy {
     }
   }
 
-  puedeEditarEliminar(): boolean {
+  // CORREGIDO: Método que verifica permisos de edición/eliminación
+  puedeEditarEliminar(curso?: Curso): boolean {
     const usuario = this.servicioAuth.obtenerUsuarioActual();
     if (!usuario) return false;
     
+    // Administrador puede editar/eliminar cualquier curso
     if (usuario.tipo === 'administrador') {
       return true;
     }
     
-    if (usuario.tipo === 'instructor') {
-      if (this.modo === 'tabla' && this.dataSource) {
-        return true;
-      }
-      return this.cursos.some(c => c.instructor === usuario.email);
+    // Instructor solo puede editar/eliminar sus propios cursos
+    if (usuario.tipo === 'instructor' && curso) {
+      // Verificar que el instructor del curso sea el mismo usuario actual
+      return curso.instructor === usuario.email;
     }
     
     return false;
   }
 
   editarCurso(curso: Curso): void {
-    console.log('CrearCurso: Editando curso:', curso);
-    this.abrirModalEdicion(curso);
+    // CORREGIDO: Pasar el curso al método de validación
+    if (this.puedeEditarEliminar(curso)) {
+      this.abrirModalEdicion(curso);
+    } else {
+      alert('No tienes permisos para editar este curso. Solo puedes editar los cursos que hayas creado.');
+    }
   }
 
   eliminarCurso(curso: Curso): void {
-    if (confirm(`¿Estás seguro de eliminar el curso "${curso.titulo}"?`)) {
-      this.servicioCursos.eliminarCurso(curso.id);
-      this.cargarCursos();
-      this.aplicarFiltros();
+    // CORREGIDO: Pasar el curso al método de validación
+    if (!this.puedeEditarEliminar(curso)) {
+      alert('No tienes permisos para eliminar este curso. Solo puedes eliminar los cursos que hayas creado.');
+      return;
+    }
+
+    if (confirm(`¿Estás seguro de eliminar el curso "${curso.titulo}"?\nEsta acción no se puede deshacer.`)) {
+      this.servicioCursos.eliminarCurso(curso.id).subscribe({
+        next: (response: any) => {
+          const respuesta = response.respuesta || response.Respuesta;
+          const leyenda = response.leyenda || response.Leyenda;
+
+          if (respuesta === 'Ok') {
+            alert(leyenda || `Curso "${curso.titulo}" eliminado correctamente.`);
+            this.cargarCursos();
+          } else {
+            alert(leyenda || 'Error al eliminar el curso');
+          }
+        },
+        error: (error) => {
+          console.error('Error al eliminar curso:', error);
+          alert('Error al eliminar el curso: ' + (error.error?.leyenda || error.message));
+        }
+      });
     }
   }
 

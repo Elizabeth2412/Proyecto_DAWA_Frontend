@@ -1,3 +1,4 @@
+/*src/app/login/login.ts*/
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -20,7 +21,8 @@ export class Login implements OnInit {
   credencialesInvalidas: boolean = false;
   cargando: boolean = false;
   mensajeCarga: string = ""; 
-  
+  errorMessage: string = "";
+
   constructor(
     private servicioAutorizacion: ServicioAutorizacion,
     private router: Router
@@ -31,57 +33,63 @@ export class Login implements OnInit {
   togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
+  async validateLogin(): Promise<void> {
+  this.reiniciarValidaciones();
 
-  validateLogin(): void {
-    this.reiniciarValidaciones();
+  if (!this.validarCamposVacios()) {
+    return;
+  }
 
-    if (!this.validarCamposVacios()) {
-      return;
+  this.cargando = true;
+  this.mensajeCarga = 'Validando credenciales...';
+  this.errorMessage = '';
+
+  try {
+    const loginExitoso = await this.servicioAutorizacion.login(
+      this.email,
+      this.password
+    );
+
+    if (!loginExitoso) {
+      throw new Error('Credenciales incorrectas');
     }
 
-    this.mensajeCarga = "Se procederá a validar las credenciales de acceso...";
-    this.cargando = true;
+    const usuario = this.servicioAutorizacion.obtenerUsuarioActual();
+
+    if (!usuario) {
+      throw new Error('No se pudo obtener el usuario');
+    }
+
+    //  LIMPIAR ESTADO DEL LOGIN
+    this.email = '';
+    this.password = '';
+    this.cargando = false;
+
+    //  REDIRECCIÓN INMEDIATA
+    switch (usuario.tipo) {
+      case 'administrador':
+        this.router.navigateByUrl('/admin-dashboard');
+        break;
+      case 'instructor':
+        this.router.navigateByUrl('/instructor');
+        break;
+      case 'estudiante':
+        this.router.navigateByUrl('/estudiante');
+        break;
+      default:
+        this.router.navigateByUrl('/pagina-principal');
+    }
+
+  } catch (error: any) {
+    console.error(error);
+
+    this.cargando = false;
+    this.credencialesInvalidas = true;
+    this.errorMessage = error?.message || 'Error al iniciar sesión';
 
     setTimeout(() => {
-      this.procesarLogin();
-    }, 1500);
-  }
-private procesarLogin(): void {
-  this.mensajeCarga = "Validando credenciales...";
-  
-  const usuario = this.servicioAutorizacion.validarCredenciales(this.email, this.password);
-
-  if (usuario) {
-    this.mensajeCarga = " Acceso concedido. Redirigiendo...";
-    
-    setTimeout(() => {
-      this.servicioAutorizacion.iniciarSesion(usuario);
-      
-      // Redireccionar según el tipo de usuario
-      switch (usuario.tipo) {
-        case 'administrador':
-          this.router.navigate(['/admin-dashboard']);
-          break;
-        case 'instructor':
-          this.router.navigate(['/instructor']);
-          break;
-        case 'estudiante':
-          this.router.navigate(['/estudiante']);
-          break;
-        default:
-          this.router.navigate(['/pagina-principal']);
-      }
-      
-      this.cargando = false;
-    }, 1500);
-
-  } else {
-    this.mensajeCarga = " Error: credenciales incorrectas.";
-
-    setTimeout(() => {
-      this.cargando = false;
-      this.mostrarErrorCredenciales();
-    }, 1500);
+      this.credencialesInvalidas = false;
+    }, 3000);
   }
 }
 
@@ -89,9 +97,10 @@ private procesarLogin(): void {
     this.vacioEmail = false;
     this.vacioPassword = false;
     this.credencialesInvalidas = false;
+    this.errorMessage = "";
   }
 
-  private validarCamposVacios(): boolean {
+    private validarCamposVacios(): boolean {
     let valido = true;
 
     if (!this.email.trim()) {
@@ -111,6 +120,7 @@ private procesarLogin(): void {
     return valido;
   }
 
+
   private mostrarErrorCredenciales(): void {
     this.credencialesInvalidas = true;
     setTimeout(() => {
@@ -118,24 +128,6 @@ private procesarLogin(): void {
     }, 3000);
   }
 
-  // CORREGIDO: Este método ya existía pero no se estaba usando correctamente
-  private redireccionarSegunTipo(tipo: string): void {
-    switch (tipo) {
-      case 'administrador':
-        this.router.navigate(['/admin-dashboard']);
-        break;
-      case 'instructor':
-        this.router.navigate(['/instructor']);
-        break;
-      case 'estudiante':
-        this.router.navigate(['/estudiante']);
-        break;
-      default:
-        this.router.navigate(['/pagina-principal']);
-    }
-  }
-
-  // CORREGIDO: Este método debe estar alineado con la clase
   registrar(): void {
     this.router.navigate(['/register']);
   }

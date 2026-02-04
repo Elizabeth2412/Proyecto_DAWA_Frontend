@@ -1,274 +1,255 @@
+// src/app/servicios/servicio-usuarios.ts
 import { Injectable } from '@angular/core';
-
-export interface Usuario {
-  email: string;
-  password: string;
-  tipo: 'administrador' | 'instructor' | 'estudiante';
-  nombre: string;
-  apellido?: string;
-  edad?: number;
-}
+import { HttpClient } from '@angular/common/http';
+import { Observable, map, catchError, throwError } from 'rxjs';
+import { environment } from '../environments/environment.development';
+import { Usuario } from '../interfaces/usuario-interface';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ServicioUsuarios {
-  // --- Usuarios del sistema ---
-  private usuarios: Usuario[] = [
-    { email: 'elizabeth@gmail.com', password: 'admin123', tipo: 'administrador', nombre: 'Elizabeth', apellido: 'Franco', edad: 20 },
-    { email: 'leslie@gmail.com', password: 'instructor123', tipo: 'instructor', nombre: 'Leslie',apellido: 'Vera', edad: 20 },
-    { email: 'joshua@hotmail.com', password: 'estudiante123', tipo: 'estudiante', nombre: 'Joshúa',apellido: 'Castillo', edad: 20 },
-    { email: 'jonacas2000@outlook.com', password: '123456', tipo: 'estudiante', nombre: 'Jonathan',apellido: 'Castro', edad: 20 },
-    { email: 'juan@outlook.com', password: '123456', tipo: 'estudiante', nombre: 'Juan', apellido: 'Robles', edad: 20 }
-  ];
+  private baseUrl = environment.apiURL;
 
-  // --- Claves para almacenamiento ---
-  private readonly claveUsuarios = 'usuarios_agropetech';
-
-  constructor() {
-    this.cargarUsuariosDesdeStorage();
-  }
+  constructor(private http: HttpClient) {}
 
   /**
-   * Carga usuarios desde localStorage al iniciar
+   * Obtiene todos los usuarios del sistema desde backend
    */
-  private cargarUsuariosDesdeStorage(): void {
-    const usuariosGuardados = localStorage.getItem(this.claveUsuarios);
-    if (usuariosGuardados) {
-      this.usuarios = JSON.parse(usuariosGuardados);
-    } else {
-      // Guardar usuarios iniciales
-      this.guardarUsuariosEnStorage();
-    }
-  }
-
-  /**
-   * Guarda usuarios en localStorage
-   */
-  private guardarUsuariosEnStorage(): void {
-    localStorage.setItem(this.claveUsuarios, JSON.stringify(this.usuarios));
-  }
-
-  /**
-   * Registra un nuevo usuario
-   */
-  registrarUsuario(nuevoUsuario: {
-    nombre: string;
-    apellido: string;
-    edad: number;
-    correo: string;
-    password: string;
-  }): { exito: boolean; mensaje: string } {
-
-    const existeUsuario = this.usuarios.find(u => u.email === nuevoUsuario.correo);
+  obtenerTodosUsuarios(): Observable<Usuario[]> {
+    const usuario = {
+      Transaccion: 'CONSULTAR_USUARIO'
+    };
     
-    if (existeUsuario) {
-      return {
-        exito: false,
-        mensaje: 'Este correo ya está registrado. Por favor usa otro o inicia sesión.'
-      };
-    }
+    return this.http.post<any>(`${this.baseUrl}/Usuario/GetUsuario`, usuario).pipe(
+      map(response => {
+        if (response && response.Respuesta === 'Ok' && response.Data) {
+          // Asegurarse de que Data sea un array
+          if (Array.isArray(response.Data)) {
+            return response.Data.map((user: any) => ({
+              email: user.Email || user.email || '',
+              tipo: user.Tipo || user.tipo || 'estudiante',
+              nombre: user.Nombre || user.nombre || '',
+              apellido: user.Apellido || user.apellido || '',
+              edad: user.Edad || user.edad || 0,
+              id: user.Id || user.id || 0
+            })) as Usuario[];
+          }
+        }
+        return [];
+      }),
+      catchError(error => {
+        console.error('Error al obtener usuarios:', error);
+        return throwError(() => new Error('Error al cargar usuarios del servidor'));
+      })
+    );
+  }
 
-    // Validar campos obligatorios
-    if (!nuevoUsuario.nombre || !nuevoUsuario.correo || !nuevoUsuario.password) {
-      return {
-        exito: false,
-        mensaje: 'Por favor completa todos los campos obligatorios.'
-      };
-    }
-
-    // Crear nuevo usuario (por defecto será estudiante)
-    const usuario: Usuario = {
-      email: nuevoUsuario.correo,
-      password: nuevoUsuario.password,
-      tipo: 'estudiante',
-      nombre: nuevoUsuario.nombre,
-      apellido: nuevoUsuario.apellido,
-      edad: nuevoUsuario.edad
+  /**
+   * Obtiene un usuario por su email desde backend
+   */
+  obtenerUsuarioPorEmail(email: string): Observable<Usuario | null> {
+    const usuario = {
+      Email: email,
+      Transaccion: 'BUSCAR_USUARIO'
     };
-
-    // Agregar a la lista
-    this.usuarios.push(usuario);
     
-    // Guardar en localStorage
-    this.guardarUsuariosEnStorage();
+    return this.http.post<any>(`${this.baseUrl}/Usuario/GetUsuario`, usuario).pipe(
+      map(response => {
+        if (response && response.Respuesta === 'Ok' && response.Data && response.Data.length > 0) {
+          const userData = response.Data[0];
+          return {
+            email: userData.Email || userData.email || email,
+            tipo: userData.Tipo || userData.tipo || 'estudiante',
+            nombre: userData.Nombre || userData.nombre || '',
+            apellido: userData.Apellido || userData.apellido || '',
+            edad: userData.Edad || userData.edad || 0,
+            id: userData.Id || userData.id || 0
+          } as Usuario;
+        }
+        return null;
+      }),
+      catchError(error => {
+        console.error('Error al obtener usuario:', error);
+        return throwError(() => new Error('Error al buscar usuario'));
+      })
+    );
+  }
 
-    return {
-      exito: true,
-      mensaje: '¡Registro exitoso! Ahora puedes iniciar sesión.'
+  /**
+   * Actualiza un usuario existente en backend
+   */
+  actualizarUsuarioBackend(usuarioData: any): Observable<any> {
+    const usuario = {
+      ...usuarioData,
+      Transaccion: 'ACTUALIZAR_USUARIO'
     };
-  }
-
-  /**
-   * Obtiene todos los usuarios del sistema
-   */
-  obtenerTodosUsuarios(): Usuario[] {
-    return [...this.usuarios]; // Retorna una copia
-  }
-
-  /**
-   * Obtiene un usuario por su email
-   */
-  obtenerUsuarioPorEmail(email: string): Usuario | undefined {
-    return this.usuarios.find(u => u.email === email);
-  }
-
-  /**
-   * Actualiza un usuario existente
-   */
-  actualizarUsuario(email: string, usuarioActualizado: Usuario): { exito: boolean; mensaje: string } {
-    const index = this.usuarios.findIndex(u => u.email === email);
     
-    if (index === -1) {
-      return {
-        exito: false,
-        mensaje: 'Usuario no encontrado.'
-      };
-    }
-
-    // Actualizar usuario manteniendo el email original
-    this.usuarios[index] = {
-      ...usuarioActualizado,
-      email: email // El email no cambia
-    };
-
-    // Guardar cambios
-    this.guardarUsuariosEnStorage();
-
-    return {
-      exito: true,
-      mensaje: 'Usuario actualizado correctamente.'
-    };
+    return this.http.post(`${this.baseUrl}/Usuario/SetUsuario`, usuario);
   }
 
   /**
-   * Elimina un usuario del sistema
+   * Elimina un usuario del sistema en backend
    */
-  eliminarUsuario(email: string): { exito: boolean; mensaje: string } {
-    const index = this.usuarios.findIndex(u => u.email === email);
+  eliminarUsuarioBackend(email: string): Observable<any> {
+    const usuario = {
+      Email: email,
+      Transaccion: 'ELIMINAR_USUARIO'
+    };
     
-    if (index === -1) {
-      return {
-        exito: false,
-        mensaje: 'Usuario no encontrado.'
-      };
-    }
-
-    // Eliminar usuario
-    this.usuarios.splice(index, 1);
-
-    // Guardar cambios
-    this.guardarUsuariosEnStorage();
-
-    return {
-      exito: true,
-      mensaje: 'Usuario eliminado correctamente.'
-    };
+    return this.http.post(`${this.baseUrl}/Usuario/SetUsuario`, usuario);
   }
 
- 
   /**
-   * Obtiene usuarios por tipo
+   * Obtiene usuarios por tipo desde backend
    */
-  obtenerUsuariosPorTipo(tipo: 'administrador' | 'instructor' | 'estudiante'): Usuario[] {
-    return this.usuarios.filter(u => u.tipo === tipo);
+  obtenerUsuariosPorTipo(tipo: 'administrador' | 'instructor' | 'estudiante'): Observable<Usuario[]> {
+    return this.obtenerTodosUsuarios().pipe(
+      map(usuarios => usuarios.filter(u => u.tipo === tipo))
+    );
   }
 
   /**
    * Obtiene estadísticas de usuarios
    */
-  obtenerEstadisticasUsuarios(): {
+  obtenerEstadisticasUsuarios(): Observable<{
     total: number;
     administradores: number;
     instructores: number;
     estudiantes: number;
-  } {
-    return {
-      total: this.usuarios.length,
-      administradores: this.usuarios.filter(u => u.tipo === 'administrador').length,
-      instructores: this.usuarios.filter(u => u.tipo === 'instructor').length,
-      estudiantes: this.usuarios.filter(u => u.tipo === 'estudiante').length
-    };
+  }> {
+    return this.obtenerTodosUsuarios().pipe(
+      map(usuarios => ({
+        total: usuarios.length,
+        administradores: usuarios.filter(u => u.tipo === 'administrador').length,
+        instructores: usuarios.filter(u => u.tipo === 'instructor').length,
+        estudiantes: usuarios.filter(u => u.tipo === 'estudiante').length
+      }))
+    );
   }
 
   /**
    * Cambia el tipo de usuario
    */
-  cambiarTipoUsuario(email: string, nuevoTipo: 'administrador' | 'instructor' | 'estudiante'): { exito: boolean; mensaje: string } {
-    const usuario = this.obtenerUsuarioPorEmail(email);
-    
-    if (!usuario) {
-      return {
-        exito: false,
-        mensaje: 'Usuario no encontrado.'
-      };
-    }
-
-    const usuarioActualizado: Usuario = {
-      ...usuario,
-      tipo: nuevoTipo
-    };
-
-    return this.actualizarUsuario(email, usuarioActualizado);
-  }
-
-  /**
-   * Cambia la contraseña de un usuario
-   */
-  cambiarPassword(email: string, nuevaPassword: string): { exito: boolean; mensaje: string } {
-    const usuario = this.obtenerUsuarioPorEmail(email);
-    
-    if (!usuario) {
-      return {
-        exito: false,
-        mensaje: 'Usuario no encontrado.'
-      };
-    }
-
-    const usuarioActualizado: Usuario = {
-      ...usuario,
-      password: nuevaPassword
-    };
-
-    return this.actualizarUsuario(email, usuarioActualizado);
+  cambiarTipoUsuario(email: string, nuevoTipo: 'administrador' | 'instructor' | 'estudiante'): Observable<any> {
+    return this.obtenerUsuarioPorEmail(email).pipe(
+      map(usuario => {
+        if (!usuario) {
+          throw new Error('Usuario no encontrado');
+        }
+        
+        const usuarioActualizado = {
+          Email: email,
+          Nombre: usuario.nombre,
+          Apellido: usuario.apellido,
+          Edad: usuario.edad,
+          Tipo: nuevoTipo,
+          Transaccion: 'ACTUALIZAR_USUARIO'
+        };
+        
+        return this.actualizarUsuarioBackend(usuarioActualizado);
+      })
+    );
   }
 
   /**
    * Verifica si un email ya está registrado
    */
-  existeUsuario(email: string): boolean {
-    return this.usuarios.some(u => u.email === email);
-  }
-
-  /**
-   * Busca usuarios por nombre o email
-   */
-  buscarUsuarios(termino: string): Usuario[] {
-    const terminoLower = termino.toLowerCase();
-    return this.usuarios.filter(u => 
-      u.nombre.toLowerCase().includes(terminoLower) ||
-      u.email.toLowerCase().includes(terminoLower) ||
-      (u.apellido && u.apellido.toLowerCase().includes(terminoLower))
+  existeUsuario(email: string): Observable<boolean> {
+    return this.obtenerUsuarioPorEmail(email).pipe(
+      map(usuario => usuario !== null),
+      catchError(() => [false])
     );
   }
 
   /**
    * Obtiene el número total de usuarios
    */
-  obtenerTotalUsuarios(): number {
-    return this.usuarios.length;
+  obtenerTotalUsuarios(): Observable<number> {
+    return this.obtenerTodosUsuarios().pipe(
+      map(usuarios => usuarios.length)
+    );
   }
+
   /**
- * Valida las credenciales del usuario (para login)
- */
-validarCredenciales(email: string, password: string): Usuario | null {
-  console.log('Validando credenciales para:', email);
-  console.log('Usuarios disponibles:', this.usuarios.map(u => ({ email: u.email, password: u.password })));
+   * Valida las credenciales del usuario (para login)
+   * Este método ya no se necesita porque se usa el backend directamente
+   * Se mantiene solo para compatibilidad
+   */
+  validarCredenciales(email: string, password: string): Observable<Usuario | null> {
+    console.log('Validando credenciales en backend para:', email);
+    
+    const usuario = {
+      Email: email,
+      Password: password,
+      Transaccion: 'VALIDAR_USUARIO'
+    };
+    
+    return this.http.post<any>(`${this.baseUrl}/Usuario/ValidarLogin`, usuario).pipe(
+      map(response => {
+        if (response && response.Respuesta === 'Ok' && response.Data && response.Data.Usuario) {
+          const userData = response.Data.Usuario;
+          return {
+            email: userData.Email || email,
+            password: password, // Guardar temporalmente
+            tipo: userData.Tipo || 'estudiante',
+            nombre: userData.Nombre || '',
+            apellido: userData.Apellido || '',
+            edad: userData.Edad || 0,
+            id: userData.Id || 0
+          } as Usuario;
+        }
+        return null;
+      })
+    );
+  }
   
-  const usuario = this.usuarios.find(u => u.email === email && u.password === password);
-  
-  console.log('Usuario encontrado:', usuario);
-  
-  return usuario || null;
-}
+  // Método para login usando JWT (método principal)
+  loginBackend(credentials: { email: string, password: string }): Observable<any> {
+    const usuario = {
+      Email: credentials.email,
+      Password: credentials.password,
+      Transaccion: 'VALIDAR_USUARIO'
+    };
+    
+    return this.http.post(`${this.baseUrl}/Usuario/ValidarLogin`, usuario, {
+      timeout: 10000
+    });
+  }
+
+  // Método para obtener información del usuario desde backend
+  getUsuarioInfoBackend(email: string): Observable<any> {
+    const usuario = {
+      Email: email,
+      Transaccion: 'BUSCAR_USUARIO'
+    };
+    
+    return this.http.post(`${this.baseUrl}/Usuario/GetUsuario`, usuario);
+  }
+
+  // Método para registrar usuario en backend
+  registrarUsuarioBackend(usuarioData: any): Observable<any> {
+    const usuario = {
+      ...usuarioData,
+      Transaccion: 'INSERTAR_USUARIO'
+    };
+    
+    return this.http.post(`${this.baseUrl}/Usuario/RegistrarUsuario`, usuario);
+  }
+
+  /**
+   * Busca usuarios por nombre o email
+   */
+  buscarUsuarios(termino: string): Observable<Usuario[]> {
+    return this.obtenerTodosUsuarios().pipe(
+      map(usuarios => {
+        const terminoLower = termino.toLowerCase();
+        return usuarios.filter(u => 
+          u.nombre.toLowerCase().includes(terminoLower) ||
+          u.email.toLowerCase().includes(terminoLower) ||
+          (u.apellido && u.apellido.toLowerCase().includes(terminoLower))
+        );
+      })
+    );
+  }
 }

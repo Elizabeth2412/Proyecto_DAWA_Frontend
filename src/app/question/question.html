@@ -1,0 +1,256 @@
+<!-- ═══════════════════════════════════════════ -->
+<!-- PANTALLA DE GESTIÓN DE PREGUNTAS           -->
+<!-- ═══════════════════════════════════════════ -->
+
+<div class="preguntas-wrapper">
+
+  <!-- ── HEADER ── -->
+  <div class="preguntas-header">
+    <div class="header-left">
+      <button class="btn-volver" (click)="onVolverClick()" title="Volver a evaluaciones">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="header-info">
+        <h1 class="header-titulo">
+          <mat-icon class="icon-titulo">q uiz</mat-icon>
+          {{ evaluacion?.titulo || 'Preguntas' }}
+        </h1>
+        <p class="header-sub">
+          Módulo: <span class="modulo-tag">{{ evaluacion?.modulo || '—' }}</span>
+          · Duración: {{ evaluacion?.duracion || '—' }}
+        </p>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <button class="btn-nueva-pregunta" (click)="abrirModalCrear()">
+        <mat-icon>add</mat-icon>
+        Nueva Pregunta
+      </button>
+      <div class="contador-preguntas">
+        <mat-icon>assignment</mat-icon>
+        <span>{{ preguntasConOpciones.length }} pregunta{{ preguntasConOpciones.length !== 1 ? 's' : '' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ESTADO: CARGANDO ── -->
+  <div *ngIf="cargando" class="estado-carga">
+    <div class="spinner"></div>
+    <p>Cargando preguntas...</p>
+  </div>
+
+  <!-- ── ESTADO: ERROR ── -->
+  <div *ngIf="!cargando && errorCarga" class="estado-error">
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ errorCarga }}</p>
+    <button class="btn-reintentar" (click)="cargarPreguntas()">
+      <mat-icon>refresh</mat-icon> Reintentar
+    </button>
+  </div>
+
+  <!-- ── ESTADO: SIN PREGUNTAS ── -->
+  <div *ngIf="!cargando && !errorCarga && preguntasConOpciones.length === 0" class="estado-vacio">
+    <mat-icon class="icon-vacio">inbox</mat-icon>
+    <h3>No hay preguntas aún</h3>
+    <p>Crea la primera pregunta para esta evaluación</p>
+    <button class="btn-nueva-pregunta" (click)="abrirModalCrear()">
+      <mat-icon>add</mat-icon> Crear primera pregunta
+    </button>
+  </div>
+
+  <!-- ── LISTA DE PREGUNTAS ── -->
+  <div *ngIf="!cargando && !errorCarga && preguntasConOpciones.length > 0" class="lista-preguntas">
+
+    <div *ngFor="let item of preguntasConOpciones; let i = index"
+         class="card-pregunta">
+
+      <!-- Header de la card -->
+      <div class="card-pregunta-header">
+        <div class="card-header-left">
+          <span class="badge-numero">Pregunta {{ i + 1 }}</span>
+          <span class="badge-opciones">{{ item.opciones.length }} opciones</span>
+        </div>
+        <div class="card-header-acciones">
+          <button class="btn-accion btn-editar"
+                  (click)="abrirModalEditar(item)"
+                  title="Editar pregunta">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button class="btn-accion btn-eliminar"
+                  (click)="confirmarEliminar(item.pregunta.id)"
+                  title="Eliminar pregunta">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Texto de la pregunta -->
+      <div class="card-pregunta-body">
+        <p class="texto-pregunta">{{ item.pregunta.texto }}</p>
+
+        <!-- Opciones -->
+        <div class="opciones-lista">
+          <div *ngFor="let opt of item.opciones; let oi = index"
+               class="opcion-item"
+               [class.opcion-correcta]="opt.esCorrecta">
+
+            <!-- Indicador correcta/letra -->
+            <div class="opcion-indicador" [class.indicador-correcta]="opt.esCorrecta">
+              <mat-icon *ngIf="opt.esCorrecta" class="icon-check">check</mat-icon>
+              <span *ngIf="!opt.esCorrecta" class="letra">{{ letra(oi) }}</span>
+            </div>
+
+            <!-- Texto opción -->
+            <span class="opcion-texto">{{ opt.texto }}</span>
+
+            <!-- Badge "Correcta" -->
+            <span *ngIf="opt.esCorrecta" class="badge-correcta">✓ Correcta</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- MODAL CREAR / EDITAR PREGUNTA              -->
+<!-- ═══════════════════════════════════════════ -->
+
+<div *ngIf="mostrarModal" class="modal-overlay" (click)="cerrarModal()">
+  <div class="modal-contenedor" (click)="$event.stopPropagation()">
+
+    <!-- Header modal -->
+    <div class="modal-header">
+      <div class="modal-header-texto">
+        <h2 class="modal-titulo">
+          <mat-icon>{{ modoModal === 'crear' ? 'add_circle' : 'edit' }}</mat-icon>
+          {{ modoModal === 'crear' ? 'Nueva Pregunta' : 'Editar Pregunta' }}
+        </h2>
+        <p class="modal-subtitulo">
+          {{ modoModal === 'crear'
+            ? 'Ingresa el texto y añade las opciones de respuesta'
+            : 'Modifica el texto y las opciones' }}
+        </p>
+      </div>
+      <button class="btn-cerrar-modal" (click)="cerrarModal()" title="Cerrar">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Body modal -->
+    <div class="modal-body">
+
+      <!-- Campo: Texto de la pregunta -->
+      <div class="campo-grupo">
+        <label class="campo-label">
+          <mat-icon>description</mat-icon>
+          Texto de la pregunta *
+        </label>
+        <textarea
+          class="campo-textarea"
+          [(ngModel)]="form.texto"
+          name="textoPregunta"
+          placeholder="Ej: ¿Qué es la agricultura sostenible?"
+          rows="3">
+        </textarea>
+      </div>
+
+      <!-- Campo: Opciones de respuesta -->
+      <div class="campo-grupo">
+        <div class="opciones-header">
+          <label class="campo-label">
+            <mat-icon>list</mat-icon>
+            Opciones de respuesta *
+          </label>
+          <span class="opciones-hint">Mínimo 2 opciones · Marca la correcta con el radio</span>
+        </div>
+
+        <div class="opciones-form">
+          <div *ngFor="let opt of form.opciones; let idx = index"
+               class="opcion-form-item"
+               [class.opcion-form-correcta]="opt.esCorrecta">
+
+            <!-- Radio: marcar como correcta -->
+            <div class="radio-correcta"
+                 [class.radio-activo]="opt.esCorrecta"
+                 (click)="marcarCorrecta(idx)"
+                 title="Marcar como correcta">
+              <div *ngIf="opt.esCorrecta" class="radio-inner"></div>
+            </div>
+
+            <!-- Input texto de la opción -->
+            <input
+              type="text"
+              class="input-opcion"
+              [class.input-correcta]="opt.esCorrecta"
+              [(ngModel)]="opt.texto"
+              [name]="'opcion_' + idx"
+              [placeholder]="'Opción ' + letra(idx)"
+            >
+
+            <!-- Botón eliminar opción -->
+            <button *ngIf="form.opciones.length > 2"
+                    class="btn-eliminar-opcion"
+                    (click)="eliminarOpcion(idx)"
+                    title="Eliminar opción">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Botón añadir opción -->
+        <button class="btn-añadir-opcion" (click)="agregarOpcion()">
+          <mat-icon>add</mat-icon>
+          Añadir otra opción
+        </button>
+
+        <!-- Validación: opción correcta -->
+        <p class="validacion-correcta" [class.validacion-ok]="tieneOpcionCorrecta" [class.validacion-error]="!tieneOpcionCorrecta">
+          <mat-icon>{{ tieneOpcionCorrecta ? 'check_circle' : 'warning' }}</mat-icon>
+          {{ tieneOpcionCorrecta
+            ? 'Opción correcta seleccionada'
+            : 'Selecciona la opción correcta haciendo clic en el radio' }}
+        </p>
+      </div>
+
+      <!-- Botones del modal -->
+      <div class="modal-acciones">
+        <button class="btn-modal-cancelar" (click)="cerrarModal()">
+          <mat-icon>cancel</mat-icon>
+          Cancelar
+        </button>
+        <button class="btn-modal-guardar"
+                [disabled]="!formularioValido"
+                (click)="guardarPregunta()">
+          <mat-icon>{{ modoModal === 'crear' ? 'add_circle' : 'save' }}</mat-icon>
+          {{ modoModal === 'crear' ? 'Crear Pregunta' : 'Guardar Cambios' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- MODAL CONFIRMACIÓN DE ELIMINACIÓN          -->
+<!-- ═══════════════════════════════════════════ -->
+
+<div *ngIf="mostrarConfirmDelete" class="modal-overlay modal-overlay-confirm" (click)="cancelarEliminar()">
+  <div class="modal-confirm" (click)="$event.stopPropagation()">
+    <div class="confirm-icon">
+      <mat-icon>warning_amber</mat-icon>
+    </div>
+    <h3 class="confirm-titulo">¿Eliminar esta pregunta?</h3>
+    <p class="confirm-texto">
+      Esta acción eliminará la pregunta y todas sus opciones de respuesta. No puede deshacerse.
+    </p>
+    <div class="confirm-acciones">
+      <button class="btn-confirm-cancelar" (click)="cancelarEliminar()">Cancelar</button>
+      <button class="btn-confirm-eliminar" (click)="ejecutarEliminar()">
+        <mat-icon>delete</mat-icon> Eliminar
+      </button>
+    </div>
+  </div>
+</div>
