@@ -16,31 +16,44 @@ export class ServicioUsuarios {
   /**
    * Obtiene todos los usuarios del sistema desde backend
    */
-  obtenerTodosUsuarios(): Observable<Usuario[]> {
-    const usuario = {
-      Transaccion: 'CONSULTAR_USUARIO'
+   obtenerTodosUsuarios(): Observable<Usuario[]> {
+    const requestBody = {
+      transaccion: 'CONSULTAR_USUARIO'
     };
     
-    return this.http.post<any>(`${this.baseUrl}/Usuario/GetUsuario`, usuario).pipe(
+    console.log('Obteniendo usuarios, URL:', `${this.baseUrl}/api/Usuario/GetUsuario`);
+    console.log('Request body:', requestBody);
+    
+    return this.http.post<any>(`${this.baseUrl}/Usuario/GetUsuario`, requestBody).pipe(
       map(response => {
-        if (response && response.Respuesta === 'Ok' && response.Data) {
-          // Asegurarse de que Data sea un array
-          if (Array.isArray(response.Data)) {
-            return response.Data.map((user: any) => ({
-              email: user.Email || user.email || '',
-              tipo: user.Tipo || user.tipo || 'estudiante',
-              nombre: user.Nombre || user.nombre || '',
-              apellido: user.Apellido || user.apellido || '',
-              edad: user.Edad || user.edad || 0,
-              id: user.Id || user.id || 0
+        console.log('Respuesta completa del backend:', response);
+        
+        // Verificar estructura de respuesta
+        if (response && response.respuesta === 'Ok') {
+          if (response.data && Array.isArray(response.data)) {
+            // Mapear los datos de respuesta a la interfaz Usuario
+            const usuariosMapeados = response.data.map((user: any) => ({
+              email: user.email || '',
+              tipo: user.tipo || 'estudiante',
+              nombre: user.nombre || '',
+              apellido: user.apellido || '',
+              edad: user.edad || 0,
+              id: user.id || 0
             })) as Usuario[];
+            
+            console.log('Usuarios mapeados:', usuariosMapeados);
+            return usuariosMapeados;
+          } else {
+            console.warn('La propiedad data no es un array o no existe:', response.data);
           }
+        } else {
+          console.warn('Respuesta no exitosa del backend:', response);
         }
         return [];
       }),
       catchError(error => {
         console.error('Error al obtener usuarios:', error);
-        return throwError(() => new Error('Error al cargar usuarios del servidor'));
+        return throwError(() => new Error('Error al cargar usuarios del servidor: ' + error.message));
       })
     );
   }
@@ -49,33 +62,32 @@ export class ServicioUsuarios {
    * Obtiene un usuario por su email desde backend
    */
   obtenerUsuarioPorEmail(email: string): Observable<Usuario | null> {
-    const usuario = {
-      Email: email,
-      Transaccion: 'BUSCAR_USUARIO'
+    const requestBody = {
+      email: email,
+      transaccion: 'BUSCAR_USUARIO'
     };
     
-    return this.http.post<any>(`${this.baseUrl}/Usuario/GetUsuario`, usuario).pipe(
+    return this.http.post<any>(`${this.baseUrl}/api/Usuario/GetUsuario`, requestBody).pipe(
       map(response => {
-        if (response && response.Respuesta === 'Ok' && response.Data && response.Data.length > 0) {
-          const userData = response.Data[0];
+        if (response && response.respuesta === 'Ok' && response.data && response.data.length > 0) {
+          const userData = response.data[0];
           return {
-            email: userData.Email || userData.email || email,
-            tipo: userData.Tipo || userData.tipo || 'estudiante',
-            nombre: userData.Nombre || userData.nombre || '',
-            apellido: userData.Apellido || userData.apellido || '',
-            edad: userData.Edad || userData.edad || 0,
-            id: userData.Id || userData.id || 0
+            email: userData.email || email,
+            tipo: userData.tipo || 'estudiante',
+            nombre: userData.nombre || '',
+            apellido: userData.apellido || '',
+            edad: userData.edad || 0,
+            id: userData.id || 0
           } as Usuario;
         }
         return null;
       }),
       catchError(error => {
         console.error('Error al obtener usuario:', error);
-        return throwError(() => new Error('Error al buscar usuario'));
+        return throwError(() => new Error('Error al buscar usuario: ' + error.message));
       })
     );
   }
-
   /**
    * Actualiza un usuario existente en backend
    */

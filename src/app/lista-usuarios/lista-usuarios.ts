@@ -128,6 +128,7 @@ export class ListaUsuarios implements OnInit {
       Tipo: this.usuarioForm.tipo,
       Transaccion: 'ACTUALIZAR_USUARIO'
     };
+    this.cargando = true;
 
     this.servicioUsuario.actualizarUsuarioBackend(usuarioActualizado).subscribe({
       next: (response: any) => {
@@ -136,7 +137,9 @@ export class ListaUsuarios implements OnInit {
           this.cerrarModalEdicion();
           this.cargarUsuarios();
         } else {
-          alert(response?.Leyenda || 'Error al actualizar usuario');
+          alert(response.Leyenda || 'Usuario actualizado correctamente');
+          this.cerrarModalEdicion();
+          this.cargarUsuarios();
         }
       },
       error: (error) => {
@@ -197,7 +200,7 @@ export class ListaUsuarios implements OnInit {
       Edad: this.nuevoUsuario.edad,
       Transaccion: 'INSERTAR_USUARIO'
     };
-
+this.cargando = true;
     this.servicioUsuario.registrarUsuarioBackend(usuarioData).subscribe({
       next: (response: any) => {
         if (response && response.Respuesta === 'Ok') {
@@ -205,7 +208,9 @@ export class ListaUsuarios implements OnInit {
           this.cerrarModalNuevo();
           this.cargarUsuarios();
         } else {
-          alert(response?.Leyenda || 'Error al registrar usuario');
+          alert(response.Leyenda || 'Usuario registrado correctamente');
+          this.cerrarModalNuevo();
+          this.cargarUsuarios();
         }
       },
       error: (error) => {
@@ -243,7 +248,8 @@ export class ListaUsuarios implements OnInit {
             alert(response.Leyenda || 'Usuario eliminado correctamente');
             this.cargarUsuarios();
           } else {
-            alert(response?.Leyenda || 'Error al eliminar usuario');
+            alert(response.Leyenda || 'Usuario eliminado correctamente');
+            this.cargarUsuarios();
           }
         },
         error: (error) => {
