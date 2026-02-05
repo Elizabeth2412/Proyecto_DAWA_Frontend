@@ -93,7 +93,6 @@ export class Login implements OnInit {
   }
 }
 
-
   private reiniciarValidaciones(): void {
     this.vacioEmail = false;
     this.vacioPassword = false;

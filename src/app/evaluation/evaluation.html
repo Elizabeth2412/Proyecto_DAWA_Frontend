@@ -65,7 +65,7 @@
           <tbody>
             <tr *ngFor="let evaluacion of evaluacionesFiltradas">
               <td class="text-center">{{ evaluacion.id }}</td>
-              <td class="text-center">{{ evaluacion.cursoId }}</td>
+              <td class="text-center">{{ evaluacion.cursoName }}</td>
               <td class="nombre-evaluacion fw-semibold">{{ evaluacion.titulo }}</td>
               <td class="text-center">
                 <span class="badge-modulo px-2 py-1 rounded-3">
@@ -89,8 +89,8 @@
                 <button class="btn-preguntas" 
                         (click)="irAPreguntas(evaluacion)" 
                         title="Gestionar preguntas">
-                  <mat-icon>help_outline</mat-icon>
-                </button>
+                  <mat-icon>quiz</mat-icon>
+                </button> 
                 <button class="btn-ver" 
                         (click)="verEvaluacion(evaluacion)" 
                         title="Ver detalles">
@@ -345,6 +345,20 @@
             placeholder="Ej: Evaluación del Módulo 1"
             required>
         </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">
+            <i class="bi bi-pencil me-2"></i>Curso *
+          </label>
+          <input 
+            type="text" 
+            class="form-control form-control-lg"
+            [(ngModel)]="evaluacionSeleccionada.cursoId"
+            name="curso"
+            placeholder="Ej: Evaluación del Módulo 1">
+        </div>
+        
+
 
         <!-- Módulo -->
         <div class="mb-3">

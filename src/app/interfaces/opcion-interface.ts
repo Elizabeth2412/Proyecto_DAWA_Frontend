@@ -5,5 +5,4 @@ export interface Opcion {
   esCorrecta: boolean;
   estado: string | null;
   usuarioId: number | null;
-  transaccion: string | null;
 }

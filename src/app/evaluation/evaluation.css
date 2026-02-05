@@ -1878,8 +1878,7 @@ h1.display-5 {
 
 /* Estilos para el botón de preguntas */
 .btn-preguntas {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  color: rgb(16, 85, 37);
   border: none;
   width: 36px;
   height: 36px;
@@ -1889,19 +1888,17 @@ h1.display-5 {
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
   margin: 0 2px;
 }
 
 .btn-preguntas:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
 }
 
 .btn-preguntas:active {
   transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+  box-shadow: 0 2px 4px rgba(2, 10, 46, 0.2);
 }
 
 .btn-preguntas mat-icon {
