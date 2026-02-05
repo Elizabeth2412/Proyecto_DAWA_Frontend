@@ -6,5 +6,5 @@ export interface Foro {
   autor: string;
   fechaHora: string;
   replicas: number;
-  image?: string | null;
+  urlImagen?: string | null;
 }
