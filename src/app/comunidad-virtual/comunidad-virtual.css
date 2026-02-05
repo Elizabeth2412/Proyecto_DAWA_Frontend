@@ -91,7 +91,7 @@ h1 {
 
 .search-input:focus {
   border-color: #4a7c2c;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(74, 124, 44, 0.1);
 }
 
 .forum-container {
@@ -110,11 +110,13 @@ h1 {
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border: 1px solid #e5e7eb;
-  transition: box-shadow 0.2s;
+  transition: all 0.3s;
+  cursor: pointer;
 }
 
 .forum-card:hover {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(74, 124, 44, 0.15);
+  transform: translateY(-2px);
 }
 
 .forum-card-content {
@@ -132,13 +134,12 @@ h1 {
   font-size: 1.25rem;
   font-weight: 600;
   color: #1f2937;
-  cursor: pointer;
   margin: 0;
   flex: 1;
   transition: color 0.2s;
 }
 
-.forum-title:hover {
+.forum-card:hover .forum-title {
   color: #4a7c2c;
 }
 
@@ -167,16 +168,38 @@ h1 {
 
 .icon-btn-edit:hover {
   color: #4a7c2c;
+  background: #f0fdf4;
 }
 
 .icon-btn-delete:hover {
   color: #dc2626;
+  background: #fef2f2;
+}
+
+/* Imagen en tarjeta de foro */
+.forum-image-container {
+  width: 100%;
+  max-height: 300px;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.forum-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.forum-card:hover .forum-image {
+  transform: scale(1.05);
 }
 
 .forum-content {
   color: #4b5563;
   margin-bottom: 1rem;
-  line-height: 1.5;
+  line-height: 1.6;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -199,6 +222,7 @@ h1 {
 .meta-replies {
   margin-left: auto;
   font-weight: 500;
+  color: #4a7c2c;
 }
 
 .empty-state {
@@ -216,6 +240,7 @@ h1 {
   margin: 0;
 }
 
+/* Modales */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -225,6 +250,12 @@ h1 {
   justify-content: center;
   z-index: 50;
   padding: 1rem;
+  animation: fadeIn 0.2s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .modal-content {
@@ -234,17 +265,36 @@ h1 {
   max-width: 42rem;
   width: 100%;
   max-height: 90vh;
-  overflow-y: hidden;
+  overflow: hidden;
+  animation: slideUp 0.3s;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .modal-small {
   max-width: 28rem;
 }
 
+.modal-large {
+  max-width: 56rem;
+}
+
 .modal-header {
   padding: 1.5rem;
-  border-bottom: 1px solid linear-gradient(135deg, #1e7145 0%, #21854f 100%);
+  border-bottom: 1px solid #e5e7eb;
   background: #4a7c2c;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .modal-header h2 {
@@ -252,12 +302,119 @@ h1 {
   font-weight: bold;
   color: white;
   margin: 0;
+  flex: 1;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .modal-body {
   padding: 1.5rem;
 }
 
+.modal-scroll {
+  max-height: calc(90vh - 120px);
+  overflow-y: auto;
+}
+
+.modal-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.modal-scroll::-webkit-scrollbar-thumb {
+  background: #4a7c2c;
+  border-radius: 10px;
+}
+
+.modal-scroll::-webkit-scrollbar-thumb:hover {
+  background: #3a6322;
+}
+
+/* Detalle del foro */
+.detalle-image-container {
+  width: 100%;
+  max-height: 400px;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.detalle-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #f9fafb;
+}
+
+.detalle-content {
+  margin-bottom: 1.5rem;
+}
+
+.detalle-content p {
+  color: #374151;
+  line-height: 1.7;
+  font-size: 1rem;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.detalle-meta {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 1.5rem 0;
+}
+
+.respuestas-section {
+  margin-top: 1.5rem;
+}
+
+.respuestas-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.respuestas-empty {
+  text-align: center;
+  padding: 2rem;
+  background: #f9fafb;
+  border-radius: 0.5rem;
+  color: #6b7280;
+}
+
+/* Formularios */
 .form-group {
   margin-bottom: 1rem;
 }
@@ -292,12 +449,78 @@ h1 {
 
 .form-control:focus {
   border-color: #4a7c2c;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(74, 124, 44, 0.1);
 }
 
 textarea.form-control {
-  resize: none;
+  resize: vertical;
   font-family: inherit;
+  min-height: 120px;
+}
+
+/* Preview de imagen */
+.image-preview {
+  margin-top: 1rem;
+  position: relative;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 2px solid #e5e7eb;
+}
+
+.image-preview img {
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  display: block;
+  background: #f9fafb;
+}
+
+.remove-image-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.remove-image-btn:hover {
+  background: #b91c1c;
+  transform: scale(1.1);
+}
+
+/* Imagen actual al editar */
+.image-current {
+  margin-top: 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.image-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  padding: 0.5rem 1rem;
+  background: #f9fafb;
+  margin: 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.image-current img {
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  display: block;
+  background: #f9fafb;
 }
 
 .modal-footer {
@@ -306,8 +529,10 @@ textarea.form-control {
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
+  background: #f9fafb;
 }
 
+/* Modal de eliminación */
 .delete-icon {
   width: 3rem;
   height: 3rem;
@@ -316,26 +541,30 @@ textarea.form-control {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1rem;
+  margin: 0 auto 1rem;
   color: #dc2626;
 }
 
 .delete-message {
   color: #4b5563;
   margin-bottom: 0.5rem;
+  text-align: center;
 }
 
 .delete-warning {
   font-size: 0.875rem;
   color: #6b7280;
   margin-bottom: 1.5rem;
+  text-align: center;
 }
 
 .delete-warning strong {
   display: block;
   margin-bottom: 0.25rem;
+  color: #1f2937;
 }
 
+/* Responsive */
 @media (max-width: 768px) {
   .header-content {
     flex-direction: column;
@@ -354,5 +583,42 @@ textarea.form-control {
 
   .forum-meta {
     flex-wrap: wrap;
+  }
+
+  .modal-content {
+    max-width: 100%;
+    margin: 0.5rem;
+  }
+
+  .modal-large {
+    max-width: 100%;
+  }
+
+  .detalle-meta {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .forum-title {
+    font-size: 1.125rem;
+  }
+
+  .forum-image-container {
+    max-height: 200px;
+  }
+
+  .detalle-image-container {
+    max-height: 250px;
   }
 }

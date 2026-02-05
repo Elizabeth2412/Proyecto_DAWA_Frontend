@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Foro } from '../interfaces/foro-interface';
+import { ServicioForos } from '../servicios/servicio-foros';
 /**
  * Interface que contiene los datos de Foro
  */
@@ -16,8 +17,8 @@ import { Foro } from '../interfaces/foro-interface';
 export class ComunidadVirtual {
 
 
-  constructor(private router: Router) {}
-
+  constructor(private router: Router,private servicioForos: ServicioForos) {}
+  foros: Foro[] = [];
   forosFiltrados: Foro[] = [];
   txtBusqueda: string = '';
   
@@ -26,26 +27,58 @@ export class ComunidadVirtual {
   isDeleteForoOpen:boolean = false;
   
   foroSelect: Foro | null = null;
+  archivoSeleccionado: File | null = null
   
+
+  isDetalleForoOpen: boolean = false;
+  imagenPreview: string | null = null;
+
   nuevoForo = {
     titulo: '',
-    contenido: '',
-    image: null as string | null
+    contenido: ''
   };
 
   ngOnInit(): void {
-    this.forosFiltrados = [...this.forosList];
+    this.cargarForos();
   }
+
+  /*
+    * Carga la lista de foros desde el servicio y los asigna a la variable de foros filtrados
+  */
+  cargarForos(): void {
+    this.servicioForos.listar().subscribe(res => {
+      if (res.respuesta === 'Ok' && res.data) {
+        // Mapear datos del backend a la interfaz Foro
+        this.foros = res.data.map((p: any) => ({
+          id: p.id,
+          titulo: p.titulo,
+          contenido: p.contenido,
+          autor: p.nombreAutor || 'Anónimo',
+          fechaHora: this.formatDate(new Date(p.fechaCreacion)),
+          replicas: p.numeroRespuestas || 0,
+          urlImagen: p.urlImagen
+        }));
+        this.forosFiltrados = [...this.foros];
+      }
+    });
+  }
+  
 
   /**
    * Filtra los foros según el término de búsqueda ingresado por el usuario.
    * Busca coincidencias tanto en el título como en el contenido del foro.
    */
   buscarForo(): void {
-    const term = this.txtBusqueda.toLowerCase();
-    this.forosFiltrados = this.forosList.filter(forum =>
-      forum.titulo.toLowerCase().includes(term) ||
-      forum.contenido.toLowerCase().includes(term)
+    const term = this.txtBusqueda.toLowerCase().trim();
+    
+    if (!term) {
+      this.forosFiltrados = [...this.foros];
+      return;
+    }
+    
+    this.forosFiltrados = this.foros.filter(foro =>
+      foro.titulo.toLowerCase().includes(term) ||
+      foro.contenido.toLowerCase().includes(term)
     );
   }
 
@@ -65,9 +98,9 @@ export class ComunidadVirtual {
     this.foroSelect = forum;
     this.nuevoForo = {
       titulo: forum.titulo,
-      contenido: forum.contenido,
-      image: forum.image || null
+      contenido: forum.contenido
     };
+    this.archivoSeleccionado = null;
     this.isEditForoOpen = true;
   }
 
@@ -87,6 +120,7 @@ export class ComunidadVirtual {
     this.isNewForoOpen = false;
     this.isEditForoOpen = false;
     this.isDeleteForoOpen = false;
+    this.isDetalleForoOpen = false;
     this.foroSelect = null;
     this.resetForm();
   }
@@ -97,24 +131,10 @@ export class ComunidadVirtual {
   resetForm(): void {
     this.nuevoForo = {
       titulo: '',
-      contenido: '',
-      image: null
+      contenido: ''
     };
-  }
-
-  /**
-   * Maneja la carga de una imagen seleccionada por el usuario y la convierte a base64
-   * @param event Evento del input file que contiene el archivo seleccionado
-   */
-  onFileChange(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.nuevoForo.image = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
+    this.archivoSeleccionado = null;
+    this.imagenPreview = null;
   }
 
   /**
@@ -126,19 +146,31 @@ export class ComunidadVirtual {
       return;
     }
 
-    const foro: Foro = {
-      id: this.forosList.length + 1,
-      titulo: this.nuevoForo.titulo,
-      contenido: this.nuevoForo.contenido,
-      autor: "Usuario Actual",
-      fechaHora: this.formatDate(new Date()),
-      replicas: 0,
-      image: this.nuevoForo.image
-    };
+      const fd = new FormData();
 
-    this.forosList.unshift(foro);
-    this.buscarForo();
-    this.cerrarVentanas();
+    fd.append('publicacion.Titulo', this.nuevoForo.titulo);
+    fd.append('publicacion.Contenido', this.nuevoForo.contenido);
+    fd.append('publicacion.UsuarioCreacionId', '1');//id del usuario que crea el foro
+
+    if (this.archivoSeleccionado) {
+      fd.append('archivo.Archivo', this.archivoSeleccionado);
+    }
+
+    this.servicioForos.crear(fd).subscribe({
+      next: (res) => {
+        if (res.respuesta === 'Ok') {
+          this.cargarForos();
+          this.cerrarVentanas();
+        } else {
+          console.error('Error al crear:', res.leyenda);
+          alert(res.leyenda);
+        }
+      },
+      error: (err) => {
+        console.error('Error:', err);
+        alert('Error al crear el foro');
+      }
+    });
   }
 
   /**
@@ -146,22 +178,44 @@ export class ComunidadVirtual {
    * @returns 
    */
   editForum(): void {
-    if (!this.foroSelect || !this.nuevoForo.titulo || !this.nuevoForo.contenido) {
-      return;
+    if (!this.foroSelect || !this.isForoValido()) {return;}
+
+    const fd = new FormData();
+
+    fd.append('publicacion.Id', this.foroSelect.id.toString());
+    fd.append('publicacion.Titulo', this.foroSelect.titulo);
+    fd.append('publicacion.Contenido', this.foroSelect.contenido);
+    fd.append('publicacion.UsuarioModificacionId', '1');//id del usuario logueado
+    
+    // Si hay imagen actual y NO hay nueva imagen, mantener la actual
+    if (this.foroSelect.urlImagen && !this.archivoSeleccionado) {
+      fd.append('publicacion.UrlImagen', this.foroSelect.urlImagen);
     }
 
-    const index = this.forosList.findIndex(f => f.id === this.foroSelect!.id);
-    if (index !== -1) {
-      this.forosList[index] = {
-        ...this.forosList[index],
-        titulo: this.nuevoForo.titulo,
-        contenido: this.nuevoForo.contenido,
-        image: this.nuevoForo.image
-      };
+    // Si hay nueva imagen, enviarla
+    if (this.archivoSeleccionado) {
+      fd.append('archivo.Archivo', this.archivoSeleccionado);
+      // Enviar URL anterior para que el backend la elimine
+      if (this.foroSelect.urlImagen) {
+        fd.append('publicacion.UrlImagen', this.foroSelect.urlImagen);
+      }
     }
 
-    this.buscarForo();
-    this.cerrarVentanas();
+    this.servicioForos.actualizar(fd).subscribe({
+      next: (res) => {
+        if (res.respuesta === 'Ok') {
+          this.cargarForos();
+          this.cerrarVentanas();
+        } else {
+          console.error('Error al actualizar:', res.leyenda);
+          alert(res.leyenda);
+        }
+      },
+      error: (err) => {
+        console.error('Error:', err);
+        alert('Error al actualizar el foro');
+      }
+    });
   }
 
   /**
@@ -171,9 +225,60 @@ export class ComunidadVirtual {
   deleteForo(): void {
     if (!this.foroSelect) return;
 
-    this.forosList = this.forosList.filter(f => f.id !== this.foroSelect!.id);
-    this.buscarForo();
-    this.cerrarVentanas();
+    const body = {
+      id: this.foroSelect.id,
+      usuarioEliminacionId: 1, // ← ID del usuario logueado
+      urlImagen: this.foroSelect.urlImagen // Para eliminar imagen de MinIO
+    };
+
+    this.servicioForos.eliminar(body).subscribe({
+      next: (res) => {
+        if (res.respuesta === 'Ok') {
+          this.cargarForos();
+          this.cerrarVentanas();
+        } else {
+          console.error('Error al eliminar:', res.leyenda);
+          alert(res.leyenda);
+        }
+      },
+      error: (err) => {
+        console.error('Error:', err);
+        alert('Error al eliminar el foro');
+      }
+    });
+  }
+
+   /**
+    * Abre el modal de detalle del foro
+    */
+  view_detalleForo(foro: Foro): void {
+    this.foroSelect = foro;
+    this.isDetalleForoOpen = true;
+  }
+  /**
+   * Maneja la selección de imagen y genera preview
+   */
+  onFileChange(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.archivoSeleccionado = file;
+      
+      // Generar preview
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.imagenPreview = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  /**
+   * Elimina la imagen seleccionada
+   */
+  removeImage(fileInput: HTMLInputElement): void {
+    this.archivoSeleccionado = null;
+    this.imagenPreview = null;
+    fileInput.value = '';
   }
 
   /**
@@ -199,37 +304,4 @@ export class ComunidadVirtual {
     };
     return new Intl.DateTimeFormat('es-ES', options).format(date);
   }
-
-  /**
-   * Lista principal de todos los foros disponibles en la plataforma
-   */
-  forosList: Foro[] = [
-    {
-      id: 1,
-      titulo: "¿Cómo combatir el gusano cogollero en maíz sin químicos agresivos?",
-      contenido: "Hola grupo. Tengo un lote de 5 hectáreas de maíz híbrido en etapa V4 y hoy amaneció con un 20% de incidencia de daño en hoja (ventanita). Se ve aserrín fresco en el cogollo, pero quiero evitar piretroides porque tengo colmenas de abejas cerca. ¿Alguien ha tenido éxito controlando esto solo con aplicaciones de Bacillus thuringiensis y trampas de feromonas en esta etapa, o ya es muy tarde?",
-      autor: "Roberto Méndez",
-      fechaHora: "15 Nov 2025 14:30",
-      replicas: 12,
-      image: null
-    },
-    {
-      id: 2,
-      titulo: "Suplementación para ganado lechero en época seca",
-      contenido: "Saludos colegas. La sequía golpeó fuerte el pasto estrella en mi zona y mis vacas (cruce Holstein) bajaron de 18 a 12 litros promedio esta semana. Tengo acceso a comprar silo de maíz y algo de cascarilla de soya, pero me da miedo causar una acidosis si cambio la dieta de golpe. ¿Qué proporción de fibra seca me sugieren incluir para estabilizar el rumen mientras recupero potreros?",
-      autor: "Sofía Castillo",
-      fechaHora: "14 Nov 2025 09:15",
-      replicas: 8,
-      image: null
-    },
-    {
-      id: 3,
-      titulo: "Dudas sobre instalación de riego por goteo en aguacate",
-      contenido: "Estoy diseñando el riego para 2 hectáreas de Hass en un terreno arcilloso con un desnivel de casi 15 metros entre la bomba y la parte alta. Me preocupa que la presión no sea uniforme. ¿Valen la pena los goteros autocompensantes de botón (PCJ) en este caso? Estoy entre usar de 4L/h o de 8L/h, pero no quiero encharcar la raíz por el tipo de suelo que drena lento.",
-      autor: "Miguel Ángel Torres",
-      fechaHora: "13 Nov 2025 16:45",
-      replicas: 5,
-      image: null
-    }
-  ];
 }
