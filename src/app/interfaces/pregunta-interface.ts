@@ -6,6 +6,5 @@ export interface Pregunta {
   texto: string;
   estado: string | null;
   usuarioId: number | null;
-  transaccion: string | null;
   opciones?: Opcion[]; 
 }

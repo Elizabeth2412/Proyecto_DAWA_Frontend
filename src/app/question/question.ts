@@ -246,25 +246,34 @@ export class Question implements OnInit, OnChanges {
     }
 
     private crearPregunta(): void {
-        const nuevaPregunta: Pregunta = {
-            id: 0,
-            evaluacionId: this.evaluacionId,
-            texto: this.form.texto.trim(),
-            estado: 'Activa',
-            usuarioId: 1,
-            transaccion: null
-        };
+    const nuevaPregunta: Pregunta = {
+        id: 0,
+        evaluacionId: this.evaluacionId,
+        texto: this.form.texto.trim(),
+        estado: 'Activa',
+        usuarioId: 1
+    };
 
-        this.servicioPregunta.crear(nuevaPregunta).subscribe({
-            next: (preguntaCreada: any) => {
-                this.crearOpcionesBulk(preguntaCreada.id, this.form.opciones);
-            },
-            error: (err) => {
-                console.error('Error al crear pregunta:', err);
-                alert('No se pude crear la pregunta. Intenta de nuevo.');
+    this.servicioPregunta.crear(nuevaPregunta).subscribe({
+        next: (preguntaCreada: any) => {
+            console.log('📦 Pregunta creada - respuesta completa:', preguntaCreada);
+            console.log('🔑 ID de la pregunta:', preguntaCreada?.id);
+            
+            // Validación defensiva
+            if (!preguntaCreada || !preguntaCreada.id) {
+                console.error('⚠️ La pregunta se creó pero no tiene ID:', preguntaCreada);
+                alert('La pregunta se creó pero el servidor no devolvió el ID. Recarga la página.');
+                return;
             }
-        });
-    }
+            
+            this.crearOpcionesBulk(preguntaCreada.id, this.form.opciones);
+        },
+        error: (err) => {
+            console.error('❌ Error al crear pregunta:', err);
+            alert('No se pudo crear la pregunta. Intenta de nuevo.');
+        }
+    });
+}
 
     /**
      * Crea todas las opciones de una pregunta de forma secuencial.
@@ -281,8 +290,7 @@ export class Question implements OnInit, OnChanges {
                 texto: opt.texto.trim(),
                 esCorrecta: opt.esCorrecta,
                 estado: 'Activa',
-                usuarioId: null,
-                transaccion: null
+                usuarioId: 1
             };
 
             this.servicioOpcion.crear(nuevaOpcion).subscribe({
@@ -308,8 +316,11 @@ export class Question implements OnInit, OnChanges {
         if (!this.preguntaEditando) return;
 
         const preguntaActualizada: Pregunta = {
-            ...this.preguntaEditando.pregunta,
-            texto: this.form.texto.trim()
+            id: this.preguntaEditando.pregunta.id,
+            evaluacionId: this.preguntaEditando.pregunta.evaluacionId,
+            texto: this.form.texto.trim(),
+            estado: this.preguntaEditando.pregunta.estado,
+            usuarioId: 1
         };
 
         this.servicioPregunta.actualizar(preguntaActualizada).subscribe({
@@ -366,8 +377,7 @@ export class Question implements OnInit, OnChanges {
                     texto: opt.texto.trim(),
                     esCorrecta: opt.esCorrecta,
                     estado: 'Activa',
-                    usuarioId: 1,
-                    transaccion: null
+                    usuarioId: 1
                 };
 
                 this.servicioOpcion.actualizar(opcionActualizada).subscribe({
@@ -388,8 +398,7 @@ export class Question implements OnInit, OnChanges {
                     texto: opt.texto.trim(),
                     esCorrecta: opt.esCorrecta,
                     estado: 'Activa',
-                    usuarioId: null,
-                    transaccion: null
+                    usuarioId: 1
                 };
 
                 this.servicioOpcion.crear(nuevaOpcion).subscribe({
