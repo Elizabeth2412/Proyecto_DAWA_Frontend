@@ -28,7 +28,7 @@
     <div *ngFor="let foro of forosFiltrados" class="forum-card" (click)="view_detalleForo(foro)">
       <div class="forum-card-content">
         <div class="forum-header">
-          <h2 class="forum-title">{{ foro.titulo }}</h2>
+          <h2 class="forum-title">{{ foro.Titulo }}</h2>
           <div class="forum-actions" (click)="$event.stopPropagation()">
             <button class="icon-btn icon-btn-edit" (click)="view_editForo(foro)" title="Editar">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -46,11 +46,11 @@
         </div>
 
         <!-- Imagen del foro (si existe) -->
-        <div *ngIf="foro.urlImagen" class="forum-image-container">
-          <img [src]="foro.urlImagen" [alt]="foro.titulo" class="forum-image">
+        <div *ngIf="foro.UrlImagen" class="forum-image-container">
+          <img [src]="foro.UrlImagen" [alt]="foro.Titulo" class="forum-image">
         </div>
         
-        <p class="forum-content">{{ foro.contenido }}</p>
+        <p class="forum-content">{{ foro.Contenido }}</p>
         
         <div class="forum-meta">
           <div class="meta-item">
@@ -58,20 +58,20 @@
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
-            <span>{{ foro.autor }}</span>
+            <span>{{ foro.Autor }}</span>
           </div>
           <div class="meta-item">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
-            <span>{{ foro.fechaHora }}</span>
+            <span>{{ foro.FechaHora }}</span>
           </div>
           <div class="meta-item meta-replies">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
             </svg>
-            <span>{{ foro.replicas }} respuestas</span>
+            <span>{{ foro.Replicas }} respuestas</span>
           </div>
         </div>
       </div>
@@ -90,7 +90,7 @@
 <div *ngIf="isDetalleForoOpen" class="modal-overlay" (click)="cerrarVentanas()">
   <div class="modal-content modal-large" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h2>{{ foroSelect?.titulo }}</h2>
+      <h2>{{ foroSelect?.Titulo }}</h2>
       <button class="close-btn" (click)="cerrarVentanas()">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -101,13 +101,13 @@
     
     <div class="modal-body modal-scroll">
       <!-- Imagen del foro -->
-      <div *ngIf="foroSelect?.urlImagen" class="detalle-image-container">
-        <img [src]="foroSelect?.urlImagen" [alt]="foroSelect?.titulo" class="detalle-image">
+      <div *ngIf="foroSelect?.UrlImagen" class="detalle-image-container">
+        <img [src]="foroSelect?.UrlImagen" [alt]="foroSelect?.Titulo" class="detalle-image">
       </div>
 
       <!-- Contenido del foro -->
       <div class="detalle-content">
-        <p>{{ foroSelect?.contenido }}</p>
+        <p>{{ foroSelect?.Contenido }}</p>
       </div>
 
       <!-- Metadata -->
@@ -117,14 +117,14 @@
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
-          <span>{{ foroSelect?.autor }}</span>
+          <span>{{ foroSelect?.Autor}}</span>
         </div>
         <div class="meta-item">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
             <polyline points="12 6 12 12 16 14"></polyline>
           </svg>
-          <span>{{ foroSelect?.fechaHora }}</span>
+          <span>{{ foroSelect?.FechaHora }}</span>
         </div>
       </div>
 
@@ -136,7 +136,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
           </svg>
-          Respuestas ({{ foroSelect?.replicas || 0 }})
+          Respuestas ({{ foroSelect?.Replicas || 0 }})
         </h3>
 
         <!-- Aquí irán las respuestas cuando las implementes -->
@@ -205,9 +205,9 @@
         </div>
 
         <!-- Mostrar imagen actual al editar -->
-        <div *ngIf="isEditForoOpen && foroSelect?.urlImagen && !imagenPreview" class="image-current">
+        <div *ngIf="isEditForoOpen && foroSelect?.UrlImagen && !imagenPreview" class="image-current">
           <p class="image-label">Imagen actual:</p>
-          <img [src]="foroSelect?.urlImagen" [alt]="foroSelect?.titulo">
+          <img [src]="foroSelect?.UrlImagen" [alt]="foroSelect?.Titulo">
         </div>
       </div>
     </div>
@@ -243,7 +243,7 @@
         ¿Estás seguro de que deseas eliminar este foro?
       </p>
       <p class="delete-warning">
-        <strong>{{ foroSelect?.titulo }}</strong><br>
+        <strong>{{ foroSelect?.Titulo }}</strong><br>
         Esta acción no se puede deshacer.
       </p>
     </div>
