@@ -1,10 +1,10 @@
 
 export interface Foro {
-  id: number;
-  titulo: string;
-  contenido: string;
-  autor: string;
-  fechaHora: string;
-  replicas: number;
-  urlImagen?: string | null;
+  Id: number;
+  Titulo: string;
+  Contenido: string;
+  Autor: string;
+  FechaHora: string;
+  Replicas: number;
+  UrlImagen?: string | null;
 }

@@ -59,25 +59,27 @@ async registrarUsuario() {
 
   console.log('Datos transformados:', usuarioParaEnviar);
 
-  try {
-    const resultado = await this.authService.registrarUsuario(usuarioParaEnviar);
-    
-    if (resultado && resultado.Respuesta === 'Ok') {
-      alert('Registro exitoso! Ahora puedes iniciar sesión.');
-      this.limpiarFormulario();
-      this.router.navigate(['/login']);
-    } else {
-               alert('Registro exitoso! Ahora puedes iniciar sesión.');
-      this.limpiarFormulario();
-      this.router.navigate(['/login']);
+  this.authService.registrarUsuario(usuarioParaEnviar).subscribe({
+    next: (resultado) => {
+      console.log('Respuesta del servidor:', resultado);
+      
+      if (resultado?.respuesta === 'Ok') {
+        alert('Registro exitoso! Ahora puedes iniciar sesión.');
+        this.limpiarFormulario();
+        this.router.navigate(['/login']);
+      } else {
+        this.mensajeError = resultado?.leyenda || 'Error al registrar usuario';
+        alert(this.mensajeError);
+      }
+      this.cargando = false;
+    },
+    error: (error) => {
+      console.error('Error en registro:', error);
+      this.mensajeError = error.error?.leyenda || 'Error de conexión con el servidor';
+      alert(this.mensajeError);
+      this.cargando = false;
     }
-  } catch (error: any) {
-          alert('Registro exitoso! Ahora puedes iniciar sesión.');
-      this.limpiarFormulario();
-      this.router.navigate(['/login']);
-  } finally {
-    this.cargando = false;
-  }
+  });
 }
     private validarFormulario(): boolean {
     if (!this.user.nombre.trim()) {

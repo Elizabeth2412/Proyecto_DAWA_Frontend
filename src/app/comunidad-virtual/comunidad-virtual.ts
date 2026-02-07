@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Foro } from '../interfaces/foro-interface';
 import { ServicioForos } from '../servicios/servicio-foros';
+import { ServicioAutorizacion } from '../autorizacion.service';
 /**
  * Interface que contiene los datos de Foro
  */
@@ -17,7 +18,7 @@ import { ServicioForos } from '../servicios/servicio-foros';
 export class ComunidadVirtual {
 
 
-  constructor(private router: Router,private servicioForos: ServicioForos) {}
+  constructor(private router: Router,private servicioForos: ServicioForos,private servicioAutorizacion: ServicioAutorizacion) {}
   foros: Foro[] = [];
   forosFiltrados: Foro[] = [];
   txtBusqueda: string = '';
@@ -28,7 +29,6 @@ export class ComunidadVirtual {
   
   foroSelect: Foro | null = null;
   archivoSeleccionado: File | null = null
-  
 
   isDetalleForoOpen: boolean = false;
   imagenPreview: string | null = null;
@@ -50,20 +50,19 @@ export class ComunidadVirtual {
       if (res.respuesta === 'Ok' && res.data) {
         // Mapear datos del backend a la interfaz Foro
         this.foros = res.data.map((p: any) => ({
-          id: p.id,
-          titulo: p.titulo,
-          contenido: p.contenido,
-          autor: p.nombreAutor || 'Anónimo',
-          fechaHora: this.formatDate(new Date(p.fechaCreacion)),
-          replicas: p.numeroRespuestas || 0,
-          urlImagen: p.urlImagen
+          Id: p.id,
+          Titulo: p.titulo,
+          Contenido: p.contenido,
+          Autor: p.nombreAutor || 'Anónimo',
+          FechaHora: this.formatDate(new Date(p.fechaCreacion)),
+          Replicas: p.numeroRespuestas || 0,
+          UrlImagen: p.urlImagen
         }));
         this.forosFiltrados = [...this.foros];
       }
     });
   }
   
-
   /**
    * Filtra los foros según el término de búsqueda ingresado por el usuario.
    * Busca coincidencias tanto en el título como en el contenido del foro.
@@ -77,8 +76,8 @@ export class ComunidadVirtual {
     }
     
     this.forosFiltrados = this.foros.filter(foro =>
-      foro.titulo.toLowerCase().includes(term) ||
-      foro.contenido.toLowerCase().includes(term)
+      foro.Titulo.toLowerCase().includes(term) ||
+      foro.Contenido.toLowerCase().includes(term)
     );
   }
 
@@ -97,8 +96,8 @@ export class ComunidadVirtual {
   view_editForo(forum: Foro): void {
     this.foroSelect = forum;
     this.nuevoForo = {
-      titulo: forum.titulo,
-      contenido: forum.contenido
+      titulo: forum.Titulo,
+      contenido: forum.Contenido
     };
     this.archivoSeleccionado = null;
     this.isEditForoOpen = true;
@@ -145,16 +144,26 @@ export class ComunidadVirtual {
     if (!this.nuevoForo.titulo || !this.nuevoForo.contenido) {
       return;
     }
-
-      const fd = new FormData();
-
+    const usuario = this.servicioAutorizacion.obtenerUsuarioActual();
+    if (!usuario || !usuario.id) {
+      alert('Debe iniciar sesión para crear un foro');
+      return;
+    }
+    console.log('👤 Usuario obtenido:', usuario);
+    console.log('👤 ID del usuario:', usuario?.id);
+    const fd = new FormData();
     fd.append('publicacion.Titulo', this.nuevoForo.titulo);
     fd.append('publicacion.Contenido', this.nuevoForo.contenido);
-    fd.append('publicacion.UsuarioCreacionId', '1');//id del usuario que crea el foro
+    fd.append('publicacion.UsuarioCreacionId', usuario.id.toString());
 
     if (this.archivoSeleccionado) {
       fd.append('archivo.Archivo', this.archivoSeleccionado);
     }
+    // 🔍 LOG 2: Verificar FormData
+  console.log('📦 FormData a enviar:');
+  fd.forEach((value, key) => {
+    console.log(`  ${key}:`, value);
+  });
 
     this.servicioForos.crear(fd).subscribe({
       next: (res) => {
@@ -182,22 +191,22 @@ export class ComunidadVirtual {
 
     const fd = new FormData();
 
-    fd.append('publicacion.Id', this.foroSelect.id.toString());
-    fd.append('publicacion.Titulo', this.foroSelect.titulo);
-    fd.append('publicacion.Contenido', this.foroSelect.contenido);
+    fd.append('publicacion.Id', this.foroSelect.Id.toString());
+    fd.append('publicacion.Titulo', this.foroSelect.Titulo);
+    fd.append('publicacion.Contenido', this.foroSelect.Contenido);
     fd.append('publicacion.UsuarioModificacionId', '1');//id del usuario logueado
     
     // Si hay imagen actual y NO hay nueva imagen, mantener la actual
-    if (this.foroSelect.urlImagen && !this.archivoSeleccionado) {
-      fd.append('publicacion.UrlImagen', this.foroSelect.urlImagen);
+    if (this.foroSelect.UrlImagen && !this.archivoSeleccionado) {
+      fd.append('publicacion.UrlImagen', this.foroSelect.UrlImagen);
     }
 
     // Si hay nueva imagen, enviarla
     if (this.archivoSeleccionado) {
       fd.append('archivo.Archivo', this.archivoSeleccionado);
       // Enviar URL anterior para que el backend la elimine
-      if (this.foroSelect.urlImagen) {
-        fd.append('publicacion.UrlImagen', this.foroSelect.urlImagen);
+      if (this.foroSelect.UrlImagen) {
+        fd.append('publicacion.UrlImagen', this.foroSelect.UrlImagen);
       }
     }
 
@@ -226,9 +235,9 @@ export class ComunidadVirtual {
     if (!this.foroSelect) return;
 
     const body = {
-      id: this.foroSelect.id,
+      id: this.foroSelect.Id,
       usuarioEliminacionId: 1, // ← ID del usuario logueado
-      urlImagen: this.foroSelect.urlImagen // Para eliminar imagen de MinIO
+      urlImagen: this.foroSelect.UrlImagen // Para eliminar imagen de MinIO
     };
 
     this.servicioForos.eliminar(body).subscribe({
@@ -305,3 +314,7 @@ export class ComunidadVirtual {
     return new Intl.DateTimeFormat('es-ES', options).format(date);
   }
 }
+function obtenerUsuarioActual() {
+  throw new Error('Function not implemented.');
+}
+
