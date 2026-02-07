@@ -21,7 +21,7 @@ export class ServicioUsuarios {
       transaccion: 'CONSULTAR_USUARIO'
     };
     
-    console.log('Obteniendo usuarios, URL:', `${this.baseUrl}/api/Usuario/GetUsuario`);
+    console.log('Obteniendo usuarios, URL:', `${this.baseUrl}/Usuario/GetUsuario`);
     console.log('Request body:', requestBody);
     
     return this.http.post<any>(`${this.baseUrl}/Usuario/GetUsuario`, requestBody).pipe(
@@ -67,7 +67,7 @@ export class ServicioUsuarios {
       transaccion: 'BUSCAR_USUARIO'
     };
     
-    return this.http.post<any>(`${this.baseUrl}/api/Usuario/GetUsuario`, requestBody).pipe(
+    return this.http.post<any>(`${this.baseUrl}/Usuario/GetUsuario`, requestBody).pipe(
       map(response => {
         if (response && response.respuesta === 'Ok' && response.data && response.data.length > 0) {
           const userData = response.data[0];
@@ -219,12 +219,12 @@ export class ServicioUsuarios {
   // Método para login usando JWT (método principal)
   loginBackend(credentials: { email: string, password: string }): Observable<any> {
     const usuario = {
-      Email: credentials.email,
-      Password: credentials.password,
-      Transaccion: 'VALIDAR_USUARIO'
+      email: credentials.email,
+      password: credentials.password,
+      transaccion: 'VALIDAR_USUARIO'
     };
     
-    return this.http.post(`${this.baseUrl}/Usuario/ValidarLogin`, usuario, {
+    return this.http.post(`${this.baseUrl}/Usuario/getUsuario`, usuario, {
       timeout: 10000
     });
   }

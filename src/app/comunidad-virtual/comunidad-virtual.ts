@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Foro } from '../interfaces/foro-interface';
 import { ServicioForos } from '../servicios/servicio-foros';
+import { ServicioAutorizacion } from '../autorizacion.service';
 /**
  * Interface que contiene los datos de Foro
  */
@@ -17,7 +18,7 @@ import { ServicioForos } from '../servicios/servicio-foros';
 export class ComunidadVirtual {
 
 
-  constructor(private router: Router,private servicioForos: ServicioForos) {}
+  constructor(private router: Router,private servicioForos: ServicioForos,private servicioAutorizacion: ServicioAutorizacion) {}
   foros: Foro[] = [];
   forosFiltrados: Foro[] = [];
   txtBusqueda: string = '';
@@ -28,7 +29,6 @@ export class ComunidadVirtual {
   
   foroSelect: Foro | null = null;
   archivoSeleccionado: File | null = null
-  
 
   isDetalleForoOpen: boolean = false;
   imagenPreview: string | null = null;
@@ -63,7 +63,6 @@ export class ComunidadVirtual {
     });
   }
   
-
   /**
    * Filtra los foros según el término de búsqueda ingresado por el usuario.
    * Busca coincidencias tanto en el título como en el contenido del foro.
@@ -145,12 +144,16 @@ export class ComunidadVirtual {
     if (!this.nuevoForo.titulo || !this.nuevoForo.contenido) {
       return;
     }
+    const usuario = this.servicioAutorizacion.obtenerUsuarioActual();
+    if (!usuario || !usuario.id) {
+      alert('Debe iniciar sesión para crear un foro');
+      return;
+    }
 
-      const fd = new FormData();
-
-    fd.append('publicacion.Titulo', this.nuevoForo.titulo);
-    fd.append('publicacion.Contenido', this.nuevoForo.contenido);
-    fd.append('publicacion.UsuarioCreacionId', '1');//id del usuario que crea el foro
+    const fd = new FormData();
+    fd.append('Titulo', this.nuevoForo.titulo);
+    fd.append('Contenido', this.nuevoForo.contenido);
+    fd.append('UsuarioCreacionId', usuario.id.toString());//id del usuario que crea el foro
 
     if (this.archivoSeleccionado) {
       fd.append('archivo.Archivo', this.archivoSeleccionado);
@@ -305,3 +308,7 @@ export class ComunidadVirtual {
     return new Intl.DateTimeFormat('es-ES', options).format(date);
   }
 }
+function obtenerUsuarioActual() {
+  throw new Error('Function not implemented.');
+}
+

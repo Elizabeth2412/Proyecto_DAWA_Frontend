@@ -8,7 +8,7 @@ import { environment } from '../environments/environment.development';
   providedIn: 'root',
 })
 export class ServicioForos {
-    private apiUrl = `${environment.apiURL}/api/Foro`;
+    private apiUrl = `${environment.apiURL}/Foro`;
   constructor(private http: HttpClient) {}
 
   /**

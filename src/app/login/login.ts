@@ -33,65 +33,65 @@ export class Login implements OnInit {
   togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
+  //Validar login
   async validateLogin(): Promise<void> {
-  this.reiniciarValidaciones();
+    this.reiniciarValidaciones();
 
-  if (!this.validarCamposVacios()) {
-    return;
+    if (!this.validarCamposVacios()) {
+      return;
+    }
+
+    this.cargando = true;
+    this.mensajeCarga = 'Validando credenciales...';
+    this.errorMessage = '';
+
+    try {
+      const loginExitoso = await this.servicioAutorizacion.login(
+        this.email,
+        this.password
+      );
+
+      if (!loginExitoso) {
+        throw new Error('Credenciales incorrectas');
+      }
+
+      const usuario = this.servicioAutorizacion.obtenerUsuarioActual();
+
+      if (!usuario) {
+        throw new Error('No se pudo obtener el usuario');
+      }
+
+      //  LIMPIAR ESTADO DEL LOGIN
+      this.email = '';
+      this.password = '';
+      this.cargando = false;
+
+      //  REDIRECCIÓN INMEDIATA
+      switch (usuario.tipo) {
+        case 'administrador':
+          this.router.navigateByUrl('/admin-dashboard');
+          break;
+        case 'instructor':
+          this.router.navigateByUrl('/instructor');
+          break;
+        case 'estudiante':
+          this.router.navigateByUrl('/estudiante');
+          break;
+        default:
+          this.router.navigateByUrl('/pagina-principal');
+      }
+    } catch (error: any) {
+      console.error(error);
+
+      this.cargando = false;
+      this.credencialesInvalidas = true;
+      this.errorMessage = error?.message || 'Error al iniciar sesión';
+
+      setTimeout(() => {
+        this.credencialesInvalidas = false;
+      }, 3000);
+    }
   }
-
-  this.cargando = true;
-  this.mensajeCarga = 'Validando credenciales...';
-  this.errorMessage = '';
-
-  try {
-    const loginExitoso = await this.servicioAutorizacion.login(
-      this.email,
-      this.password
-    );
-
-    if (!loginExitoso) {
-      throw new Error('Credenciales incorrectas');
-    }
-
-    const usuario = this.servicioAutorizacion.obtenerUsuarioActual();
-
-    if (!usuario) {
-      throw new Error('No se pudo obtener el usuario');
-    }
-
-    //  LIMPIAR ESTADO DEL LOGIN
-    this.email = '';
-    this.password = '';
-    this.cargando = false;
-
-    //  REDIRECCIÓN INMEDIATA
-    switch (usuario.tipo) {
-      case 'administrador':
-        this.router.navigateByUrl('/admin-dashboard');
-        break;
-      case 'instructor':
-        this.router.navigateByUrl('/instructor');
-        break;
-      case 'estudiante':
-        this.router.navigateByUrl('/estudiante');
-        break;
-      default:
-        this.router.navigateByUrl('/pagina-principal');
-    }
-
-  } catch (error: any) {
-    console.error(error);
-
-    this.cargando = false;
-    this.credencialesInvalidas = true;
-    this.errorMessage = error?.message || 'Error al iniciar sesión';
-
-    setTimeout(() => {
-      this.credencialesInvalidas = false;
-    }, 3000);
-  }
-}
 
   private reiniciarValidaciones(): void {
     this.vacioEmail = false;
