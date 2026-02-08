@@ -31,6 +31,8 @@ export class ComunidadVirtual {
   archivoSeleccionado: File | null = null
 
   isDetalleForoOpen: boolean = false;
+  nuevaRespuesta: string = '';
+  respuestas: any[] = [];
   imagenPreview: string | null = null;
 
   nuevoForo = {
@@ -63,6 +65,48 @@ export class ComunidadVirtual {
     });
   }
   
+  /**
+   * Agrega una nueva respuesta al foro seleccionado. Valida que la respuesta no esté vacía y que haya un foro seleccionado antes de proceder.
+   * Después de agregar la respuesta, limpia el campo de nueva respuesta y recarga las respuestas del foro.
+   */
+  agregarRespuesta() {
+    // 1. Validación inicial
+    if (!this.nuevaRespuesta?.trim() || !this.foroSelect) {
+      return;
+    }
+
+    const usuario = this.servicioAutorizacion.obtenerUsuarioActual();
+    if (!usuario || !usuario.id) {
+      alert('Debe iniciar sesión para responder en el foro');
+      return;
+    }
+
+    const foroId = this.foroSelect.Id; 
+
+    const fd = new FormData();
+    fd.append('publicacion.Contenido', this.nuevaRespuesta);
+    fd.append('publicacion.UsuarioId', usuario.id.toString());
+    
+    // Usamos la variable local 'foroId' en lugar de 'this.foroSelect.Id'
+    fd.append('publicacion.ParentId', foroId.toString());
+    
+    this.servicioForos.crearRespuesta(fd).subscribe({
+      next: (res) => {
+        if (res.respuesta === 'Ok') {
+          this.nuevaRespuesta = '';
+          this.cargarRespuestas(foroId); 
+        } else {
+          console.error('Error al responder:', res.leyenda);
+          alert(res.leyenda);
+        }
+      },
+      error: (err) => {
+        console.error('Error:', err);
+        alert('Error al enviar la respuesta');
+      }
+    });
+  }
+
   /**
    * Filtra los foros según el término de búsqueda ingresado por el usuario.
    * Busca coincidencias tanto en el título como en el contenido del foro.
@@ -149,21 +193,14 @@ export class ComunidadVirtual {
       alert('Debe iniciar sesión para crear un foro');
       return;
     }
-    console.log('👤 Usuario obtenido:', usuario);
-    console.log('👤 ID del usuario:', usuario?.id);
     const fd = new FormData();
     fd.append('publicacion.Titulo', this.nuevoForo.titulo);
     fd.append('publicacion.Contenido', this.nuevoForo.contenido);
-    fd.append('publicacion.UsuarioCreacionId', usuario.id.toString());
+    fd.append('publicacion.UsuarioId', usuario.id.toString());
 
     if (this.archivoSeleccionado) {
       fd.append('archivo.Archivo', this.archivoSeleccionado);
     }
-    // 🔍 LOG 2: Verificar FormData
-  console.log('📦 FormData a enviar:');
-  fd.forEach((value, key) => {
-    console.log(`  ${key}:`, value);
-  });
 
     this.servicioForos.crear(fd).subscribe({
       next: (res) => {
@@ -188,14 +225,17 @@ export class ComunidadVirtual {
    */
   editForum(): void {
     if (!this.foroSelect || !this.isForoValido()) {return;}
-
+    const usuario = this.servicioAutorizacion.obtenerUsuarioActual();
+    if (!usuario || !usuario.id) {
+      alert('Debe iniciar sesión para crear un foro');
+      return;
+    }
     const fd = new FormData();
 
     fd.append('publicacion.Id', this.foroSelect.Id.toString());
-    fd.append('publicacion.Titulo', this.foroSelect.Titulo);
-    fd.append('publicacion.Contenido', this.foroSelect.Contenido);
-    fd.append('publicacion.UsuarioModificacionId', '1');//id del usuario logueado
-    
+    fd.append('publicacion.Titulo', this.nuevoForo.titulo);
+    fd.append('publicacion.Contenido', this.nuevoForo.contenido);
+    fd.append('publicacion.UsuarioModificacionId', usuario.id.toString());
     // Si hay imagen actual y NO hay nueva imagen, mantener la actual
     if (this.foroSelect.UrlImagen && !this.archivoSeleccionado) {
       fd.append('publicacion.UrlImagen', this.foroSelect.UrlImagen);
@@ -263,7 +303,32 @@ export class ComunidadVirtual {
   view_detalleForo(foro: Foro): void {
     this.foroSelect = foro;
     this.isDetalleForoOpen = true;
+    this.cargarRespuestas(foro.Id);
   }
+
+  cargarRespuestas(foroId: number): void {
+    this.servicioForos.listarRespuestas(foroId).subscribe({
+      next: (res) => {
+        if (res.respuesta === 'Ok' && res.data) {
+          this.respuestas = res.data.map((p: any) => ({
+             Id: p.id,
+             Contenido: p.contenido,
+             Autor: p.nombreAutor || 'Usuario',
+             Fecha: this.formatDate(new Date(p.fechaCreacion)),
+             UsuarioId: p.usuarioId
+          }));
+        } else {
+          // Si no hay respuestas
+          this.respuestas = [];
+          console.warn('No se encontraron respuestas o hubo un aviso:', res.leyenda);
+        }
+      },
+      error: (err) => {
+        console.error('Error al cargar respuestas:', err);
+      }
+    });
+  }
+    
   /**
    * Maneja la selección de imagen y genera preview
    */
@@ -313,8 +378,5 @@ export class ComunidadVirtual {
     };
     return new Intl.DateTimeFormat('es-ES', options).format(date);
   }
-}
-function obtenerUsuarioActual() {
-  throw new Error('Function not implemented.');
 }
 

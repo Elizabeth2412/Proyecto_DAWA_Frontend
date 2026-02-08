@@ -8,18 +8,7 @@ import { environment } from '../environments/environment.development';
   providedIn: 'root',
 })
 export class ServicioForos {
-    private apiUrl = `${environment.apiURL}/F
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    oro`;
+    private apiUrl = `${environment.apiURL}/Foro`;
   constructor(private http: HttpClient) {}
 
   /**
@@ -27,6 +16,17 @@ export class ServicioForos {
    */
   listar(): Observable<Resultado> {
     const body = { transaccion: 'CONSULTAR_POSTS' };
+    return this.http.post<Resultado>(`${this.apiUrl}/GetPublicacionForo`, body);
+  }
+
+  /**
+   * Lista todos las respuestas de un foro específico
+   */
+  listarRespuestas(idForo: number): Observable<Resultado> {
+    const body = { 
+      transaccion: 'CONSULTAR_POST_COMPLETO',
+      id: idForo
+    };
     return this.http.post<Resultado>(`${this.apiUrl}/GetPublicacionForo`, body);
   }
 
@@ -60,5 +60,12 @@ export class ServicioForos {
       transaccion: 'BUSCAR_POSTS'
     };
     return this.http.post<Resultado>(`${this.apiUrl}/GetPublicacionForo`, body);
+  }
+
+  /**
+   * Crea una nueva respuesta para un foro
+   */
+  crearRespuesta(formData: FormData): Observable<Resultado> {
+    return this.http.post<Resultado>(`${this.apiUrl}/CrearRespuesta`, formData);
   }
 }
