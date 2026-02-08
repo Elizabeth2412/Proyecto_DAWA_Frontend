@@ -1,5 +1,4 @@
 <!-- Vista de tabla de evaluaciones -->
-
 <div *ngIf="modo === 'tabla'" class="container-fluid">
   <!-- Encabezado -->
   <div class="row mb-4">
@@ -17,10 +16,10 @@
     <div class="acciones-superiores d-flex flex-wrap justify-content-between align-items-center">
       <button class="btn-agregar" (click)="abrirDialogoNuevo()">
         <i class="bi bi-pencil me-1"></i> Agregar nueva Evaluación
-      </button> 
+      </button>
 
       <div class="controles-tabla d-flex gap-3 mb-2">
-        <input 
+        <input
           type="text"
           placeholder="🔍 Buscar evaluaciones..."
           class="buscador form-control"
@@ -65,7 +64,7 @@
           <tbody>
             <tr *ngFor="let evaluacion of evaluacionesFiltradas">
               <td class="text-center">{{ evaluacion.id }}</td>
-              <td class="text-center">{{ evaluacion.cursoName }}</td>
+              <td class="text-center">{{ evaluacion.cursoName || 'N/A' }}</td>
               <td class="nombre-evaluacion fw-semibold">{{ evaluacion.titulo }}</td>
               <td class="text-center">
                 <span class="badge-modulo px-2 py-1 rounded-3">
@@ -86,25 +85,26 @@
                 </span>
               </td>
               <td class="text-center acciones">
-                <button class="btn-preguntas" 
-                        (click)="irAPreguntas(evaluacion)" 
+                <button class="btn-preguntas"
+                        (click)="irAPreguntas(evaluacion)"
                         title="Gestionar preguntas">
                   <mat-icon>quiz</mat-icon>
-                </button> 
-                <button class="btn-ver" 
-                        (click)="verEvaluacion(evaluacion)" 
-                        title="Ver detalles">
+                </button>
+                <button class="btn-ver"
+                        (click)="verEvaluacion(evaluacion)"
+                        title="Ver detalles"
+                        [disabled]="cargandoEvaluacion">
                   <mat-icon>visibility</mat-icon>
                 </button>
-                
-                <button class="btn-modificar" 
-                        (click)="editarEvaluacion(evaluacion)" 
+
+                <button class="btn-modificar"
+                        (click)="editarEvaluacion(evaluacion)"
                         title="Editar">
                   <mat-icon>edit</mat-icon>
                 </button>
-                
-                <button class="btn-eliminar" 
-                        (click)="eliminarEvaluacion(evaluacion.id)" 
+
+                <button class="btn-eliminar"
+                        (click)="eliminarEvaluacion(evaluacion.id)"
                         title="Eliminar">
                   <mat-icon>delete</mat-icon>
                 </button>
@@ -125,66 +125,83 @@
   </div>
 </div>
 
-
-
 <!-- Modal de inicio de evaluación -->
 <div *ngIf="mostrarModalInicio" class="modal-overlay-evaluation" (click)="cerrarModal()">
   <div class="modal-dialog-evaluation" (click)="$event.stopPropagation()">
-    
-    <!-- Header del Modal -->
-    <div class="modal-header-evaluation">
-      <button class="btn-close-evaluation" (click)="cerrarModal()" type="button" title="Cerrar">
-        <mat-icon>close</mat-icon>
-      </button>
+
+    <!-- Indicador de carga -->
+    <div *ngIf="cargandoEvaluacion" class="loading-container">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <p class="mt-3">Cargando evaluación...</p>
     </div>
 
-    <div class="modal-body-evaluation">
-      <div class="icon-container-eval">
-        <mat-icon class="icon-large-eval">assignment</mat-icon>
+    <!-- Contenido del modal -->
+    <div *ngIf="!cargandoEvaluacion">
+      <!-- Header del Modal -->
+      <div class="modal-header-evaluation">
+        <button class="btn-close-evaluation" (click)="cerrarModal()" type="button" title="Cerrar">
+          <mat-icon>close</mat-icon>
+        </button>
       </div>
 
-      <h1 class="title-eval">{{ evaluationData.title }}</h1>
-      <p class="subtitle-eval">Pon a prueba tus conocimientos con esta evaluación</p>
-
-      <div class="info-section-eval">
-        <div class="info-card-eval">
-          <div class="info-left-eval">
-            <mat-icon class="icon-small-eval">quiz</mat-icon>
-            <span class="info-label-eval">Total de preguntas</span>
-          </div>
-          <span class="info-value-eval">{{ evaluationData.totalQuestions }}</span>
+      <div class="modal-body-evaluation">
+        <div class="icon-container-eval">
+          <mat-icon class="icon-large-eval">assignment</mat-icon>
         </div>
 
-        <div class="info-card-eval">
-          <div class="info-left-eval">
-            <mat-icon class="icon-small-eval">schedule</mat-icon>
-            <span class="info-label-eval">Duración estimada</span>
+        <h1 class="title-eval">{{ evaluationData.title }}</h1>
+        <p class="subtitle-eval">Pon a prueba tus conocimientos con esta evaluación</p>
+
+        <div class="info-section-eval">
+          <div class="info-card-eval">
+            <div class="info-left-eval">
+              <mat-icon class="icon-small-eval">quiz</mat-icon>
+              <span class="info-label-eval">Total de preguntas</span>
+            </div>
+            <span class="info-value-eval">{{ evaluationData.totalQuestions }}</span>
           </div>
-          <span class="info-value-eval">{{ evaluationData.duration }}</span>
+
+          <div class="info-card-eval">
+            <div class="info-left-eval">
+              <mat-icon class="icon-small-eval">schedule</mat-icon>
+              <span class="info-label-eval">Duración estimada</span>
+            </div>
+            <span class="info-value-eval">{{ evaluationData.duration }}</span>
+          </div>
         </div>
-      </div>
 
-      <div class="instructions-box-eval">
-        <h3 class="instructions-title-eval">
-          <mat-icon>info</mat-icon>
-          Instrucciones:
-        </h3>
-        <ul class="instructions-list-eval">
-          <li>• Lee cada pregunta cuidadosamente</li>
-          <li>• Selecciona una respuesta para cada pregunta</li>
-          <li>• Puedes navegar entre preguntas libremente</li>
-          <li>• Revisa tus respuestas antes de finalizar</li>
-        </ul>
-      </div>
+        <!-- Advertencia si no hay preguntas -->
+        <div *ngIf="evaluationData.totalQuestions === 0" class="alert alert-warning mt-3 d-flex align-items-center">
+          <mat-icon class="me-2">warning</mat-icon>
+          <span>Esta evaluación aún no tiene preguntas asignadas.</span>
+        </div>
 
-      <button class="btn-start-eval" (click)="startEvaluation()">
-        <span>Iniciar Evaluación</span>
-        <mat-icon>arrow_forward</mat-icon>
-      </button>
+        <div class="instructions-box-eval">
+          <h3 class="instructions-title-eval">
+            <mat-icon>info</mat-icon>
+            Instrucciones:
+          </h3>
+          <ul class="instructions-list-eval">
+            <li>• Lee cada pregunta cuidadosamente</li>
+            <li>• Selecciona una respuesta para cada pregunta</li>
+            <li>• Puedes navegar entre preguntas libremente</li>
+            <li>• Revisa tus respuestas antes de finalizar</li>
+          </ul>
+        </div>
+
+        <button
+          class="btn-start-eval"
+          (click)="startEvaluation()"
+          [disabled]="evaluationData.totalQuestions === 0">
+          <span>Iniciar Evaluación</span>
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
     </div>
   </div>
 </div>
-
 
 <!-- Pantalla de evaluación -->
 <div *ngIf="isStarted" class="evaluation-screen">
@@ -200,7 +217,7 @@
         </div>
         <div class="timer">
           <svg class="icon-timer" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <span>Tiempo restante: {{ evaluationData.duration }}</span>
@@ -272,7 +289,7 @@
       <div class="sidebar">
         <div class="navigation-panel">
           <h4 class="nav-title">Navegación de Preguntas</h4>
-          
+
           <div class="questions-grid">
             <button
               *ngFor="let i of createRange(evaluationData.totalQuestions)"
@@ -302,7 +319,7 @@
 
           <div class="progress-box">
             <p>
-              <strong>Progreso:</strong> {{ getAnsweredCount() }}/{{ evaluationData.totalQuestions }} 
+              <strong>Progreso:</strong> {{ getAnsweredCount() }}/{{ evaluationData.totalQuestions }}
               preguntas contestadas
             </p>
           </div>
@@ -337,8 +354,8 @@
           <label class="form-label fw-bold">
             <i class="bi bi-pencil me-2"></i>Título de la Evaluación *
           </label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             class="form-control form-control-lg"
             [(ngModel)]="evaluacionSeleccionada.titulo"
             name="titulo"
@@ -346,26 +363,29 @@
             required>
         </div>
 
-          <div class="mb-3">
-            <label class="form-label fw-bold">
-            <i class="bi bi-pencil me-2"></i>Curso *
+        <!-- Curso -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">
+            <i class="bi bi-book-half me-2"></i>Curso *
           </label>
-          <input 
-            type="text" 
-            class="form-control form-control-lg"
+          <select
+            class="form-select form-select-lg"
             [(ngModel)]="evaluacionSeleccionada.cursoId"
             name="curso"
-            placeholder="Ej: Evaluación del Módulo 1">
+            required>
+            <option [value]="0">Selecciona un curso</option>
+            <option *ngFor="let curso of cursosDisponibles" [value]="curso.id">
+              {{ curso.titulo }}
+            </option>
+          </select>
         </div>
-        
-
 
         <!-- Módulo -->
         <div class="mb-3">
           <label class="form-label fw-bold">
             <i class="bi bi-book me-2"></i>Módulo *
           </label>
-          <select 
+          <select
             class="form-select form-select-lg"
             [(ngModel)]="evaluacionSeleccionada.modulo"
             name="modulo"
@@ -385,8 +405,8 @@
             <label class="form-label fw-bold">
               <i class="bi bi-list-ol me-2"></i>Número de Preguntas *
             </label>
-            <input 
-              type="number" 
+            <input
+              type="number"
               class="form-control form-control-lg"
               [(ngModel)]="evaluacionSeleccionada.totalPreguntas"
               name="totalPreguntas"
@@ -399,8 +419,8 @@
             <label class="form-label fw-bold">
               <i class="bi bi-clock me-2"></i>Duración *
             </label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               class="form-control form-control-lg"
               [(ngModel)]="evaluacionSeleccionada.duracion"
               name="duracion"
@@ -416,9 +436,9 @@
           </label>
           <div class="d-flex gap-3">
             <div class="form-check">
-              <input 
-                class="form-check-input" 
-                type="radio" 
+              <input
+                class="form-check-input"
+                type="radio"
                 name="estado"
                 id="activa-dialog"
                 [value]="'Activa'"
@@ -428,9 +448,9 @@
               </label>
             </div>
             <div class="form-check">
-              <input 
-                class="form-check-input" 
-                type="radio" 
+              <input
+                class="form-check-input"
+                type="radio"
                 name="estado"
                 id="inactiva-dialog"
                 [value]="'Inactiva'"
@@ -443,15 +463,15 @@
         </div>
 
         <div class="d-flex gap-3 justify-content-end">
-          <button 
-            type="button" 
+          <button
+            type="button"
             class="btn btn-secondary btn-lg"
             (click)="cerrarDialogoFormulario()">
             <i class="bi bi-x-circle me-2"></i>
             Cancelar
           </button>
-          <button 
-            type="button" 
+          <button
+            type="button"
             class="btn-agregar"
             (click)="guardarFormulario()">
             <i class="bi bi-check-circle me-2"></i>
@@ -463,10 +483,9 @@
   </div>
 </div>
 
-
-<!-- VISTA DE GESTIÓN DE PREGUNTAS              -->
+<!-- VISTA DE GESTIÓN DE PREGUNTAS -->
 <div *ngIf="modo === 'preguntas' && evaluacionSeleccionada">
-  <app-preguntas 
+  <app-preguntas
     [evaluacionId]="evaluacionSeleccionada.id"
     [evaluacion]="evaluacionSeleccionada"
     (volverClick)="volverDePreguntas()">

@@ -1,14 +1,16 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
-import { ServiceEvaluacion} from '../servicios/service-evaluacion';
+import { ServiceEvaluacion } from '../servicios/service-evaluacion';
+import { ServicioCursos } from '../servicios/servicio-cursos';
 import { ServicioAutorizacion } from '../autorizacion.service';
 import { Questions } from '../interfaces/question-interface';
+import { Curso } from '../interfaces/curso-interface';
 import { Evaluacion } from '../interfaces/evaluacion-interface';
-import { A } from '@angular/cdk/keycodes';
 import { Question } from '../question/question';
+
 interface VisualizationEvaluation {
   title: string;
   duration: string;
@@ -23,24 +25,29 @@ interface VisualizationEvaluation {
   templateUrl: './evaluation.html',
   styleUrl: './evaluation.css',
 })
-export class Evaluation {
+export class Evaluation implements OnInit {
 
   constructor(
     private router: Router,
     private serviceEvaluacion: ServiceEvaluacion,
-    private servicioAuth: ServicioAutorizacion
+    private servicioAuth: ServicioAutorizacion,
+    private servicioCursos: ServicioCursos
   ) { }
 
   static modoGlobal: 'formulario' | 'tabla' | 'preguntas' = 'tabla';
 
+  // Estados de la evaluación
   isStarted = false;
   mostrarModalInicio = false;
   currentQuestion = 0;
   selectedAnswer: number | null = null;
   answers: { [key: number]: number } = {};
   esEstudiante: boolean = false;
+  cursosDisponibles: Curso[] = [];
+  cargandoEvaluacion: boolean = false;
 
-  @Input() modo: 'tabla' | 'evaluacion' | 'formulario'| 'preguntas' = 'tabla';
+  // Modos y filtros
+  @Input() modo: 'tabla' | 'evaluacion' | 'formulario' | 'preguntas' = 'tabla';
   terminoBusqueda: string = '';
   filtroEstado: string = '';
   evaluacionesFiltradas: Evaluacion[] = [];
@@ -51,148 +58,90 @@ export class Evaluation {
   mostrarDialogoFormulario: boolean = false;
 
   evaluationData: VisualizationEvaluation = {
-    title: 'Evaluacion del Modulo 1',
-    duration: '15 minutos',
-    totalQuestions: 3,
-    questions: [
-      {
-        id: 1,
-        text: "¿Qué es la agricultura sostenible?",
-        options: [
-          "Un sistema que busca producir más usando químicos",
-          "Un enfoque que equilibra productividad, cuidado ambiental y bienestar social",
-          "Una técnica para cultivar únicamente en invernaderos",
-          "Un modelo basado solo en agricultura tradicional"
-        ]
-      },
-      {
-        id: 2,
-        text: "¿Cuál es el objetivo principal del uso eficiente del agua en agricultura sostenible?",
-        options: [
-          "Aumentar el consumo de agua",
-          "Reducir costos sin considerar el ambiente",
-          "Optimizar recursos y disminuir el desperdicio hídrico",
-          "Evitar el riego por completo"
-        ]
-      },
-      {
-        id: 3,
-        text: "¿Cuál de las siguientes prácticas ayuda a conservar el suelo?",
-        options: [
-          "Monocultivo intensivo",
-          "Labranza excesiva",
-          "Rotación de cultivos",
-          "Aplicación constante de agroquímicos"
-        ]
-      },
-      {
-        id: 4,
-        text: "¿Qué se entiende por biodiversidad en la agricultura sostenible?",
-        options: [
-          "La reducción de especies para facilitar el cultivo",
-          "Tener solo un tipo de planta en el terreno",
-          "La variedad de especies que favorecen el equilibrio ecológico",
-          "El uso de variedades genéticamente modificadas"
-        ]
-      },
-      {
-        id: 5,
-        text: "¿Cuál es un beneficio de utilizar abonos orgánicos?",
-        options: [
-          "Contaminan los ríos",
-          "Empobrecen el suelo",
-          "Mejoran la estructura y fertilidad del suelo",
-          "Eliminan toda la vida microbiana"
-        ]
-      },
-      {
-        id: 6,
-        text: "¿Qué es el manejo integrado de plagas (MIP)?",
-        options: [
-          "Uso exclusivo de pesticidas químicos",
-          "Un enfoque que combina métodos biológicos, culturales y químicos responsables",
-          "Eliminar todas las plagas sin excepción",
-          "Aplicar pesticidas semanalmente"
-        ]
-      },
-      {
-        id: 7,
-        text: "¿Qué rol cumplen los polinizadores en la agricultura sostenible?",
-        options: [
-          "Reducir el rendimiento de los cultivos",
-          "Aumentar la erosión del suelo",
-          "Facilitar la reproducción de las plantas y mejorar la producción",
-          "Controlar plagas de forma química"
-        ]
-      },
-      {
-        id: 8,
-        text: "¿Cuál es una práctica sostenible en el uso del agua?",
-        options: [
-          "Riego por goteo",
-          "Inundar completamente los cultivos",
-          "Regar en las horas de mayor calor",
-          "No medir el consumo de agua"
-        ]
-      },
-      {
-        id: 9,
-        text: "¿Para qué sirve el compostaje en agricultura sostenible?",
-        options: [
-          "Para quemar residuos agrícolas",
-          "Para producir fertilizante natural mediante descomposición",
-          "Para eliminar microorganismos beneficiosos",
-          "Para endurecer el suelo"
-        ]
-      },
-      {
-        id: 10,
-        text: "¿Qué beneficio aporta la siembra de cultivos de cobertura?",
-        options: [
-          "Aumentar la erosión",
-          "Disminuir la fertilidad",
-          "Proteger el suelo y mejorar su calidad",
-          "Incrementar el uso de químicos"
-        ]
-      },
-      {
-        id: 11,
-        text: "¿Qué caracteriza a un sistema agroecológico?",
-        options: [
-          "Busca maximizar la producción ignorando el ecosistema",
-          "Integra prácticas que imitan los procesos naturales",
-          "Depende exclusivamente de maquinaria pesada",
-          "Requiere grandes cantidades de fertilizantes sintéticos"
-        ]
-      }
-    ]
+    title: '',
+    duration: '',
+    totalQuestions: 0,
+    questions: []
   };
 
   ngOnInit(): void {
     this.modo = Evaluation.modoGlobal;
 
+    // Verificar tipo de usuario
     const usuario = this.servicioAuth.obtenerUsuarioActual();
     this.esEstudiante = !!(usuario && usuario.tipo === 'estudiante');
 
+    // Manejar navegación desde otro componente
     const state = history.state;
-    if (state?.abrirModalInicio) {
+    if (state?.abrirModalInicio && state?.evaluacionId) {
       this.modo = 'evaluacion';
-      this.abrirModal();
+      this.cargarYMostrarEvaluacion(state.evaluacionId);
       history.replaceState({}, '');
     } else if (this.modo === 'tabla') {
       this.cargarEvaluaciones();
     }
+
+    this.cargarCursosDisponibles();
   }
 
+  /**
+   * Carga una evaluación específica y abre el modal
+   * @param evaluacionId ID de la evaluación a cargar
+   */
+  cargarYMostrarEvaluacion(evaluacionId: number): void {
+    this.cargandoEvaluacion = true;
+    
+    this.serviceEvaluacion.obtenerEvaluacionConPreguntas(evaluacionId).subscribe({
+      next: (evaluacionCompleta) => {
+        this.evaluacionSeleccionada = evaluacionCompleta;
+        this.prepararDatosEvaluacion(evaluacionCompleta);
+        this.abrirModal();
+        this.cargandoEvaluacion = false;
+      },
+      error: (error) => {
+        console.error('Error al cargar evaluación:', error);
+        alert('No se pudo cargar la evaluación. Por favor intenta de nuevo.');
+        this.cargandoEvaluacion = false;
+        this.router.navigate(['/estudiante']);
+      }
+    });
+  }
+
+  /**
+   * Prepara los datos de la evaluación para la visualización
+   * @param evaluacion Evaluación completa con preguntas
+   */
+  private prepararDatosEvaluacion(evaluacion: Evaluacion): void {
+    const preguntasMapeadas = this.mapearPreguntasAFormato(evaluacion.preguntas || []);
+
+    this.evaluationData = {
+      title: evaluacion.titulo,
+      duration: evaluacion.duracion,
+      totalQuestions: preguntasMapeadas.length,
+      questions: preguntasMapeadas
+    };
+  }
+
+
+  /**
+   * Mapea las preguntas del backend al formato esperado por la interfaz
+   * @param preguntas Array de preguntas desde el backend
+   * @returns Array de preguntas en formato Questions
+   */
+  private mapearPreguntasAFormato(preguntas: any[]): Questions[] {
+    return preguntas.map((pregunta) => ({
+      id: pregunta.id,
+      text: pregunta.texto,
+      options: pregunta.opciones || []
+    }));
+  }
 
   /**
    * Abre el modal de inicio de evaluación.
    */
   abrirModal(): void {
     this.mostrarModalInicio = true;
-    document.body.style.overflow = 'hidden';
   }
-
 
   /**
    * Cierra el modal de inicio de evaluación.
@@ -206,21 +155,51 @@ export class Evaluation {
     }
   }
 
-
   /**
-   * Inicia la evaluación solo si el usuario es estudiante y cierra el modal de inicio.
+   * Carga los cursos disponibles desde el servicio.
    */
-  startEvaluation() {
-    if (this.esEstudiante) {
-      this.mostrarModalInicio = false;
-      this.isStarted = true;
-      document.body.style.overflow = 'auto';
-      this.modo = 'evaluacion';
-    }else{
-      alert('Solo los estudiantes pueden iniciar la evaluación.');
-    }
+  cargarCursosDisponibles(): void {
+    this.servicioCursos.obtenerCursos().subscribe({
+      next: (cursos) => {
+        this.cursosDisponibles = cursos || [];
+      },
+      error: (error) => {
+        console.error('Error al cargar cursos:', error);
+        this.cursosDisponibles = [];
+      }
+    });
   }
 
+  /**
+   * Inicia la evaluación solo si el usuario es estudiante y hay preguntas disponibles.
+   */
+  startEvaluation(): void {
+    if (!this.esEstudiante) {
+      alert('Solo los estudiantes pueden iniciar la evaluación.');
+      return;
+    }
+
+    // Validar que la evaluación tenga preguntas
+    if (!this.evaluationData.questions || this.evaluationData.questions.length === 0) {
+      alert('Esta evaluación no tiene preguntas disponibles. Por favor contacta al administrador.');
+      return;
+    }
+
+    // Validar que todas las preguntas tengan opciones
+    const preguntasSinOpciones = this.evaluationData.questions.filter(
+      q => !q.options || q.options.length === 0
+    );
+
+    if (preguntasSinOpciones.length > 0) {
+      alert('Algunas preguntas no tienen opciones disponibles. Por favor contacta al administrador.');
+      return;
+    }
+
+    this.mostrarModalInicio = false;
+    this.isStarted = true;
+    document.body.style.overflow = 'auto';
+    this.modo = 'evaluacion';
+  }
 
   /**
    * Selecciona una respuesta para la pregunta actual.
@@ -240,7 +219,6 @@ export class Evaluation {
     this.selectedAnswer = this.answers[index] !== undefined ? this.answers[index] : null;
   }
 
-
   /**
    * Navega a la siguiente pregunta.
    */
@@ -249,7 +227,6 @@ export class Evaluation {
       this.goToQuestion(this.currentQuestion + 1);
     }
   }
-
 
   /**
    * Navega a la pregunta anterior.
@@ -283,7 +260,6 @@ export class Evaluation {
     return Object.keys(this.answers).length;
   }
 
-
   /**
    * Finaliza la evaluación con confirmación del usuario.
    */
@@ -291,10 +267,23 @@ export class Evaluation {
     const confirmed = confirm(
       `Has contestado ${this.getAnsweredCount()} de ${this.evaluationData.totalQuestions} preguntas.\n¿Deseas finalizar la evaluación?`
     );
-    if (confirmed) {
+    
+    if (confirmed) {      
       alert('Evaluación finalizada. ¡Gracias por participar!');
+      this.resetearEvaluacion();
       this.router.navigate(['/estudiante']);
     }
+  }
+
+  /**
+   * Resetea el estado de la evaluación
+   */
+  private resetearEvaluacion(): void {
+    this.isStarted = false;
+    this.currentQuestion = 0;
+    this.selectedAnswer = null;
+    this.answers = {};
+    this.evaluacionSeleccionada = null;
   }
 
   /**
@@ -312,10 +301,11 @@ export class Evaluation {
   cargarEvaluaciones(): void {
     this.serviceEvaluacion.obtenerEvaluaciones().subscribe({
       next: (evaluaciones) => {
-        this.evaluacionesFiltradas = evaluaciones;  
+        this.evaluacionesFiltradas = evaluaciones;
       },
       error: (error) => {
         console.error('Error al cargar evaluaciones:', error);
+        this.evaluacionesFiltradas = [];
       }
     });
   }
@@ -325,15 +315,15 @@ export class Evaluation {
    */
   filtrarEvaluaciones(): void {
     this.serviceEvaluacion.filtrarEvaluaciones(this.terminoBusqueda, this.filtroEstado)
-    .subscribe({
-      next: (evaluaciones) => {
-        this.evaluacionesFiltradas = evaluaciones;
-      },
-      error: (err) => {
-        console.error('Error cargando evaluaciones filtradas:', err);
-        this.evaluacionesFiltradas = [];
-      }
-    });
+      .subscribe({
+        next: (evaluaciones) => {
+          this.evaluacionesFiltradas = evaluaciones;
+        },
+        error: (err) => {
+          console.error('Error cargando evaluaciones filtradas:', err);
+          this.evaluacionesFiltradas = [];
+        }
+      });
   }
 
   /**
@@ -354,7 +344,6 @@ export class Evaluation {
     this.mostrarDialogoFormulario = true;
   }
 
-
   /**
    * Crea una nueva evaluación.
    * @param evaluacion  Evaluación a crear.
@@ -363,7 +352,6 @@ export class Evaluation {
     this.serviceEvaluacion.crearEvaluacion(evaluacion).subscribe({
       next: () => {
         alert('Evaluación creada exitosamente');
-       
         this.filtrarEvaluaciones();
         this.modo = 'tabla';
       },
@@ -374,25 +362,30 @@ export class Evaluation {
     });
   }
 
-
-
   /**
-   * Muestra los detalles de una evaluación.
+   * Muestra los detalles de una evaluación cargando sus preguntas desde la BD.
    * @param evaluacion  Evaluación a visualizar.
    */
   verEvaluacion(evaluacion: Evaluacion): void {
-    this.evaluacionSeleccionada = evaluacion;
+    this.cargandoEvaluacion = true;
 
-    this.evaluationData = {
-      title: evaluacion.titulo,
-      duration: evaluacion.duracion,
-      totalQuestions: evaluacion.totalPreguntas,
-      questions: evaluacion.preguntas || this.evaluationData.questions
-    };
+    // Cargar la evaluación completa con sus preguntas desde el backend
+    this.serviceEvaluacion.obtenerEvaluacionConPreguntas(evaluacion.id).subscribe({
+      next: (evaluacionCompleta) => {
+        this.evaluacionSeleccionada = evaluacionCompleta;
+        this.prepararDatosEvaluacion(evaluacionCompleta);
 
-    this.isStarted = false;
-    this.modo = 'tabla';
-    this.abrirModal();
+        this.isStarted = false;
+        this.modo = 'tabla';
+        this.abrirModal();
+        this.cargandoEvaluacion = false;
+      },
+      error: (error) => {
+        console.error('Error al cargar evaluación completa:', error);
+        alert('No se pudo cargar la evaluación. Por favor intenta de nuevo.');
+        this.cargandoEvaluacion = false;
+      }
+    });
   }
 
   /**
@@ -405,7 +398,6 @@ export class Evaluation {
     this.modo = 'tabla';
     this.mostrarDialogoFormulario = true;
   }
-
 
   /**
    * Actualiza una evaluación ya seleccionada anteriormente.
@@ -437,8 +429,6 @@ export class Evaluation {
 
     if (!confirmado) return;
 
-    console.log('Eliminando evaluación con id:', id);
-
     this.serviceEvaluacion.eliminarEvaluacion(id).subscribe({
       next: () => {
         alert('Evaluación eliminada exitosamente');
@@ -450,7 +440,6 @@ export class Evaluation {
       }
     });
   }
-
 
   /**
    * Guarda el formulario de creación o edición de evaluación.
@@ -506,18 +495,13 @@ export class Evaluation {
    */
   volverATabla(): void {
     this.modo = 'tabla';
-    this.isStarted = false;
-    this.currentQuestion = 0;
-    this.selectedAnswer = null;
-    this.answers = {};
-    this.evaluacionSeleccionada = null;
+    this.resetearEvaluacion();
   }
 
-
   /**
- * NUEVA FUNCIÓN: Redirige a la vista de preguntas de una evaluación específica.
- * @param evaluacion Evaluación cuyas preguntas se desean gestionar.
- */
+   * Redirige a la vista de preguntas de una evaluación específica.
+   * @param evaluacion Evaluación cuyas preguntas se desean gestionar.
+   */
   irAPreguntas(evaluacion: Evaluacion): void {
     this.evaluacionSeleccionada = evaluacion;
     this.modo = 'preguntas';
@@ -525,11 +509,17 @@ export class Evaluation {
   }
 
   /**
-   * NUEVA FUNCIÓN: Vuelve de la vista de preguntas a la tabla de evaluaciones.
+   * Vuelve de la vista de preguntas a la tabla de evaluaciones.
    */
   volverDePreguntas(): void {
     this.modo = 'tabla';
     Evaluation.modoGlobal = 'tabla';
     this.evaluacionSeleccionada = null;
+    this.cargarEvaluaciones();
   }
+
+  
+
+
+  
 }

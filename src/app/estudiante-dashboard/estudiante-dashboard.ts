@@ -7,6 +7,7 @@ import { Curso } from '../interfaces/curso-interface';
 import { ServicioArchivos } from '../servicios/servicio-archivos';
 import { Archivo } from '../interfaces/archivo-interface';
 import { Usuario } from '../interfaces/usuario-interface';
+import { ServiceEvaluacion } from '../servicios/service-evaluacion';
 @Component({
   selector: 'app-estudiante-dashboard',
   standalone: true,
@@ -24,17 +25,50 @@ export class EstudianteDashboard implements OnInit {
     private servicioAutorizacion: ServicioAutorizacion,
     private servicioCursos: ServicioCursos,
     private servicioArchivos: ServicioArchivos,
+    private serviceEvaluacion: ServiceEvaluacion,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.usuarioActual = this.servicioAutorizacion.obtenerUsuarioActual();
+    console.log('Usuario actual:', this.usuarioActual);
     this.cargarCursos();
   }
 
-  iniciarEvaluacion(): void {
+  /*iniciarEvaluacion(): void {
     this.router.navigate(['/evaluacion'], { 
       state: { abrirModalInicio: true } 
+    });
+  }*/
+
+  /**
+   * Inicia la evaluación asociada al curso actual
+  */
+  iniciarEvaluacion(): void {
+    if (!this.cursoSeleccionado) {
+      alert('Por favor selecciona un curso primero');
+      return;
+    }
+
+    // Buscar la evaluación asociada a este curso
+    this.serviceEvaluacion.obtenerEvaluacionPorCurso(this.cursoSeleccionado.id).subscribe({
+      next: (evaluacion) => {
+        if (evaluacion) {
+          // Navegar a la vista de evaluación con el ID
+          this.router.navigate(['/evaluacion'], {
+            state: {
+              abrirModalInicio: true,
+              evaluacionId: evaluacion.id
+            }
+          });
+        } else {
+          alert('No hay evaluación disponible para este curso');
+        }
+      },
+      error: (error) => {
+        console.error('Error al obtener evaluación:', error);
+        alert('No se pudo cargar la evaluación del curso');
+      }
     });
   }
 

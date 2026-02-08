@@ -1501,7 +1501,8 @@ h1.display-5 {
   max-width: 650px;
   width: 100%;
   max-height: 90vh;
-  overflow: hidden;
+  overflow: auto;
+  max-height: calc(90vh - 60px);
   display: flex;
   flex-direction: column;
   animation: slideUpEvalModal 0.4s cubic-bezier(0.4, 0, 0.2, 1);
