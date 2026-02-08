@@ -133,16 +133,44 @@
       <!-- Sección de respuestas -->
       <div class="respuestas-section">
         <h3 class="respuestas-title">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-          </svg>
-          Respuestas ({{ foroSelect?.Replicas || 0 }})
-        </h3>
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    </svg>
+    Respuestas ({{ foroSelect?.Replicas || 0 }})
+  </h3>
 
-        <!-- Aquí irán las respuestas cuando las implementes -->
-        <div class="respuestas-empty">
-          <p>Aún no hay respuestas. ¡Sé el primero en comentar!</p>
-        </div>
+  <!-- Formulario para agregar respuesta -->
+  <div class="agregar-respuesta">
+    <textarea
+      class="form-control"
+      rows="3"
+      [(ngModel)]="nuevaRespuesta"
+      placeholder="Escribe tu respuesta..."
+    ></textarea>
+    <button 
+      class="btn-primary btn-sm"
+      [disabled]="!nuevaRespuesta.trim()"
+      (click)="agregarRespuesta()"
+    >
+      Responder
+    </button>
+  </div>
+
+  <!-- Lista de respuestas -->
+  <div *ngIf="respuestas && respuestas.length > 0" class="respuestas-lista">
+    <div *ngFor="let respuesta of respuestas" class="respuesta-card">
+      <div class="respuesta-header">
+        <span class="respuesta-autor">{{ respuesta.Autor }}</span>
+        <span class="respuesta-fecha">{{ respuesta.FechaHora }}</span>
+      </div>
+      <p class="respuesta-contenido">{{ respuesta.Contenido }}</p>
+    </div>
+  </div>
+
+  <div *ngIf="!respuestas || respuestas.length === 0" class="respuestas-empty">
+    <p>Aún no hay respuestas. ¡Sé el primero en comentar!</p>
+  </div>
+
       </div>
     </div>
   </div>
@@ -155,7 +183,7 @@
       <h2>{{ isNewForoOpen ? 'Crear Nuevo Foro' : 'Editar Foro' }}</h2>
     </div>
     
-    <div class="modal-body">
+    <div class="modal-body modal-scroll">
       <div class="form-group">
         <label>Título</label>
         <input
